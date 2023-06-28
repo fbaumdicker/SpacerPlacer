@@ -38,8 +38,55 @@ Alternatively, you can reach out to us via email at axel.fehrenbach@uni-tuebinge
 Thank you for your interest in SpacerPlacer!
 
 
+However, if you want to already prepare your input data here is what SpacerPlacer requires as an input:
+
+
+## Input data preparation
+
+### Initial steps
+Currently SpacerPlacer requires CRISPRcasFinder output format.
+To get files in this format you can e.g. submit the gemonic sequences to the CRISPRcasFinder web server.
+
+
+
+
+![first_step_long](doc/figures/firstlong.gif)
+
+
+
+
+
+You then need to carefully select the output CRISPR array and place them into two folders
+CRISPRcasFinder interface is capable of predicting the orientation but alwas provides the spacers from the forward strand.
+Be aware that since CRISPRcasFinder predicts the orientation internally the consensus repeat will appear different in the output.
+
+
+
+![positive-negative](doc/figures/forward_reverse.gif)
+
+
+CRISPRcasFinder only provides the forward strand output. So in order to ensure the correct representation 
+you need to place all the files from the forward strand into the "forward" directory.
+And all the files from the reverse strand into the "reverse" directory. 
+
+![saving_reversed](doc/figures/saved_reversed.gif)
+
+
+### Input data format
+The standard input format is a folder containing two subfolders "forward" and "reverse".
+Each subfolder contains the CRISPRcasFinder output for the corresponding strand.
+The CRISPRcasFinder output is a set of files in fasta format containing only the spacers from the corresponding CRISPR arrays.
+
+
+
+
+
+
+
+
 ## Installation
 
+(installation instructions are currently not up to date)
 
 To install SpacerPlacer, follow these steps:
 
