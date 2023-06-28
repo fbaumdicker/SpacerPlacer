@@ -1,6 +1,6 @@
 # SpacerPlacer
 
-![SpacerPlacer Logo](doc/figures/logo.pdf)
+![SpacerPlacer Logo](doc/figures/logo.png)
 
 
 SpacerPlacer is a powerful software for reconstructing ancestral CRISPR spacer arrays along a given phylogenetic tree.
