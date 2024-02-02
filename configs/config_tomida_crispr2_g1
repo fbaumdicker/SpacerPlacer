@@ -1,0 +1,11 @@
+0_example_datasets/tomida_datasets/CRISPR2/G1.fa
+0_result_folder/tomida_crispr2_g1
+--input_type
+spacer_fasta
+--lh_fct
+simple
+--significance_level
+0.05
+--determine_orientation
+--orientation_decision_boundary
+5
