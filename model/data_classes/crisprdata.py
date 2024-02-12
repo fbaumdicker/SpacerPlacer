@@ -112,9 +112,6 @@ class CRISPRGroup:
                 chromosome += 1
             elif 'plasmid' in array.chromosome_plasmid.lower():
                 plasmid += 1
-            # else:
-            #   print('Not chromosome nor plasmid: ', array.name, ' ', array.chromosome_plasmid)
-            # print(array.chromosome_plasmid)
         if chromosome > 0 and plasmid > 0:
             label = 'c + p'
         elif chromosome > 0:
@@ -215,5 +212,4 @@ class CRISPRArray:
         self.spacer_array = ['-' if s == '--' else s for s in self.spacer_array]
         return
 
-# Data that takes long for no reason:
-# GGCTCATCCCCGCTGGCGCGGGGAGCAC
+

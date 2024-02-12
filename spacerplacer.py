@@ -25,7 +25,7 @@ parser = ArgumentParser(prog='spacerplacer',
 parser.add_argument('--verbosity', type=int, default=2, choices=[0, 1, 2],
                     help='Verbosity level. 0: no output, 1: minimal output, 2: maximal output.')
 parser.add_argument('--seed', type=int, default=2357, help='Seed for the random number generator '
-                                                           '(in particular MAFFT).')
+                                                           'only impact on MAFFT.')
 # parser.add_argument('--group_by_metadata', type=str, default=None,
 #                     help='Not supported.')
 ############################################################################################################
@@ -85,7 +85,7 @@ parser.add_argument('--extend_branches', type=float, default=0.00001,
 #                          "that are not parsimonious. We do not recommend to use this flag.")
 # ########################################################################################################### Tree
 # estimation:
-parser.add_argument('--tree_distance_function', type=str, choices=['likelihood', 'breakpoint'],
+parser.add_argument('--tree_distance_function', type=str, choices=['likelihood'],
                     default='likelihood', help='Determines the distance function used for the tree estimation '
                                                'with UPGMA.')
 parser.add_argument('--tree_insertion_rate', type=float, default=None,
@@ -201,7 +201,7 @@ rec_parameter_dict = {'model': args.rec_model, 'gain_rate': args.insertion_rate,
 logger.debug(vars(args))
 
 tree_path = None
-extend_branches = args.extend_branches if args.tree_path is not None else False
+extend_branches = args.extend_branches
 
 if args.input_type == 'pickled':
     dict_crispr_groups = run_pickled_data(rec_parameter_dict,
@@ -260,8 +260,8 @@ elif args.input_type in ['ccf', 'crisprcasfinder', 'spacer_fasta']:
             group_no_ext = os.path.splitext(group)[0]
             tp = os.path.join(args.tree_path, group_no_ext + '.nwk')
             if not os.path.exists(tp):
-                logger.error(f'No tree found for group {group}. File would be found here {tp}.')
-                raise ValueError(f'No tree found for group {group}. File would be found here {tp}.')
+                logger.error(f'No tree found for group {group}. File would be found here {tp}. Or provide json.')
+                raise ValueError(f'No tree found for group {group}. File would be found here {tp}. Or provide json.')
             dict_trees[group_no_ext] = import_data.load_single_tree(tp).format(fmt='newick')
 
         tree_path = os.path.join(args.output_path, 'additional_data', 'dict_nwk_trees.json')
@@ -281,13 +281,15 @@ elif args.input_type in ['ccf', 'crisprcasfinder', 'spacer_fasta']:
                                                 plot_order=not args.no_plot_order_graph,
                                                 significance_level=args.significance_level,
                                                 extend_branches=extend_branches,
-                                                tree_lh_fct=args.tree_distance_function,
+                                                tree_distance_fct=args.tree_distance_function,
+                                                tree_lh_fct=args.tree_lh_fct,
                                                 tree_insertion_rate=args.tree_insertion_rate,
                                                 tree_deletion_rate=args.tree_deletion_rate,
                                                 tree_alpha=args.tree_alpha,
                                                 alpha_bias_correction=not args.no_alpha_bias_correction,
                                                 rho_bias_correction=not args.no_rho_bias_correction,
                                                 combine_non_unique_arrays=args.combine_non_unique_arrays,
+                                                seed=args.seed,
                                                 )
     summary_dict = compose_summary_dict(df_results_wo_details, dict(vars(args)))
     write_summary(summary_dict, os.path.join(args.output_path, 'summary.txt'))

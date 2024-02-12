@@ -20,7 +20,7 @@ def compose_summary_dict(df_results, supplied_parameters):
                                    'nb of reconstructed other dup. events',
                                    'nb of reconstructed ind. acquisitions, not duplicates'}
     orientation_results_keys = {'reversed_ln_lh_idm', 'reversed_ln_lh_bdm', 'ln_lh_bdm - reversed_ln_lh_bdm',
-                                'our predicted orientation'}
+                                'predicted orientation'}
     tree_information_keys = {'tree height', 'tree length', 'min/max tree branch lengths',
                              'nb of leafs (before combining non-uniques)',
                              'nb of leafs (after combining non-uniques)',

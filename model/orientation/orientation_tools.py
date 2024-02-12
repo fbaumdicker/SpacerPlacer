@@ -57,9 +57,6 @@ def compare_likelihoods_for_orientation(protocol, protocol_reversed_raw, protoco
     ls_pred_orient = []
     ls_reversed_lh_0, ls_reversed_lh_1, ls_reversed_ln_lh_0, ls_reversed_ln_lh_1 = [], [], [], []
     dict_trees_final = {}
-    # print('or', oriented_protocol.index)
-    # print('boring', protocol_boring['name'])
-    # print('boring _r', protocol_boring_reversed['name'])
     for i, n in enumerate(protocol.index):
         if new_protocol.loc[n, 'recommend reversing array'] == True:
             protocol.loc[n, :] = protocol_reversed_raw.loc[n, :]
@@ -87,7 +84,7 @@ def compare_likelihoods_for_orientation(protocol, protocol_reversed_raw, protoco
             if dict_trees:
                 dict_trees_final[n] = dict_tree_forward[n]
     oriented_protocol['recommend reversing array'] = ls_recommendation
-    oriented_protocol['our predicted orientation'] = ls_pred_orient
+    oriented_protocol['predicted orientation'] = ls_pred_orient
     oriented_protocol['reversed_lh_idm'] = ls_reversed_lh_0
     oriented_protocol['reversed_lh_bdm'] = ls_reversed_lh_1
     oriented_protocol['reversed_ln_lh_idm'] = ls_reversed_ln_lh_0

@@ -1,0 +1,11 @@
+data/streptococcus_mutans/all_fa_files
+0_result_folder/strmut
+--input_type
+spacer_fasta
+--lh_fct
+simple
+--significance_level
+0.05
+--determine_orientation
+--orientation_decision_boundary
+5

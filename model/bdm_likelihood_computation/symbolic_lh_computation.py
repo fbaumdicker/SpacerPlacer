@@ -156,16 +156,20 @@ if __name__ == '__main__':
     # if i < 15:
     #     pprint(p_ilm[i])
     # pprint(p_ilm)
-    p = solve_kolmogorov_backward_eq_death_process(100, log=False,
-                                                   save_path=os.path.join('../../data', '0_lh',
-                                                                          'death_lh_up_to_100_groot'),
-                                                   # cont_p=p
-                                                   cont_p=None
-                                                   )
+    # p = solve_kolmogorov_backward_eq_death_process(100, log=False,
+    #                                                save_path=os.path.join('../../data', '0_lh',
+    #                                                                       'death_lh_up_to_100_groot'),
+    #                                                # cont_p=p
+    #                                                cont_p=None
+    #                                                )
     # p_log = apply_log(p)
-    save_p_to_pickle(os.path.join('../../data', '0_lh', 'death_lh_up_to_100_groot'), p)
-    load_lambdify_lh_fct(os.path.join('../../data', '0_lh', 'death_lh_up_to_100_groot.pickle'),
-                         save_path=os.path.join('../../data', '0_lh', 'death_lh_up_to_100_groot_lambdifyed.pickle'),
+    # save_p_to_pickle(os.path.join('additional_data', '0_lh', 'death_lh_up_to_100_groot'), p)
+
+    # Depending on version of sympy/numpy/...? Might need to re-lambdify the function, or do it on loading instead ->
+    # more expensive.
+    load_lambdify_lh_fct(os.path.join('../../additional_data', '0_lh', '230329_death_lh_up_to_100_groot.pickle'),
+                         save_path=os.path.join('../../additional_data', '0_lh',
+                                                '230329_death_lh_up_to_100_groot_lambdifyed'),
                          save_lambdified_lh_fct=True)
 
     # p = load_p_from_pickle(os.path.join('data', '0_lh', 'testing_lh.pickle'))

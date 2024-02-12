@@ -7,17 +7,16 @@ import numpy as np
 import random
 import json
 
-from model import mafft_integration, distance_tree_constructor, model_tools
+from model import mafft_integration, model_tools
 from model.helpers import misc, import_data, stats
 from model.orientation import orientation_tools
 from model.bdm_likelihood_computation import symbolic_lh_computation
 from model.experiments_tools import expand_sim_parameters, multiple_selection_fcts, construct_tree, filter_fct, \
-    load_align_omer_data, load_arrays_from_pkl, align_crispr_groups_for_sim_as_rec, pooling_for_parameter_estimation, \
-    load_align_single_fasta, expand_sim_parameters_based_on_import, tree_handling
-from model.simulation_tree import SimulationTree
+    load_align_pickled_data, load_arrays_from_pkl, align_crispr_groups_for_sim_as_rec, pooling_for_parameter_estimation, \
+    load_align_single_fasta, expand_sim_parameters_based_on_import, tree_handling, name_inner_nodes_if_unnamed
+from additional_data.additional_scripts.model.simulation_tree import SimulationTree
 from model.reconstruction_tree import ReconstructionTree
 from model.data_classes.advanced_tree import AdvancedTree
-from model.summary import write_summary, compose_summary_dict
 
 WORK_PATH = os.path.join('data', 'simulation_alignment')
 TREE_GENERATION_PARAMETERS = {
@@ -28,16 +27,22 @@ TREE_GENERATION_PARAMETERS = {
     'precise_deletion_rate': 0.1830,
     'precise_alpha': 3.3377,
 }
-LH_FCT_PATH = os.path.join('data', '0_lh', 'death_lh_up_to_100_lambdified.pkl')
+LH_FCT_PATH = os.path.join('additional_data', '0_lh',
+                           '230329_death_lh_up_to_68_lambdifyed.pickle'
+                           )
 
 
 def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict, lh_fct=None, logger=None, plot_tree=True,
                         do_show=False, combine_non_unique_arrays=False, determine_orientation=True,
                         orientation_decision_boundary=10,
                         tree_path=None, plot_order=True, significance_level=0.05, extend_branches=False,
+                        tree_distance_fct='likelihood',
                         tree_lh_fct=None, tree_insertion_rate=None, tree_deletion_rate=None, tree_alpha=None,
                         alpha_bias_correction=True, rho_bias_correction=True,
+                        seed=None,
                         ):
+    if seed is not None:
+        np.random.seed(seed)
     dict_crispr_groups = {}
     run_timer = misc.RunTimer()
     save_data_folder = os.path.join(save_path, 'additional_data')
@@ -52,7 +57,8 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict, lh_fct=None
                                                group_name=group_name,
                                                logger=logger,
                                                mafft_options=None,
-                                               save_path=None)
+                                               save_path=None,
+                                               seed=seed)
         dict_crispr_groups[group_name] = crispr_group
     # logger.debug(f'Loading and aligning time: {run_timer.time_from_last_checkpoint()}')
     print_save_path = os.path.join(save_data_folder, 'work_folder')
@@ -72,7 +78,6 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict, lh_fct=None
                                                                                                             'precise'] \
             else lh_fct
     dict_crispr_groups_for_reverse = copy.deepcopy(dict_crispr_groups) if determine_orientation else {}
-
     logger.info(f'Beginning reconstruction of (forward oriented) group(s)...\n')
     df_rec_protocol, \
         df_rec_protocol_trivial, _, \
@@ -98,7 +103,8 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict, lh_fct=None
                                                               group_by=None,
                                                               significance_level=significance_level,
                                                               extend_branches=extend_branches,
-                                                              tree_distance_function=tree_lh_fct,
+                                                              tree_lh_fct=tree_lh_fct,
+                                                              tree_distance_function=tree_distance_fct,
                                                               tree_gain_rate=tree_insertion_rate,
                                                               tree_loss_rate=tree_deletion_rate,
                                                               tree_alpha=tree_alpha,
@@ -109,6 +115,7 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict, lh_fct=None
                                                               )
     dict_trees = dict_trees_forward
     df_rec_protocol = df_rec_protocol.set_index('name')
+    df_results_wo_details = df_rec_protocol
     if not df_rec_protocol_trivial.empty:
         df_rec_protocol_trivial = df_rec_protocol_trivial.set_index('name')
 
@@ -152,7 +159,8 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict, lh_fct=None
                                       group_by=None,
                                       significance_level=significance_level,
                                       extend_branches=extend_branches,
-                                      tree_distance_function=tree_lh_fct,
+                                      tree_lh_fct=tree_lh_fct,
+                                      tree_distance_function=tree_distance_fct,
                                       tree_gain_rate=tree_insertion_rate,
                                       tree_loss_rate=tree_deletion_rate,
                                       tree_alpha=tree_alpha,
@@ -162,7 +170,7 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict, lh_fct=None
                                       provided_numbering=dict_provided_numbering,
                                       provided_aligned_arrays=dict_provided_aligned_arrays,
                                       provided_dict_duplicated_spacers=dict_provided_duplicated_spacers,
-                                      metadata=False)
+                                      metadata=False, )
         dict_trees = {'forward': dict_trees_forward,
                       'reversed': dict_trees_reversed}
 
@@ -188,25 +196,28 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict, lh_fct=None
                                                      '0_detailed_results_wo_trivial_groups.csv'))
         df_oriented_rec_protocol.to_pickle(os.path.join(detailed_protocols_save_path,
                                                         '0_detailed_results_wo_trivial_groups.pkl'))
-    df_results_wo_details = df_rec_protocol.drop(columns=['relative deletion positions', 'nb of existent spacers',
-                                                          'all max block deletion lengths',
-                                                          'all max block deletion lengths (normalized)',
-                                                          'reversed_lh_idm', 'reversed_lh_bdm',
-                                                          'lh_idm / reversed_lh_idm',
-                                                          'lh_bdm / reversed_lh_bdm',
-                                                          'lh_idm', 'lh_bdm',
-                                                          'excluding young spacers deletion_rate_idm',
-                                                          'excluding young spacers deletion_rate_bdm',
-                                                          'excluding young spacers alpha_bdm',
-                                                          'containing old spacers deletion_rate_idm',
-                                                          'containing old spacers deletion_rate_bdm',
-                                                          'containing old spacers alpha_bdm', 'fes +m presence',
-                                                          'les -m presence',
-                                                          'ls -m presence', 'fs +m presence', 'global fes +m presence',
-                                                          'global les -m presence', 'global ls -m presence',
-                                                          'combined array names',
-                                                          ],
-                                                 errors='ignore')
+        df_results_wo_details = df_oriented_rec_protocol
+
+    df_results_wo_details = df_results_wo_details.drop(
+        columns=['relative deletion positions', 'nb of existent spacers',
+                 'all max block deletion lengths',
+                 'all max block deletion lengths (normalized)',
+                 'reversed_lh_idm', 'reversed_lh_bdm',
+                 'lh_idm / reversed_lh_idm',
+                 'lh_bdm / reversed_lh_bdm',
+                 'lh_idm', 'lh_bdm',
+                 'excluding young spacers deletion_rate_idm',
+                 'excluding young spacers deletion_rate_bdm',
+                 'excluding young spacers alpha_bdm',
+                 'containing old spacers deletion_rate_idm',
+                 'containing old spacers deletion_rate_bdm',
+                 'containing old spacers alpha_bdm', 'fes +m presence',
+                 'les -m presence',
+                 'ls -m presence', 'fs +m presence', 'global fes +m presence',
+                 'global les -m presence', 'global ls -m presence',
+                 'combined array names',
+                 ],
+        errors='ignore')
 
     df_results_wo_details.to_csv(os.path.join(save_path, '_'.join(['0_results']) + '.csv'))
 
@@ -262,9 +273,9 @@ def run_pickled_data(rec_parameter_dict, data_path, save_path=None, plot_tree=Tr
         logger.info(f'Number of arrays before reconstruction: {nb_arrays}')
     else:
         logger.info(f'Loading and aligning from files {data_path}')
-        dict_crispr_groups = load_align_omer_data(data_path, mafft_options=alignment_options_dict['mafft_options'],
-                                                  exclude_files=alignment_options_dict['exclude_files'],
-                                                  save_path=alignment_options_dict['save_path'])
+        dict_crispr_groups = load_align_pickled_data(data_path, mafft_options=alignment_options_dict['mafft_options'],
+                                                     exclude_files=alignment_options_dict['exclude_files'],
+                                                     save_path=alignment_options_dict['save_path'])
 
     dict_crispr_groups_for_reverse = copy.deepcopy(dict_crispr_groups) if determine_orientation else {}
     (df_rec_protocol, df_rec_protocol_boring, (dict_data_for_group_by, lh_fct), dict_provided_numbering,
@@ -374,12 +385,9 @@ def run_pickled_data(rec_parameter_dict, data_path, save_path=None, plot_tree=Tr
                 val_group_by = df_oriented_rec_protocol[group_by]
             ls_data_for_lh_ratio = []
             for idx in df_oriented_rec_protocol.index:
-                # if idx in list(df_rec_protocol_boring['name']) \
-                #         and idx in list(df_rec_protocol_reversed_boring['name']):
-                #     continue
                 ls_data_for_lh_ratio.append(dict_data_for_group_by_reversed[idx] \
                                                 if df_oriented_rec_protocol.loc[
-                                                       idx, 'our predicted orientation'] == 'Reverse' \
+                                                       idx, 'predicted orientation'] == 'Reverse' \
                                                 else dict_data_for_group_by[idx])
             group_names, groups_lh_0, groups_lh_1, \
                 groups_result_0, groups_result_1 = pooling_for_parameter_estimation(ls_data_for_lh_ratio,
@@ -496,8 +504,6 @@ def run_simulation_and_reconstruction(sim_parameter_dict, rec_parameter_dict, sa
         logger.info(f'Loading simulations from {sim_save_path}...')
         with open(os.path.join(sim_save_path, 'dict_crispr_groups.pkl'), 'rb') as f:
             dict_crispr_groups = pickle.load(f)
-        # with open(os.path.join(sim_save_path, 'dict_simulation_trees.pkl'), 'rb') as f:
-        #     ls_sim_m = pickle.load(f)
         df_sim_protocol = pd.read_pickle(os.path.join(sim_save_path, '_'.join(['0_sim_protocol']) + '.pkl'))
     else:
         logger.info('Starting simulations...')
@@ -517,7 +523,7 @@ def run_simulation_and_reconstruction(sim_parameter_dict, rec_parameter_dict, sa
             logger.info('Starting alignment...')
             dict_crispr_groups = mafft_integration.align_crispr_groups(WORK_PATH, dict_crispr_groups,
                                                                        mafft_options=alignment_options,
-                                                                       logger=logger,)
+                                                                       logger=logger, )
 
         if sim_save_path:
             with open(os.path.join(sim_save_path, 'dict_crispr_groups.pkl'), 'wb') as f:
@@ -654,12 +660,6 @@ def run_simulation_and_reconstruction(sim_parameter_dict, rec_parameter_dict, sa
                         ls_data_for_lh_ratio.append(dict_data_for_group_by[idx])
                         filtered_val_group_by.append(val_group_by[i])
 
-                # ls_data_for_lh_ratio.append(dict_data_for_group_by_reversed[idx] \
-                #                                 if df_oriented_rec_protocol.loc[
-                #                                        idx, 'our predicted orientation'] == 'Reverse' \
-                #                                 else dict_data_for_group_by[idx])
-            # logger.info(f'ls_data_for_lh_ratio: {ls_data_for_lh_ratio}')
-            # logger.info(f'filtered_val_group_by: {filtered_val_group_by}')
             group_names, groups_lh_0, groups_lh_1, \
                 groups_result_0, groups_result_1 = pooling_for_parameter_estimation(ls_data_for_lh_ratio,
                                                                                     group_by=filtered_val_group_by,
@@ -712,12 +712,6 @@ def run_simulation_and_reconstruction(sim_parameter_dict, rec_parameter_dict, sa
         with open(os.path.join(tree_save_path, 'final_dict_nwk_trees.pkl'), 'wb') as f:
             pickle.dump(dict_trees, f)
 
-    # if plot_tree:
-    #     for crispr_group in dict_crispr_groups.values():
-    #         ls_png = [os.path.join(sim_save_path, crispr_group.name + '_sim.pdf'),
-    #                   os.path.join(rec_save_path, crispr_group.name + '_full_rec.pdf')]
-    # misc.merge_pdf(ls_png, os.path.join(save_path, crispr_group.name + '_all.pdf'))
-
 
 def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, plot_tree=True,
                        lh_fct=None,
@@ -736,7 +730,8 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                        finite_bl_at_root=True,
                        logger=None,
                        extend_branches=False,
-                       tree_distance_function='breakpoint',
+                       tree_lh_fct=None,
+                       tree_distance_function='likelihood',
                        tree_gain_rate=None,
                        tree_loss_rate=None,
                        tree_alpha=None,
@@ -753,6 +748,8 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                        ):
     """
 
+    :param tree_lh_fct: 
+    :param seed:
     :param metadata:
     :param lh_fct:
     :param provided_aligned_arrays:
@@ -836,7 +833,6 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
     else:
         dict_trees = {}
     new_dict_trees = {}
-    # rec_m_save_file = open(os.path.join(save_path, '0_rec_m_saved.pkl'), 'wb')
     dict_data_for_lh_ratio = dict()
     new_dict_provided_numberings = dict()
     new_dict_provided_aligned_arrays = dict()
@@ -848,9 +844,6 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
         if crispr_group.repeat:
             logger.info(f'Repeat: {crispr_group.repeat}')
         logger.info(f'Progress (group/total): {i + 1} / {len(dict_crispr_groups)}')
-        # for key, val in crispr_group.crispr_dict.items():
-        #     print(key)
-        #     print(val.spacer_array)
 
         skip, reason = multiple_selection_fcts(crispr_group,
                                                selection_criteria=selection_fct[0] if selection_fct else None,
@@ -895,12 +888,7 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                 continue
             tree = import_data.load_single_tree_from_string(dict_trees[crispr_group.name] + '\n')
         else:
-            # old... If I want support for single file nwk trees, I should do it differently.
-            # if tree_path is not None:
-            #     logger.info(f'Loading single tree from {tree_path} ...')
-            #     tree = import_data.load_single_tree(os.path.join(tree_path, crispr_group.name + '_tree.nwk'))
-            # else:
-            if lh_fct is None or lh_fct.lower() == 'simple':
+            if tree_lh_fct is None or tree_lh_fct == 'simple':
                 modifier = 'simple_'
             else:
                 modifier = 'precise_'
@@ -916,7 +904,7 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                         f'gain rate: {tree_gain_rate}, '
                         f'loss rate: {tree_loss_rate}, '
                         f'alpha: {tree_alpha}, '
-                        f'provided_lh_fct: {lh_fct} ...')
+                        f'provided_lh_fct: {tree_lh_fct} ...')
             tree = construct_tree(ls_array_names, ls_arrays, crispr_group.name,
                                   logger=logger, distance_fct=tree_distance_function,
                                   gain_rate=tree_gain_rate, loss_rate=tree_loss_rate, alpha=tree_alpha,
@@ -935,6 +923,8 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                 ls_skipped_protocol.append({'name': crispr_group.name, 'repeat': crispr_group.repeat,
                                             'reason': 'Skipped because too few arrays after pruning.'})
                 continue
+        else:
+            tree = name_inner_nodes_if_unnamed(tree)
 
         if len(ls_arrays) <= 1:
             logger.warning(f'{crispr_group.name} was skipped because there is only one array.')
@@ -1052,9 +1042,6 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                                                   spacer_labels_num=spacer_labels_num,
                                                   re_plot_order=False,
                                                   )
-            # print('dict_bg_colors', dict_bg_colors)
-            # print('Provided numbering: %s' % provided_numbering)
-            # print('spacerlabelsnum', spacer_labels_num)
 
         if not sim_as_rec:
             rec_m.ml_anc_joint_correct_contra(repeated=True, finite_bl_at_root=finite_bl_at_root)
@@ -1069,25 +1056,15 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
             count_reacquisitions, count_ind_dups_default, \
             count_other_dup_events, \
             count_indep_acquisitions_not_dup_candidates = rec_m.get_rec_duplication_type_counts()
-        # count_duplications = sum([len(value) for value in rec_duplications.values()])
-        # count_rearrangements = sum([len(value) for value in rec_rearrangements.values()])
-        # count_reacquisitions = sum([len(value) for value in rec_reacquisitions.values()])
-        # count_ind_dups_default = sum([len(value) for value in rec_default_duplications.values()])
 
         logger.info(f'Length of topological order: {len(rec_m.top_order)}')
         nb_gained_spacers = len(rec_m.top_order)
 
         nb_rec_insertions = sum([len(val) for val in rec_m.rec_gain_dict.values()])
         nb_rec_deletions = sum([len(val) for val in rec_m.rec_loss_dict.values()])
-        # unique_spacers = set()
-        # for leaf in rec_m.get_terminals():
-        #     unique_spacers = unique_spacers.union(set(leaf.spacers))
         nb_unique_spacers = len(rec_m.top_order) - count_duplications_rearrangement_candidates
-        # logger.info(f'All spacer orders: {rec_m.spacer_orders}')
         dict_matrices = rec_m.generate_possible_losses_sets()
-        # logger.info(f'Possible multiple losses sets: {dict_matrices}')
         dict_max_length_losses, ls_all_max_lengths, ls_all_max_lengths_norm = rec_m.get_max_length_loss_sets()
-        # logger.info(f'Max length multiple losses sets (set, length): {dict_max_length_losses}')
         ls_rel_loss_pos, ls_losses, \
             ls_nb_ex_spacers, avg_nb_ex_spacers, \
             (fes_m_presence, les_m_presence, l_s_m_presence, f_s_m_presence), \
@@ -1101,7 +1078,6 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
 
         lh_ratio = lh_0 / lh_1 if lh_1 != 0 else np.nan
         ln_lh_0, ln_lh_1 = -opt_result_0.fun, -opt_result_1.fun
-        # ln_lh_ratio = 2 * (opt_result_0.fun - opt_result_1.fun)
         ln_lh_ratio = 2 * (ln_lh_1 - ln_lh_0)
         test_result, quantile = stats.test_significance_ratio_chi2(ln_lh_ratio, significance_level)
         preferred_model = 'BDM' if test_result else 'IDM'
@@ -1255,18 +1231,7 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
         new_dict_provided_numberings[crispr_group.name] = (rec_m.spacer_names_to_numbers, dict_bg_colors)
         new_dict_provided_aligned_arrays[crispr_group.name] = df
         new_dict_provided_duplicated_spacers[crispr_group.name] = dict_duplicated_spacers
-        # pickle.dump((i, rec_m.get_data_for_lh_ratio(filter_by=False)), rec_m_save_file)
         logger.info(f'Run time of group "{crispr_group.name}": {run_time} s\n')
-        # tree_memory_size = sys.getsizeof(rec_m)
-        # memory_size_of_function = sys.getsizeof(give_lh_fct)
-        # logger.info(f'Memory size of tree: {tree_memory_size}, Memory size lh function: {memory_size_of_function}')
-        # local_vars = list(locals().items())
-        # for var, obj in local_vars:
-        #     print(var, sys.getsizeof(obj))
-        # for name, size in sorted(((name, misc.getsize(value)) for name, value in locals().items()),
-        #                          key=lambda x: -x[1])[:20]:
-        #     print("{:>30}: {:>8}".format(name, misc.sizeof_fmt(size)))
-    # rec_m_save_file.close()
     if tree_save_path is not None:
         with open(os.path.join(tree_save_path, 'dict_nwk_trees.pkl'), 'wb') as f:
             pickle.dump(new_dict_trees, f)
@@ -1339,7 +1304,6 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
             lambdifyed_lh_fct=give_lh_fct)
 
         ln_lh_0, ln_lh_1 = -opt_result_0.fun, -opt_result_1.fun
-        # ln_lh_ratio = 2 * (opt_result_0.fun - opt_result_1.fun)
         ln_lh_ratio = 2 * (ln_lh_1 - ln_lh_0)
         test_result, quantile = stats.test_significance_ratio_chi2(ln_lh_ratio, significance_level)
         preferred_model = 'BDM' if test_result else 'IDM'
@@ -1513,8 +1477,6 @@ def run_simulation(sim_parameter_dict, save_path=None, plot_tree=True, logfile_p
         logger.info(f'Saving model to {save_path}')
         if not os.path.exists(save_path):
             os.makedirs(save_path)
-        # with open(os.path.join(save_path, 'dict_simulation_trees.pkl'), 'wb') as f:
-        #     pickle.dump(dict_sim_m, f)
         with open(os.path.join(save_path, 'dict_nwk_trees.pkl'), 'wb') as f:
             pickle.dump(dict_trees, f)
 

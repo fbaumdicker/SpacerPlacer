@@ -5,9 +5,10 @@ import numpy as np
 import os
 import pickle
 
-from model.helpers import misc, import_data, raw_data_tools
+from model.helpers import misc, import_data
+from additional_data.additional_scripts.model.helpers import raw_data_tools
 from model import model_tools
-from model.coalescent_tree_sim import mult_rnd_coalescent_tree, rnd_coalescent_tree
+from additional_data.additional_scripts.model.coalescent_tree_sim import mult_rnd_coalescent_tree, rnd_coalescent_tree
 from model import distance_tree_constructor
 from model import mafft_integration
 from model.data_classes.crisprdata import CRISPRGroup, CRISPRArray
@@ -15,6 +16,46 @@ from model.data_classes.advanced_tree import AdvancedTree
 
 GROUPS_TO_EXCLUDE = ['g_39', 'g_284', 'g_690', 'g_140', 'g_719', 'g_931', 'g_598',
                      'g_942']
+
+
+def load_align_pickled_data(path, mafft_options=None, exclude_files=None, save_path=None):
+    """
+    :param path:
+    :param mafft_options:
+    :param exclude_files:
+    :param save_path:
+    :return:
+    """
+    ls_files = []
+    for entry in sorted(os.listdir(path)):
+        if os.path.isdir(os.path.join(path, entry)):
+            continue
+        ls_files.append(entry)
+    dict_crispr_groups = {}
+    if exclude_files:
+        ls_files = [file for file in ls_files if file not in exclude_files]
+    for file in ls_files:
+        ls_arrays, ls_names, head = mafft_integration.pickled_group_to_mafft(path, [file],
+                                                                             options=mafft_options)
+        ls_crispr_arrays = []
+        for name, array in zip(ls_names, ls_arrays):
+            crispr_array = CRISPRArray(name, '', None, 4, head[1],
+                                       'chromosome', 'Bacteria', head[0], array, head[2],
+                                       cas_genes=[], all_cas_types=[], all_cas_genes=[],
+                                       species=raw_data_tools.Species('', 'Bacteria', 'sim', 'sim', 'sim', 'sim',
+                                                                      'sim', 'sim'),
+                                       species_fc='sim')
+            ls_crispr_arrays.append(crispr_array)
+        crispr_group = CRISPRGroup(head[1], ls_crispr_arrays, name=file)
+        crispr_group.convert_arrays_from_mafft_fmt()
+        dict_crispr_groups[file] = crispr_group
+
+    if save_path:
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+        with open(os.path.join(save_path, '0_aligned_crisprgroups.pkl'), 'wb') as f:
+            pickle.dump(dict_crispr_groups, f)
+    return dict_crispr_groups
 
 
 def give_count_duplicates_in_list(ls):
@@ -31,6 +72,15 @@ def give_count_duplicates_in_list(ls):
         else:
             ls_unique.append(item)
     return dict_duplicates
+
+
+def name_inner_nodes_if_unnamed(tree):
+    n_i = 0
+    for node in tree.get_nonterminals():
+        if node.name is None:
+            node.name = 'in_' + str(n_i)
+            n_i += 1
+    return tree
 
 
 def tree_handling(tree, crispr_group, name_inner_nodes=False, bl_eps=0):
@@ -67,15 +117,13 @@ def tree_handling(tree, crispr_group, name_inner_nodes=False, bl_eps=0):
         crispr_group.drop_array_by_acc_num(acc_num)
     # Naming inner nodes...
     if name_inner_nodes:
-        n_i = 0
-        for node in tree.get_nonterminals():
-            node.name = 'in_' + str(n_i)
-            n_i += 1
+        tree = name_inner_nodes_if_unnamed(tree)
     tree = AdvancedTree(tree, rooted=True, model_name=tree.model_name)
     return tree, crispr_group
 
 
-def load_align_single_fasta(data_path, work_path, mafft_options=None, group_name='g', logger=None, save_path=None):
+def load_align_single_fasta(data_path, work_path, mafft_options=None, group_name='g', logger=None, save_path=None,
+                            seed=None):
     dict_fasta = read_fasta(data_path)
     # group metadata format?
     # repeat = 'ABC'
@@ -99,7 +147,7 @@ def load_align_single_fasta(data_path, work_path, mafft_options=None, group_name
     crispr_group = CRISPRGroup(None, ls_crispr_arrays, name=group_name)
     dict_crispr_group = {crispr_group.name: crispr_group}
     dict_crispr_group = mafft_integration.align_crispr_groups(work_path, dict_crispr_group, mafft_options=mafft_options,
-                                                              logger=logger)
+                                                              logger=logger, seed=seed)
     if save_path:
         with open(save_path, 'wb') as f:
             pickle.dump(dict_crispr_group, f)
@@ -134,45 +182,6 @@ def align_crispr_groups_for_sim_as_rec(dict_crispr_groups):
     return dict_crispr_groups
 
 
-def load_align_omer_data(path, mafft_options=None, exclude_files=None, save_path=None):
-    """
-    :param path:
-    :param mafft_options:
-    :param exclude_files:
-    :param save_path:
-    :return:
-    """
-    ls_files = []
-    for entry in sorted(os.listdir(path)):
-        if os.path.isdir(os.path.join(path, entry)):
-            continue
-        ls_files.append(entry)
-    dict_crispr_groups = {}
-    if exclude_files:
-        ls_files = [file for file in ls_files if file not in exclude_files]
-    for file in ls_files:
-        ls_arrays, ls_names, head = mafft_integration.omer_group_to_mafft(path, [file],
-                                                                          options=mafft_options)
-        ls_crispr_arrays = []
-        for name, array in zip(ls_names, ls_arrays):
-            crispr_array = CRISPRArray(name, '', None, 4, head[1], 'chromosome', 'Bacteria', head[0], array, head[2],
-                                       cas_genes=[], all_cas_types=[], all_cas_genes=[],
-                                       species=raw_data_tools.Species('', 'Bacteria', 'sim', 'sim', 'sim', 'sim',
-                                                                      'sim', 'sim'),
-                                       species_fc='sim')
-            ls_crispr_arrays.append(crispr_array)
-        crispr_group = CRISPRGroup(head[1], ls_crispr_arrays, name=file)
-        crispr_group.convert_arrays_from_mafft_fmt()
-        dict_crispr_groups[file] = crispr_group
-
-    if save_path:
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
-        with open(os.path.join(save_path, '0_aligned_crisprgroups.pkl'), 'wb') as f:
-            pickle.dump(dict_crispr_groups, f)
-    return dict_crispr_groups
-
-
 def filter_fct(dict_protocol):
     """
     :param dict_protocol:
@@ -201,14 +210,9 @@ def construct_tree(ls_array_names, ls_arrays, group_name, logger=None, distance_
     if distance_fct == 'likelihood':
         distance = distance_tree_constructor.LikelihoodDistance(gain_rate, loss_rate, alpha,
                                                                 provided_lh_fct=provided_lh_fct, skip_letters={'-'})
-    elif distance_fct == 'breakpoint':
-        distance = distance_tree_constructor.RealRealBreakpoint(skip_letters={'-'})
     else:
         raise NotImplementedError('Distance function not implemented!')
-    # distance = mult_seq_align.NWMSA(ls_arrays, ls_array_names)
-    # distance = mult_seq_align.Breakpoint(ls_arrays, ls_array_names)
-    # distance = mult_seq_align.JaccardSimilarity(ls_arrays, ls_array_names)
-    # distance = mult_seq_align.GAPNWMSA(ls_arrays, ls_array_names)
+
     tree_constructor = distance_tree_constructor.FixedDistanceTreeConstructor(distance_calculator=distance,
                                                                               method='upgma')
     if logger is not None:

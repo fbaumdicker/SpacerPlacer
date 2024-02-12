@@ -7,8 +7,7 @@ import collections
 import json
 
 from model.data_classes import advanced_tree
-from model.evolution import GTR
-from model.bdm_likelihood_computation import symbolic_lh_computation
+from additional_data.additional_scripts.model.evolution import GTR
 from model.model_tools import seq2prof, prof2seq, differences_child_parent_pos, \
     compute_tree_lh, \
     minimize_fct, minimize_scalar_fct
@@ -566,7 +565,7 @@ class ReconstructionTree(advanced_tree.AdvancedTree):
             # (mask = False). Not all duplications are in cols_to_join, for them the standard is done. dup_add_idx[0] is
             # always this standard counter.
             columns = df_aligned.columns
-            mask = pd.DataFrame(full_alignment).duplicated(keep=False)
+            mask = pd.DataFrame(full_alignment).duplicated(keep=False).astype(int)
             for i, (s, col) in enumerate(zip(full_alignment, columns)):
                 if cols_to_join.get(s, False):
                     if len(cols_to_join[s]) < 2:
@@ -974,11 +973,6 @@ class ReconstructionTree(advanced_tree.AdvancedTree):
         for bl, n, mll in zip(ls_bl, nb_survivors, nb_max_length_losses):
             max_mll = max(mll) if mll else 0
 
-            # Could remove RuntimeWarning by
-            # res = np.log(m, out=np.zeros_like(m), where=(m!=0))
-            # or
-            # with errstate(divide='ignore'):
-            #     res = np.log(m)
             ls_f = np.log([max(f(bl, loss_rate, alpha), self.eps) for f in self.lambdifyed_lh_fct[:max_mll + 1]])
             ls_f[np.isnan(ls_f) | np.isinf(ls_f)] = -self.big_eps
             ln_keep = - loss_rate * bl * n
@@ -1020,7 +1014,6 @@ class ReconstructionTree(advanced_tree.AdvancedTree):
         start_values_1 = np.array([0.5, 1.5])
         bnds_0 = (0, 100000)
         bnds_1 = ((0, None), (1, None))
-        # print(len(start_values_0), len(bnds_0))
 
         max_0 = minimize_scalar_fct(lh_fct_0, bounds=bnds_0, method='bounded')
         max_1 = minimize_fct(lh_fct_1, start_values_1, bounds=bnds_1, method=method)
@@ -1245,8 +1238,7 @@ class ReconstructionTree(advanced_tree.AdvancedTree):
             top_order_sorted_by_age = list(reversed(branch_gains)) + top_order_sorted_by_age
 
             # handling duplication candidates. Probably better to handle this by using order, but candidates are removed
-            # from order... Would be a bit messy. This could make errors for some configurations of arrays. Don't know
-            # exactly. Should at least respect order within leaf arrays now!
+            # from order... Would be a bit messy. Should at least respect order within leaf arrays now!
             for s in self.rec_dup_rearr_candidates.get(node.name, []):
                 s_as_name = self.spacer_numbers_to_names[s]
                 idx_in_top_order_sorted = [i for i, v in enumerate(top_order_sorted_by_age)

@@ -1,7 +1,6 @@
 import itertools
 
 import numpy as np
-import matplotlib.pyplot as plt
 from timeit import default_timer as timer
 import logging
 import sys
@@ -87,19 +86,6 @@ class RunTimer:
                f'Checkpoint times (wrt. start): {time_from_start}'
 
 
-# def merge_pdf(ls_pdf, out_path):
-#     # merger = PdfFileMerger()
-#     # for i in ls_pdf:
-#     #     merger.append(open(i, 'rb'))
-#     # with open(out_path, 'wb') as fout:
-#     #     merger.write(fout)
-#     result = fitz.open()
-#     for pdf in ls_pdf:
-#         with fitz.open(pdf) as mfile:
-#             result.insert_pdf(mfile)
-#     result.save(out_path)
-
-
 def remove_completely_same_arrays(ls_arrays, ls_names):
     ls_cleaned_arrays = []
     set_idx_to_remove = set([])
@@ -117,38 +103,6 @@ def remove_completely_same_arrays(ls_arrays, ls_names):
             ls_cleaned_names.append(name)
 
     return ls_cleaned_arrays, ls_cleaned_names, dict_combined_names
-
-
-# def sample_poisson_distribution(lam, size):
-#     return pd.DataFrame(np.random.poisson(lam, size), columns=['gains'])
-
-
-# theta = 20
-# rho = 1
-# t = 1
-# nb_samples = 100000
-# lam_gain = theta / rho * (1 - np.exp(-rho * t))
-#
-# dist = sample_poisson_distribution(lam_gain, nb_samples)
-# print(dist)
-# sns_plt = sns.displot(dist, x="gains", discrete=True)
-# sns_plt_prob = sns.displot(dist, x='gains', discrete=True, stat='probability')
-# plt.show()
-
-
-def pos_to_spacer_names(pos, alphabet='sim'):
-    if alphabet == 'sim':
-        max_spacer = len(pos)
-        # pos: spacer_name
-        alphabet = {i: max_spacer - i for i in range(max_spacer)}
-    return [alphabet[i] for i in pos]
-
-
-def spacer_name_to_pos(array, alphabet=0):
-    if isinstance(alphabet, int):
-        max_spacer = alphabet
-        alphabet = {max_spacer - i: i for i in range(max_spacer)}
-    return [alphabet[name] for name in array]
 
 
 class GraphContainsCycleException(Exception):
@@ -209,9 +163,6 @@ def uniqify_ls_order_preserving(seq, idfun=None):
     result = []
     for item in seq:
         marker = idfun(item)
-        # in old Python versions:
-        # if seen.has_key(marker)
-        # but in new ones:
         if marker in seen: continue
         seen[marker] = 1
         result.append(item)

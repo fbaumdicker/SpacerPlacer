@@ -6,6 +6,3 @@ spacer_fasta
 simple
 --significance_level
 0.05
---determine_orientation
---orientation_decision_boundary
-5

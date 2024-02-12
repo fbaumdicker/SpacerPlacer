@@ -71,11 +71,6 @@ def visualize_tree_rec_spacers(newick_tree, df_rec_spacers=None, df_gains_losses
 
     ls_spacers = [str(c) for c in top_order]
 
-    # print('alphabet', alphabet)
-    # print('reverse_alphabet', reverse_alphabet)
-    # print('ls_spacers', ls_spacers)
-    # print('num_ls_spacers', num_ls_spacers)
-    # print('bg_col_dict', bg_col_dict)
     if not spacer_labels_num or provided_numbering is not None:
         ls_gains = []
         ls_losses = []
@@ -275,11 +270,6 @@ def visualize_tree_rec_spacers(newick_tree, df_rec_spacers=None, df_gains_losses
 
     ts_rec.legend_position = 3
 
-    # face_spacer_nb.opacity = opacity
-    # num_face_spacer_nb.opacity = opacity
-    # title
-    # ts_rec.title.add_face(ete3.TextFace(name + ' reconstruction', fsize=fsize), 0)
-
     ete_tree_rec.render(os.path.join(path, name + '.pdf'), tree_style=ts_rec)
     ete_tree_rec.render(os.path.join(path, name + '.png'), tree_style=ts_rec)
 
@@ -365,19 +355,6 @@ def visualize_tree_sim_spacers(newick_tree, df_real_rec_spacers=None, df_gains_l
 
     if do_show:
         ete_tree_sim.show(tree_style=ts_sim, name='Simulated ancestors')
-
-
-def save_tree(newick_tree, save_path):
-    ete_tree = ete3.Tree(newick_tree, format=3)
-
-    ts = ete3.TreeStyle()
-    ts.show_branch_length = False
-    ts.show_scale = False
-    ts.branch_vertical_margin = 20
-    # circular tree
-    # ts.mode = "c"
-    ts.show_leaf_name = False
-    ete_tree.render(os.path.join(save_path, 'tree_raw.pdf'), tree_style=ts)
 
 
 def assign_values_to_tree(tree, df_spacers, gain_series, loss_series, rec_contra_dict=None, bg_cmap=None,
@@ -587,78 +564,6 @@ def assign_values_to_tree(tree, df_spacers, gain_series, loss_series, rec_contra
         face_name.margin_right = 2
         n.add_face(face_name, 0, position='aligned')
     return default_bg_color_dict
-
-
-def visualize_tree_real_rec_spacers(newick_tree, df_real_rec_spacers=None, df_gains_losses=None, name='tree',
-                                    path='pictures',
-                                    do_show=True, rec_contra_dict=None, fragment_loss=False):
-    """
-    DEPRECATED
-    :param newick_tree:
-    :param df_real_rec_spacers:
-    :param df_gains_losses:
-    :param name:
-    :param path:
-    :param do_show:
-    :param rec_contra_dict:
-    :param fragment_loss:
-    :return:
-    """
-    ete_tree_sim = ete3.Tree(newick_tree, format=3)
-    ete_tree_rec = ete3.Tree(newick_tree, format=3)
-
-    ts_sim = ete3.TreeStyle()
-    ts_rec = ete3.TreeStyle()
-    # circular tree
-    # ts.mode = "c"
-    ts_sim.show_leaf_name = False
-    ts_rec.show_leaf_name = False
-    ts_sim.show_branch_length = False
-    ts_rec.show_branch_length = False
-
-    # ts.draw_aligned_faces_as_table = True
-    # ts.rotation = 45
-    # ts.branch_vertical_margin = 10
-    # ts.arc_start = -180
-    # ts.arc_span = 180
-    # Draws nodes as small red spheres of diameter equal to 10 pixels
-    # nstyle = ete3.NodeStyle()
-    # nstyle["shape"] = "sphere"
-    # nstyle["size"] = 4
-    # nstyle["fgcolor"] = "darkred"
-
-    # Gray dashed branch lines
-    # nstyle["hz_line_type"] = 1
-    # nstyle["hz_line_color"] = "#cccccc"
-
-    ls_spacers = list(reversed(range(1, len(df_real_rec_spacers.iloc[0, 0]) + 1)))
-    ls_spacers = [str(c) for c in ls_spacers]
-    fsize = determine_fsize(ls_spacers)
-    # face_spacer_nb = ete3.TextFace(str_ls_spacers, fsize=10)
-    fg_col_dict = {name: 'Black' for name in ls_spacers}
-    bg_col_dict = {name: 'Silver' for name in ls_spacers}
-
-    sim_losses = df_gains_losses['frag_losses'] if fragment_loss else df_gains_losses['sim_losses']
-    assign_values_to_tree(ete_tree_sim, df_real_rec_spacers['sim_spacers'], df_gains_losses['sim_gains'],
-                          sim_losses, events_fsize=fsize)
-    assign_values_to_tree(ete_tree_rec, df_real_rec_spacers['rec_spacers'], df_gains_losses['rec_gains'],
-                          df_gains_losses['rec_losses'], events_fsize=fsize, rec_contra_dict=rec_contra_dict)
-
-    face_spacer_nb = ete3.SequenceFace(ls_spacers, fg_colors=fg_col_dict, bg_colors=bg_col_dict, fsize=6,
-                                       col_w=fsize + 2)
-    ts_sim.aligned_header.add_face(face_spacer_nb, 1)
-    ts_rec.aligned_header.add_face(face_spacer_nb, 1)
-
-    ts_sim.title.add_face(ete3.TextFace(name + ' simulation', fsize=fsize), 0)
-    ts_rec.title.add_face(ete3.TextFace(name + ' reconstruction', fsize=fsize), 0)
-    ete_tree_sim.render(os.path.join(path, name + '_sim.pdf'), tree_style=ts_sim)
-    ete_tree_rec.render(os.path.join(path, name + '_rec.pdf'), tree_style=ts_rec)
-    ete_tree_sim.render(os.path.join(path, name + '_sim.png'), tree_style=ts_sim)
-    ete_tree_rec.render(os.path.join(path, name + '_rec.png'), tree_style=ts_rec)
-
-    if do_show:
-        ete_tree_sim.show(tree_style=ts_sim, name='Simulated ancestors')
-        ete_tree_rec.show(tree_style=ts_rec, name='Reconstructed ancestors')
 
 
 def determine_fsize(str_ls_spacers, fsize=6, events_fsize=4):

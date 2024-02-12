@@ -4,9 +4,11 @@ import subprocess
 import os
 import numpy as np
 
-from model.helpers import raw_data_tools, import_data
+from model.helpers import import_data
+from additional_data.additional_scripts.model.helpers import raw_data_tools
 from model.data_classes.crisprdata import CRISPRArray
 
+# Excluded characters that are not allowed by mafft.
 EXCLUDED_CHARACTERS = {'3e': 'ff', '3d': 'fe', '3c': 'fd',
                        '2d': 'fc', '20': 'fb', '0d': 'fa',
                        '0a': 'f9'}
@@ -28,7 +30,6 @@ DEFAULT_MAFFT_OPTIONS = ['--text',
                          '--lexp', '0',
                          '--LOP', '0',
                          '--LEXP', '0',
-                         '--randomseed', '2357',
                          '--quiet',
                          '--thread', '-1',  # multithreading -1 -> automatically choose
                          # '--threadit', '0',  # threaded iterative alignment has some randomness (this stops this)
@@ -49,7 +50,6 @@ DEFAULT_MAFFT_OPTIONS_FFT = ['--text',
                              '--lexp', '0',
                              '--LOP', '0',
                              '--LEXP', '0',
-                             '--randomseed', '2357',
                              '--quiet',
                              '--thread', '1',  # '-1',  # multithreading -1 -> automatically choose
                              # '--threadit', '0',  # threaded iterative alignment has some randomness (this stops this)
@@ -69,7 +69,6 @@ def convert_spacer_arrays_to_random_pseudo_dna(ls_arrays, length=20):
     all_unique_spacers = set().union(*[set(a) for a in ls_arrays])
     dict_alphabets = dict()
     if len(all_unique_spacers) <= 58:
-        # completely disjoint
         tuples_4 = iter([range(a, b) for a, b in zip(range(5, 245), range(9, 249))])
         for a in all_unique_spacers:
             tuple_4 = next(tuples_4)
@@ -82,7 +81,6 @@ def convert_spacer_arrays_to_random_pseudo_dna(ls_arrays, length=20):
         for i, a in enumerate(all_unique_spacers):
             while True:
                 tuple_4 = tuple(np.random.choice(considered_alphabet_range, 4, replace=False))
-                # print(tuple_4)
                 if tuple_4 not in set_alphabets:
                     dict_alphabets[a] = {str(tuple_4[0]), str(tuple_4[1]),
                                          str(tuple_4[2]), str(tuple_4[3]),
@@ -95,11 +93,9 @@ def convert_spacer_arrays_to_random_pseudo_dna(ls_arrays, length=20):
     new_ls_arrays = []
     for array in ls_arrays:
         new_array = ['1', '2', '3', '4', '3', '2', '1']
-        # print(new_array)
         for v in array:
             new_array += dict_unique_id_spacers[v]
             new_array += ['1', '2', '3', '4', '3', '2', '1']
-        # print(new_array)
         new_ls_arrays.append(new_array)
     return new_ls_arrays, dict_unique_id_spacers, dict_alphabets, '1234321'
 
@@ -111,17 +107,14 @@ def convert_pseudo_dna_to_spacer_arrays(ls_arrays, dict_unique_id_spacers, dict_
     new_ls_arrays = [[] for _ in range(nb_arrays)]
 
     dict_spacers_unique_id = {''.join(value): key for key, value in dict_unique_id_spacers.items()}
-    # print('spacers->unique', dict_spacers_unique_id)
     current_frag = ['' for _ in range(nb_arrays)]
     frag_memory = [[] for _ in range(nb_arrays)]
-    # repeat_count = [0 for _ in range(nb_arrays)]
     for j in range(alignment_length):
         for i in range(nb_arrays):
             a = ls_arrays[i][j]
             if a == '--':
                 continue
             elif a in values_in_repeat:
-                # print(a)
                 current_frag[i] += a
             else:
                 current_frag[i] += a
@@ -129,7 +122,6 @@ def convert_pseudo_dna_to_spacer_arrays(ls_arrays, dict_unique_id_spacers, dict_
         for i in range(nb_arrays):
             if current_frag[i] == repeat:
                 frag_memory[i].append('R')
-                # repeat_count[i] += 1
                 current_frag[i] = ''
             elif current_frag[i] in dict_spacers_unique_id:
                 frag_memory[i].append(dict_spacers_unique_id[current_frag[i]])
@@ -144,35 +136,7 @@ def convert_pseudo_dna_to_spacer_arrays(ls_arrays, dict_unique_id_spacers, dict_
                             new_ls_arrays[idx].append(spacer_or_repeat)
                 else:
                     new_ls_arrays[idx].append('--')
-    # print('ex_array', new_ls_arrays[0])
     return new_ls_arrays
-
-
-def arrays_to_hex_to_ascii(ls_arrays):
-    # ls_arrays1 = [[bytearray.fromhex(hex(int(x))[2:]).decode() for x in array] for array in ls_arrays]
-    output = []
-    unique_hx_val = []
-    for array in ls_arrays:
-        inner = []
-        for x in array:
-            a = hex(int(x))[2:]
-            if len(a) == 1:
-                a = '0' + a
-            if a in EXCLUDED_CHARACTERS:
-                print('you fucked up', a)
-                a = EXCLUDED_CHARACTERS[a]
-            unique_hx_val.append('0x' + a)
-            # print(unique_hx_val[-1])
-            b = bytes.fromhex(a).decode(encoding='iso8859_15')
-            print(a, x)
-            inner.append(b)
-            print(b)
-        output.append(inner)
-        print(inner)
-    unique_hx_val = np.unique(unique_hx_val)
-    # for i, a in enumerate(ls_arrays):
-    #     a[i] = [hex(int(x)) for x in a]
-    return output, unique_hx_val
 
 
 def array_to_hex(ls_arrays):
@@ -195,8 +159,6 @@ def array_to_hex(ls_arrays):
 
 def pseudo_dna_array_to_hex(ls_arrays):
     new_ls_arrays = []
-    # unique_val = [set(array) for array in ls_arrays]
-    # unique_val = set().union(*unique_val)
     unique_val = set().union(*[set(array) for array in ls_arrays])
     print(unique_val)
     unique_hx_val = dict()
@@ -247,44 +209,6 @@ def write_fasta(ls_arrays, array_names, path, file_name):
     return save_path
 
 
-# def convert_mafft_output(output):
-#     print('jo', output)
-#     output = output.decode(encoding='iso8859_15')
-#     # output = output.hex()
-#     # output = int(output, 16)
-#     print('type', type(output))
-#     print('jo', output)
-#     # print(output)
-#     ls_arrays = str(output).split('>')
-#     ls_arrays = [a.split('\n') for a in ls_arrays][1:]
-#     ls_names = [a[0] for a in ls_arrays]
-#     ls_arrays = [''.join(a[1:]) for a in ls_arrays]
-#
-#     ls_ret = []
-#     for a in ls_arrays:
-#         ls = a.split('-')
-#         new_ls = []
-#         for v in ls:
-#             if v:
-#                 for v_x in v:
-#                     v_x = v_x.encode(encoding='iso8859_15')
-#                     print('enc', v_x)
-#                     v_x = v_x.hex()
-#                     print(v_x)
-#                     if len(v_x) == 1:
-#                         v_x = '0' + v_x
-#                     # print(v_x)
-#                     # print(REVERSED_EXCLUDED_CHARACTERS)
-#                     if v_x in REVERSED_EXCLUDED_CHARACTERS:
-#                         # print('fuck everything')
-#                         v_x = REVERSED_EXCLUDED_CHARACTERS[v_x]
-#                     new_ls.append(int(v_x, 16))
-#             else:
-#                 new_ls.append('-')
-#
-#         ls_ret.append(new_ls)
-#     return ls_ret, ls_names
-
 def convert_mafft_output(file_path):
     ls_arrays = []
     ls_names = []
@@ -311,31 +235,7 @@ def convert_mafft_output(file_path):
     return ls_arrays, ls_names
 
 
-def omer_group_to_mafft(path, ls_files, options=None, remove_same_arrays=True):
-    if options is None:
-        options = DEFAULT_MAFFT_OPTIONS
-    data_dict = import_data.read_omer_data(path, ls_files)
-    ls_arrays, unique_hx_val = array_to_hex(data_dict['arrays'])
-
-    mx_path = write_matrixfile(unique_hx_val, os.path.join('../data', 'omer_fasta'), '_'.join(ls_files + ['mx']))
-
-    array_names = [a for a in data_dict['metadata']]
-    # print(ls_arrays)
-    # print(array_names)
-    write_fasta(ls_arrays, array_names, os.path.join('../data', 'omer_fasta'), '_'.join(ls_files))
-    # print(ls_arrays)
-    run_mafft(os.path.join('../data', 'omer_fasta', '_'.join(ls_files)),
-              os.path.join('../data', 'omer_fasta', '_'.join(ls_files)), options, mx_path)
-    # print(output)
-    ls_arrays, ls_names = convert_mafft_output(
-        os.path.join('../data', 'omer_fasta', '_'.join(ls_files) + '_output.txt'))
-    # print(ls_arrays)
-    # print(ls_names)
-    write_fasta(ls_arrays, ls_names, os.path.join('../data', 'omer_fasta'), '_'.join(ls_files) + '_finished')
-    return ls_arrays, ls_names, data_dict['head']
-
-
-def align_crispr_groups(work_path, dict_crispr_groups, mafft_options=None, logger=None):
+def align_crispr_groups(work_path, dict_crispr_groups, mafft_options=None, logger=None, seed=None):
     if not os.path.exists(work_path):
         os.makedirs(work_path)
 
@@ -351,6 +251,10 @@ def align_crispr_groups(work_path, dict_crispr_groups, mafft_options=None, logge
         else:
             pseudo_dna = False
             mafft_options = DEFAULT_MAFFT_OPTIONS if mafft_options is None else mafft_options
+
+        if seed is not None:
+            mafft_options.append('--randomseed')
+            mafft_options.append(str(seed))
 
         if len(ls_arrays) > 1000:
             if logger is not None:
@@ -385,7 +289,6 @@ def align_crispr_groups(work_path, dict_crispr_groups, mafft_options=None, logge
         if pseudo_dna:
             ls_arrays = convert_pseudo_dna_to_spacer_arrays(ls_arrays, dict_unique_id_spacers, dict_alphabets,
                                                             repeat)
-            # print('results', ls_arrays)
             # save_arrays_as_readable_file(group_name, ls_array_names,
             #                              ls_arrays,
             #                              save_path=os.path.join(work_path, 'pseudo_dna'),
@@ -493,7 +396,6 @@ def pickle_to_aligned_group(pickle_path, intermediate_save_path, save_path, save
                 os.path.join(intermediate_save_path, repeat + '_output.txt'))
 
             ls_reversed_renaming_aligned_arrays = reverse_renaming(ls_aligned_arrays, dict_reversed_renaming)
-            # write_fasta(ls_reversed_renaming_aligned_arrays, ls_aligned_names, save_path, repeat)
             dict_crispr_aligned[repeat] = [
                 CRISPRArray(name, crispr.acc_num, crispr.orientation, crispr.evidence_level, crispr.drconsensus,
                             crispr.chromosome_plasmid,
@@ -511,3 +413,21 @@ def pickle_to_aligned_group(pickle_path, intermediate_save_path, save_path, save
           'Number of aligned spacer arrays: ', sum([len(val) for val in dict_crispr_aligned.values()]))
     print('Number of repeats with arrays that were too long: ', len(too_long_arrays))
     return dict_crispr_aligned
+
+
+def pickled_group_to_mafft(path, ls_files, options=None, remove_same_arrays=True):
+    if options is None:
+        options = DEFAULT_MAFFT_OPTIONS
+    data_dict = import_data.read_old_data(path, ls_files)
+    ls_arrays, unique_hx_val = array_to_hex(data_dict['arrays'])
+
+    mx_path = write_matrixfile(unique_hx_val, os.path.join('../data', 'pickled_fasta'), '_'.join(ls_files + ['mx']))
+
+    array_names = [a for a in data_dict['metadata']]
+    write_fasta(ls_arrays, array_names, os.path.join('../data', 'pickled_fasta'), '_'.join(ls_files))
+    run_mafft(os.path.join('../data', 'pickled_fasta', '_'.join(ls_files)),
+              os.path.join('../data', 'pickled_fasta', '_'.join(ls_files)), options, mx_path)
+    ls_arrays, ls_names = convert_mafft_output(
+        os.path.join('../data', 'pickled_fasta', '_'.join(ls_files) + '_output.txt'))
+    write_fasta(ls_arrays, ls_names, os.path.join('../data', 'pickled_fasta'), '_'.join(ls_files) + '_finished')
+    return ls_arrays, ls_names, data_dict['head']

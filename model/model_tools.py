@@ -36,13 +36,10 @@ def compute_lh_ratio_of_multiple_trees(ls_data, method='Nelder-Mead', filter_by=
     start_values_1 = np.array([0.5, 1.5])
     bnds_0 = (0.0, 10000)
     bnds_1 = ((0.0, None), (1.0, None))
-    # print(len(start_values_0), len(bnds_0))
 
     max_0 = minimize_scalar_fct(lh_fct_0, bounds=bnds_0, method='bounded')
     max_1 = minimize_fct(lh_fct_1, start_values_1, bounds=bnds_1, method=method)
 
-    # lh_0 = compute_tree_lh(max_0.x, 1, ls_bl, ls_nb_ex_spacers, ls_nb_max_length_losses, log=False)
-    # lh_1 = compute_tree_lh(max_1.x[0], max_1.x[1], ls_bl, ls_nb_ex_spacers, ls_nb_max_length_losses, log=False)
     lh_0 = np.exp(-max_0.fun)
     lh_1 = np.exp(-max_1.fun)
 
@@ -58,25 +55,12 @@ def compute_tree_lh(loss_rate, alpha, ls_bl, nb_survivors, nb_max_length_losses,
             max_mll = max(mll) if mll else 0
             ls_f = eff_mult_loss_lh(loss_prob, alpha, max_mll, log=True)
             ls_f[np.isnan(ls_f) | np.isinf(ls_f)] = -BIG_EPS
-            # print('lossrate', loss_rate)
-            # print('bl', bl)
-            # print('lp', loss_prob)
-            # print('bl', bl, n, mll)
             ln_keep = - loss_rate * bl * n
-            # print('ln_keep', ln_keep)
-            # print('lsf', ls_f)
-            # print('mll', mll)
-            # print('f', ls_f)
             ls_ln_mult_loss_lh = [ls_f[k_i - 1] for k_i in mll]
 
             ln_mult_loss_lh = sum(ls_ln_mult_loss_lh)
-            # print('fki', ls_ln_mult_loss_lh)
-            # print('final lh before adding keep', ln_mult_loss_lh)
             tree_lh.append(ln_mult_loss_lh + ln_keep)
-            # print('final', ln_mult_loss_lh + ln_keep)
     else:
-        # print('gains', gains)
-        # print('gains', gains[1:])
         eff_lr = loss_rate
         ls_tree_ln_u_lh = rec_tree.compute_unobserved_lh(eff_lr)
         for i, (bl, n, mll, g) in enumerate(zip(ls_bl, nb_survivors, nb_max_length_losses, gains[1:])):
@@ -95,7 +79,6 @@ def compute_tree_lh(loss_rate, alpha, ls_bl, nb_survivors, nb_max_length_losses,
                 ls_ln_mult_loss_lh += [-lh for lh in ls_ln_unobserved_lh_inv]
             ln_mult_loss_lh = sum(ls_ln_mult_loss_lh)
             tree_lh.append(ln_mult_loss_lh + ln_keep)
-        # print('tree_lh', sum(tree_lh))
         root_gain = gains[0]
         if loss_rate != 0:
             ln_u_lh = log1mexp(ls_tree_ln_u_lh[0])
@@ -134,18 +117,10 @@ def compute_tree_lh_for_given_lh_fct(loss_rate, alpha, ls_bl, nb_survivors, nb_m
     """
     tree_lh = []
     for bl, n, mll in zip(ls_bl, nb_survivors, nb_max_length_losses):
-        # loss_prob = max(1 - np.exp(- loss_rate * bl), 0)
         max_mll = max(mll) if mll else 0
-
-        # Could remove RuntimeWarning by
-        # res = np.log(m, out=np.zeros_like(m), where=(m!=0))
-        # or
-        # with errstate(divide='ignore'):
-        #     res = np.log(m)
         ls_f = np.log([max(f(bl, loss_rate, alpha), EPS) for f in lambdifyed_lh_fct[:max_mll + 1]])
         ls_f[np.isnan(ls_f) | np.isinf(ls_f)] = -BIG_EPS
         ln_keep = - loss_rate * bl * n
-
         # Handle blocks that are longer than the available likelihood functions. Divide them in max length blocks
         # + Rest.
         if max_mll + 1 > len(ls_f):
@@ -154,29 +129,20 @@ def compute_tree_lh_for_given_lh_fct(loss_rate, alpha, ls_bl, nb_survivors, nb_m
                 val = 0
                 val += ls_f[k_i % (len(ls_f) - 1)]
                 incl_number = k_i // (len(ls_f) - 1)
-                # print('incl_number', incl_number, 'k_i % len(ls_f)', k_i % (len(ls_f) - 1))
                 for j in range(incl_number):
                     val = incl_number * ls_f[-1]
                 ls_ln_mult_loss_lh.append(val)
         else:
             ls_ln_mult_loss_lh = [ls_f[k_i] for k_i in mll]
         ln_mult_loss_lh = sum(ls_ln_mult_loss_lh)
-        # print('fki', ls_ln_mult_loss_lh)
-        # print('final lh before adding keep', ln_mult_loss_lh)
         tree_lh.append(ln_mult_loss_lh + ln_keep)
-        # print('final', ln_mult_loss_lh + ln_keep)
     return sum(tree_lh) if log else np.exp(sum(tree_lh))
 
 
 def eff_mult_loss_lh(loss_prob, alpha, k_i, log=True):
     geom_k = [geom(alpha, k) for k in range(1, k_i + 1)]
-    # print(alpha)
     lh = mult_loss_lh(loss_prob, alpha, geom_k)
     lh = [max(EPS, x) for x in lh]
-    # if lh > 1 or lh <= 0:
-    #     print('alpha', alpha)
-    #     print('prob_k', prob_k)
-    #     print('lh', lh)
     return np.log(lh) if log else lh
 
 
@@ -186,11 +152,6 @@ def mult_loss_lh(loss_prob, alpha, geom_k, log=True):
     f(k, \rho, \alpha) = P(loss)*(sum_{j=1}^{k} (k + 1 - j)*f(k-j)*g_\alpha (j)
                        = P(loss)*((sum_{j=1}^{k-1} (k + 1 - j)*f(k-j)*g_\alpha (j)
                        + 1 * f(0)(=1) * g_\alpha (k))
-    The Term (k + 1 - j) seems to be wrong, since lh increases above 1 in few steps. f diverges for k \to \infty, i.e.
-    (k + 1 - j) *... increase faster than the probabilities (P(loss), g_\alpha (k)).
-    See \alpha = 1: Then f(k) = P(loss)^k * \prod_{j=1}^k j (= k!), i.e. f(k) < 1 only if k, P(loss) small enough.
-    In general need condition P(loss)^k * g_\alpha(something) * ... * g_\alpha(something) is smaller than some product
-    of (k + 1 - j)..., s.t. f(k) < 1.
     :param loss_prob:
     :param alpha:
     :param geom_k:
@@ -200,24 +161,9 @@ def mult_loss_lh(loss_prob, alpha, geom_k, log=True):
     k = len(geom_k)
     if k == 0:
         return []
-    # if k == 1:
-    #     return [loss_prob * geom_k[-1]]
-    # print('alpha', alpha)
-    # print('loss_prob', loss_prob)
-    # print('prob_K', geom_k)
-    # for j in range(0, k - 1):
-    #     val = geom_k[j] * mult_loss_lh(loss_prob, alpha, geom_k[:-(j+1)])
-    #     ls.append(val)
-    # ls = [prob_k[j-1] * mult_loss_lh(loss_prob, alpha, prob_k[:-j]) for j in range(1, k)]
     f = mult_loss_lh(loss_prob, alpha, geom_k[:-1])
     ls = [geom_k[j] * f[-(j + 1)] for j in range(0, k - 1)]
-    # new f computation with (k + 1 - j)/(k - (j - 1) factor, have to be careful with indices and stuff
-    # ls = [geom_k[j] * f[-(j + 1)] * (k - j) for j in range(0, k - 1)]
     f.append(loss_prob * (geom_k[-1] + sum(ls)))
-    # print('prob_k-1', geom_k[-1])
-    # print('ls', ls)
-    # print('sum', sum(ls))
-    # print('ret', ret)
     return f
 
 
@@ -252,8 +198,6 @@ def create_df_alignment(ls_arrays, ls_names, topological_order=None):
         else:
             aligned_arrays = pd.DataFrame(columns=list(range(1, len(ls_arrays[0]) + 1)))
             for i, x in enumerate(ls_arrays):
-                # print(len(x))
-                # print(len(aligned_arrays.columns))
                 aligned_arrays.loc[ls_names[i]] = x
     return aligned_arrays
 
@@ -339,29 +283,6 @@ def find_wrong_order_gains_dict(rec_gains, tree, save_to_tree=True, given_upgrap
         if save_to_tree:
             c.contra_gain = contradictions.get(c.name, [])
     return contradictions
-
-
-# def detect_loop(leaf_arrays):
-#     unique_spacers_pos = {spacer: pos for pos, spacer in enumerate(list({x for ls in leaf_arrays for x in ls}))}
-#     adj_matrix = np.zeros((len(unique_spacers_pos), len(unique_spacers_pos)))
-#     # generate adjacency matrix
-#     for ls in leaf_arrays:
-#         for i, spacer in enumerate(ls):
-#             if i == 0:
-#                 continue
-#             adj_matrix[unique_spacers_pos[ls[i - 1]], unique_spacers_pos[ls[i]]] = 1
-#     # plot graph
-#     label_dict = {pos: spacer for spacer, pos in unique_spacers_pos.items()}
-#
-#     g = nx.from_numpy_array(adj_matrix, create_using=nx.DiGraph)
-#     cycles = nx.simple_cycles(g)
-#     labeled_cycles = []
-#     for c in cycles:
-#         s_c = []
-#         for n in c:
-#             s_c.append(label_dict[n])
-#         labeled_cycles.append(s_c)
-#     return labeled_cycles
 
 
 def determine_order_dict(leaf_arrays, save_path=None, plot_order=True, exclude_self=True):
@@ -455,7 +376,6 @@ def get_subgraph_sets(n, adj_m, save_dict):
                 subgraph = get_subgraph_sets(col, adj_m, save_dict)
 
                 total_subgraph = total_subgraph.union(subgraph)
-                # print(total_subtrees)
         save_dict[n] = total_subgraph
         return total_subgraph
 
@@ -640,10 +560,10 @@ def get_fix_mismatches_df_alignment(df, reverse_walkthrough=False):
 
     top_order = []
     for col in resolved_mismatches_df.columns:
-        unique_col = pd.unique([a for a in resolved_mismatches_df[col] if a != '-'])
+        unique_col = pd.unique(pd.Series([a for a in resolved_mismatches_df[col] if a != '-']))
         if len(unique_col) > 0:
             if len(unique_col) > 1:
-                raise Exception('You fucked up! Mismatch in column' + str(col))
+                raise Exception('Mismatch in column' + str(col))
             else:
                 val = list(unique_col)
         else:
