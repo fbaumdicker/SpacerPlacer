@@ -1,4 +1,4 @@
-0_example_datasets/tomida_datasets/CRISPR2/G1.fa
+example_datasets/tomida_datasets/CRISPR2/G1.fa
 0_result_folder/tomida_crispr2_g1_odelh
 --input_type
 spacer_fasta

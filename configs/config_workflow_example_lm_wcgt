@@ -1,4 +1,4 @@
-0_example_datasets/workflow_example_listeria_monocytogenes_all_strains
+example_datasets/workflow_example_listeria_monocytogenes_all_strains
 0_result_folder/workflow_example_listeria_monocytogenes_wcgt
 --input_type
 ccf
@@ -7,4 +7,4 @@ simple
 --significance_level
 0.05
 --tree_path
-0_example_datasets/workflow_example_core_genome_tree/workflow_example_tree.json
+example_datasets/workflow_example_core_genome_tree/workflow_example_tree.json

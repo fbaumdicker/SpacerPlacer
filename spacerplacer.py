@@ -37,8 +37,10 @@ parser.add_argument('output_path', type=str,
                     help='Path to output folder. The output folder will be created if it does not exist. '
                          'The output folder will contain files as described in the readme.')
 parser.add_argument('--tree_path', type=str, default=None,
-                    help='Path to tree file or folder. If none is provided, a tree is estimated by SpacerPlacer. '
-                         'The trees can be given in a newick format or in a pickled format (produced by SpacerPlacer).')
+                    help='Path to tree json file or folder with newick files. '
+                         'If none is provided, trees are estimated by SpacerPlacer. '
+                         'The trees can be given in a newick format or as a dictionary in a json file '
+                         '(such a json file is returned by SpacerPlacer).')
 parser.add_argument('-it', '--input_type', type=str, choices=['spacer_fasta', 'pickled', 'ccf',
                                                               'crisprcasfinder'],
                     default='spacer_fasta',  # think about this name
@@ -232,7 +234,7 @@ if args.input_type == 'pickled':
                                           core_genome_trees=True if args.tree_path is not None else False, )
 elif args.input_type in ['ccf', 'crisprcasfinder', 'spacer_fasta']:
     if args.input_type == 'spacer_fasta':
-        if os.path.splitext(args.input_path)[1] in {'.fa', '.fasta'}:
+        if os.path.splitext(args.input_path)[1] in {'.fa', '.fasta', '.fna'}:
             ls_path_to_spacer_fasta = [args.input_path]
         else:
             ls_path_to_spacer_fasta = [os.path.join(args.input_path, group) for group in os.listdir(args.input_path)]
