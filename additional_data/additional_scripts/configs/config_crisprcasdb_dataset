@@ -1,4 +1,4 @@
-0_example_datasets/CRISPRCasdb_aligned_data/dict_aligned_groups.pickle
+example_datasets/CRISPRCasdb_aligned_data/dict_aligned_groups.pickle
 0_result_folder/CRISPRCasdb_aligned_data
 --input_type
 pickled

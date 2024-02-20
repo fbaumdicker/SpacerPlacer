@@ -49,7 +49,7 @@ Please feel free to explore the posters to learn more about SpacerPlacer and its
 
 
 ## Installation
-
+At the moment, SpacerPlacer is supported on Linux. We do not guarantee that it will work on other operating systems.
 To install SpacerPlacer, follow these steps:
 
 1. Clone the GitHub repository:
@@ -58,36 +58,34 @@ To install SpacerPlacer, follow these steps:
    git clone https://github.com/fbaumdicker/SpacerPlacer.git
    ```
  
-2. If you don't have conda installed, you need to install it. 
-SpacerPlacer can be installed with other package-management systems,  
-but mafft is easily installed using conda (otherwise it needs to be manually installed).
+2. We recommend to use conda, 
+as mafft is easily installed using conda (otherwise it needs to be manually installed).
 The latest version of conda can be downloaded from: https://conda.io/projects/conda/en/latest/user-guide/install/linux.html
+Download and install conda, e.g. using the following command:
 
-Then you need to install conda (in this case Miniconda) by running the following command:
-
-```bash
-bash Miniconda3-latest-Linux-x86_64.sh
-```
+   ```bash
+   bash <conda-installer-name>-latest-Linux-x86_64.sh
+   ```
   
 3. Navigate to the cloned repository and install the required packages in a new environment:
 
    ```bash
     cd SpacerPlacer
-    conda env create -n myenv -f environment/environment.yml
+    conda env create -n <myenv> -f environment/environment.yml
    ```
-With -n myenv you can name the environment. You can choose any name you like or leave it out, 
-as environment.yml provides a default name.
+With -n <myenv> you can name the environment. You can choose any name you like or leave it out, 
+as environment.yml provides a default name (spacerplacer_env).
 
 4. Activate the environment:
 
    ```bash
-   conda activate myenv
+   conda activate <myenv>
    ```
    
 5. You can run SpacerPlacer with the following command:
 
    ```bash
-   python spacerplacer.py input_path output_path [options]
+   python spacerplacer.py <input_path> <output_path> [options]
    ```
 "input_path" is a required positional argument. It specifies the input directory containing the input data. 
 For the required format see the respective section.
@@ -101,7 +99,7 @@ Available options can be found by running:
 You can also provide the options in a config file. Then you can run SpacerPlacer with the following command:
 
    ```bash
-   python spacerplacer.py @config_file_path
+   python spacerplacer.py @<config_file_path>
    ```
 
 We provide example configs in the "configs" directory. You can use them as a template for your own config file and run
@@ -182,9 +180,10 @@ to run a reconstruction in reverse orientation (if the option is provided).
 You can then run SpacerPlacer with the following command:
 
    ```bash
-   python spacerplacer.py input_path output_path -it spacer_fasta [more_options]
+   python spacerplacer.py <input_path> <output_path> -it spacer_fasta [more_options]
    ```
-or without specfiying the input type, as "spacer_fasta" is the default.
+or without specfiying the input type, as "spacer_fasta" is the default. "input_path" is the top-level directory 
+of the run, in this case "path-to-experiment/experiment".
 
 ### CRISPRCasdb or CRISPRCasFinder input format
 Currently, SpacerPlacer can use data in CRISPRCasdb/CRISPRCasFinder output format.
@@ -252,9 +251,10 @@ If reconstructions show no overlap, you might want to check the orientation of t
 You can then run SpacerPlacer with the following command:
 
    ```bash
-   python spacerplacer.py input_path output_path -it ccf [more_options]
+   python spacerplacer.py <input_path> <output_path> -it ccf [more_options]
    ```
-alternatively for "ccf" you can use "crisprcasfinder".
+alternatively for "ccf" you can use "crisprcasfinder". "input_path" is the top-level directory 
+of the run, in this case "path-to-experiment/experiment".
 
 SpacerPlacer will automatically convert the CRISPRCasFinder format into "spacer_fasta" format. The converted files will 
 be saved in the output directory, with dictionaries detailing the renaming process. 
@@ -291,9 +291,9 @@ The leafs of the trees MUST be named like the array names in the CRISPR array fi
 Inner nodes do not need to be named (then SpacerPlacer names them during the algorithm).
 
 Then you can run SpacerPlacer by referencing to the folder containing the newick trees using the option 
-"--tree_path path_to_tree_folder".
+"--tree_path <path_to_tree_folder>".
 OR you can run SpacerPlacer by referencing to the json file (containing the trees for all experiments)
-using the option "--tree_path *.json".
+using the option "--tree_path <path-to-json>/<tree-file-name>.json".
 
 An example for one tree in json format is given in 
 "example_datasets/workflow_example_core_genome_tree" used in "configs/config_workflow_example_lm_wcgt".
@@ -301,4 +301,69 @@ An example for one tree in json format is given in
 SpacerPlacer will automatically save the input trees or predicted trees in the output directory as a json file.
 
 ## Output
+The output of SpacerPlacer is saved in the output directory provided by the user. The folder contains a "summary.txt", 
+"0_results.csv", "0_logger.log", and folders "additional_data", "detailed_results", "0_forward", and "_reversed", if 
+the option "--determine_orientation" is used.
+
+### Summary
+The "summary.txt" file contains a summary of the run. It contains information about the input data, the options used,
+and predicted parameters for each group.
+
+### log-file
+The "0_logger.log" file contains a log of the run. It contains information about the run, warnings, and errors occurring 
+during the run. The amount of information in the log file can be controlled by the user by adjusting using the option 
+"--verbosity".
+
+### Results
+The most important results are saved in the "0_results.csv" file. Where each row corresponds to a group of CRISPR arrays. 
+If "--determine orientation" is used, the parameter estimates are taken from the reconstruction with the 
+predicted orientation by SpacerPlacer. 
+If there is no certain orientation, the parameter estimates and information about the reconstruction are taken from the 
+forward orientation.
+
+For more detailed results see the protocol files in the "0_forward" or "detailed_results" folder. The "detailed_results" 
+folder only exists, if the option "--determine_orientation" is used.
+They contain additional information about the reconstructions, where detailed_results contains the information about the 
+reconstruction with the by SpacerPlacer predicted orientation.
+Note, that parameter estimation of trivial groups, "trivial" meaning without a single deletion, is not possible. Any 
+predicted parameters for trivial groups are not reliable.
+"0_protocol_skipped.csv" contains groups that were skipped 
+by SpacerPlacer and the reason for it.
+
+The "0_forward" folder contains all visualizations of the reconstructions with forward/provided array orientation. 
+The visualizations of the reconstructions and partial spacer insertion order (PSIO)
+graphs for each group (and the .dot files used for rendering the PSIO graphs with graphviz).
+<group_name>_rec shows the 
+final reconstruction after the refinement step, while <group_name>_guide_rec show the first guide reconstruction (that 
+does not follow the PSIO).
+
+If the option "--determine_orientation" is used, the "0_reversed" folder contains the same information as the 
+"0_forward" folder for the CRISPR groups reconstructed in reverse orientation.
+
+### Additional data
+The "additional_data" folder contains additional data, such as the input/predicted trees as a dictionary in a json file, 
+the CRISPR arrays in SpacerPlacers internal format in a pickle file. The "work_folder" contains the temporary files 
+generated for the alignment step with MAFFT. 
+The "spacer_fasta" folder contains the converted spacer_fasta files, if the input was in CRISPRCasFinder format.
+Then there is also a file (<experiment_name>_spacer_name_to_seq.fa) referencing each spacer name to the corresponding 
+DNA sequence and the orientation of the spacer DNA sequence. Note, this naming is done 
+automatically by SpacerPlacer when converting the CRISPRCasFinder format to the spacer_fasta format.
+
+The folder always contains a dictionary in a json file (<experiment_name>_spacer_name_to_sp_number.json), 
+detailing the renaming process from the given spacer name to 
+the internal spacer number used by SpacerPlacer (this is the numbering shown in reconstruction and PSIO visualizations).
+
+To reiterate the spacer data is converted/renamed as follows:
+- DNA sequences to spacer names to generate spacer_fasta files and determine spacer overlap between arrays. 
+This step is only done, if the input format is CRISPRCasFinder. The conversion is found in 
+"<experiment_name>_spacer_name_to_seq.fa".
+- Spacer names are converted to spacer numbers to run the reconstruction algorithm. 
+This is done to guarantee that spacers numbers are unique during the algorithm. Note, that any additions to the 
+spacer name (A, B, C, ...) show duplicate candidates in the Multiple Spacer Array Alignment as such each of those spacers have the 
+same underlying DNA sequence (e.g. 9A, 9B are the same original spacer 9). 
+This step is done for all input formats. The conversion is found in "<experiment_name>_spacer_name_to_sp_number.json".
+The spacer numbers are the numbers shown in the reconstruction and PSIO visualizations. 
+The spacer names (with duplicate candidates), so the Multiple Spacer Array Alignment is shown in gray in the 
+reconstruction visualizations. Thus, the information found in "<experiment_name>_spacer_name_to_sp_number.json" is also 
+contained in any reconstruction visualization. 
 
