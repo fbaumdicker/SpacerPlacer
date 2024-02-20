@@ -60,8 +60,8 @@ To install SpacerPlacer, follow these steps:
  
 2. We recommend to use conda, 
 as mafft is easily installed using conda (otherwise it needs to be manually installed).
-The latest version of conda can be downloaded from: https://conda.io/projects/conda/en/latest/user-guide/install/linux.html
-Download and install conda, e.g. using the following command:
+The latest version of conda can be downloaded from: https://conda.io/projects/conda/en/latest/user-guide/install/linux.html.
+Download a conda installer and install conda using the following command:
 
    ```bash
    bash <conda-installer-name>-latest-Linux-x86_64.sh
@@ -73,8 +73,8 @@ Download and install conda, e.g. using the following command:
     cd SpacerPlacer
     conda env create -n <myenv> -f environment/environment.yml
    ```
-With -n <myenv> you can name the environment. You can choose any name you like or leave it out, 
-as environment.yml provides a default name (spacerplacer_env).
+   With -n <myenv> you can name the environment. You can choose any name you like or leave it out, as environment.yml provides a default name (spacerplacer_env).
+
 
 4. Activate the environment:
 
@@ -87,9 +87,9 @@ as environment.yml provides a default name (spacerplacer_env).
    ```bash
    python spacerplacer.py <input_path> <output_path> [options]
    ```
-"input_path" is a required positional argument. It specifies the input directory containing the input data. 
-For the required format see the respective section.
+   "input_path" is a required positional argument. It specifies the input directory containing the input data. For the required format see the respective section.
 "output_path" is a required positional argument. It specifies the output directory where the results will be saved.
+
 Available options can be found by running:
 
    ```bash
