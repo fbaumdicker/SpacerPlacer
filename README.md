@@ -130,7 +130,10 @@ in the summary and result files.
 As described in the section "Output" section, all information for reconstructions with both orientations is accessible 
 in the respective directories.
 If the difference in likelihoods is below the threshold, SpacerPlacer will use the forward/provided orientation as 
-default. 
+default.
+
+It is important to provide the CRISPR arrays in consistent orientations, as spacers might not be recognized as the same,
+if the orientations are not consistent.
 
 
 ## Input data
@@ -304,8 +307,7 @@ e.g.:
 {
     "group_1": "((array_1:0.1,array_2:0.1):0.1,array_3:0.2);",
     "group_2": "tree2 in nwk format",
-    "group_3": "tree3 in nwk format",
-    ...
+    "group_3": "tree3 in nwk format"
 }
 ```
 The leafs of the trees MUST be named like the array names in the CRISPR array files. 
