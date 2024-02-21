@@ -1,0 +1,12 @@
+example_datasets/lamye_dataset/group5.fa
+0_result_folder/lamye_group_5
+--input_type
+spacer_fasta
+--lh_fct
+simple
+--significance_level
+0.05
+--determine_orientation
+--orientation_decision_boundary
+5
+--combine_non_unique_arrays
