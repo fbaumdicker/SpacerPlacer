@@ -48,7 +48,7 @@ Please feel free to explore the posters to learn more about SpacerPlacer and its
 [//]: # ()
 
 
-## Installation
+## Installation and Usage
 At the moment, SpacerPlacer is supported on Linux. We do not guarantee that it will work on other operating systems.
 To install SpacerPlacer, follow these steps:
 
@@ -111,6 +111,27 @@ them in SpacerPlacer as described above, e.g.:
 "@" specifies that the following argument is the path to a config file.
 The example configs use example data found in "example_data" directory.
 You can use them as a template for your own input data.
+
+## CRISPR-evo-inator
+CRISPR-evo-inator is a tool to predict the direction of transcription of CRISPR arrays. 
+It is based on the CRISPR array reconstruction algorithm of SpacerPlacer.
+Currently, the transcription orientation can be predicted within SpacerPlacer using the option 
+"--determine_orientation".
+
+If run with this option, SpacerPlacer will predict the orientation of the CRISPR arrays by running the reconstruction 
+of the given CRISPR arrays in the given (forward) orientation and by reversing the arrays and running the 
+reconstruction again. These two reconstructions are then compared. 
+If the difference in likelihoods between the forward and reverse reconstructions exceeds a threshold, 
+which can be provided by the user with "--orientation_threshold <threshold>", 
+SpacerPlacer will predict the orientation accordingly.
+This orientation is then used for reporting details about the reconstruction and parameter estimates 
+in the summary and result files.
+
+As described in the section "Output" section, all information for reconstructions with both orientations is accessible 
+in the respective directories.
+If the difference in likelihoods is below the threshold, SpacerPlacer will use the forward/provided orientation as 
+default. 
+
 
 ## Input data
 The CRISPR array input data has to be provided in a specific format. We provide two alternative input formats:
