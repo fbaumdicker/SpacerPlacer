@@ -5,7 +5,7 @@
 
 SpacerPlacer is a powerful software for reconstructing ancestral CRISPR spacer arrays along a given phylogenetic tree.
 SpacerPlacer is respecting the chronological timeline of spacer insertions as defined by the order of spacers within the CRISPR arrays and uses this additional information to improve the ancestral reconstruction.
-
+   
 
 ## Features
 
@@ -113,7 +113,8 @@ The example configs use example data found in "example_data" directory.
 You can use them as a template for your own input data.
 
 ## CRISPR-evo-inator
-CRISPR-evo-inator is a tool to predict the direction of transcription of CRISPR arrays. 
+CRISPR-evo-inator is a tool to predict the insertion orientation of CRISPR arrays and thus, indirectly, the 
+direction of transcription. 
 It is based on the CRISPR array reconstruction algorithm of SpacerPlacer.
 Currently, the transcription orientation can be predicted within SpacerPlacer using the option 
 "--determine_orientation".
