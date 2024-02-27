@@ -17,14 +17,16 @@ SpacerPlacer is respecting the chronological timeline of spacer insertions as de
 
 
 
-## Conference Posters
+## Conference Posters & corresponding Paper
+The preprint of the paper is available on bioRxiv: [https://www.biorxiv.org/content/10.1101/2024.02.20.581079v1](https://www.biorxiv.org/content/10.1101/2024.02.20.581079v1).
 
 We presented posters at the conference CRISPR2023, showcasing the features and applications of SpacerPlacer and the related CRISPR-evo-inator tool to predict the direction of transcription of CRISPR arrays. You can find the PDF versions of the posters below:
 
 - [SpacerPlacer Poster](doc/posters/crispr2023_spacerplacer.pdf)
-- [CRISPR-evo-inator Poster](doc/posters/crispr2023_CRISPRevoinator.pdf)
 
-Please feel free to explore the posters to learn more about SpacerPlacer and its applications.
+[//]: # (- [CRISPR-evo-inator Poster]&#40;doc/posters/crispr2023_CRISPRevoinator.pdf&#41;)
+
+Please feel free to explore the poster to learn more about SpacerPlacer and its applications.
 
 
 [//]: # (## Code Availability)
@@ -111,10 +113,9 @@ them in SpacerPlacer as described above, e.g.:
 The example configs use example data found in "example_data" directory.
 You can use them as a template for your own input data.
 
-## CRISPR-evo-inator
-CRISPR-evo-inator is a tool to predict the insertion orientation of CRISPR arrays and thus, indirectly, the 
-transcription orientation and the leader end. 
-It is based on the CRISPR array reconstruction algorithm of SpacerPlacer.
+## CRISPR orientation prediction
+SpacerPlacer allows to predict the insertion orientation of CRISPR arrays and thus, indirectly, the 
+transcription orientation and the leader end.
 Currently, the transcription orientation can be predicted within SpacerPlacer using the option 
 "--determine_orientation".
 
