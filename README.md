@@ -18,9 +18,9 @@ SpacerPlacer is respecting the chronological timeline of spacer insertions as de
 
 
 ## Corresponding Paper & Conference Poster
-The preprint of the SpacerPlacer paper is available on bioRxiv: [SpacerPlacer: Ancestral reconstruction of CRISPR arrays reveals the evolutionary dynamics of spacer deletions](https://www.biorxiv.org/content/10.1101/2024.02.20.581079v1).
+The preprint of the corresponding paper is available on bioRxiv: [SpacerPlacer: Ancestral reconstruction of CRISPR arrays reveals the evolutionary dynamics of spacer deletions](https://www.biorxiv.org/content/10.1101/2024.02.20.581079v1).
 
-We presented a poster at the conference CRISPR2023, showcasing the features and applications of SpacerPlacer: [SpacerPlacer Poster](doc/posters/crispr2023_spacerplacer.pdf)
+We presented a poster at the conference CRISPR2023, showcasing the features and applications of SpacerPlacer: [SpacerPlacer Poster](doc/posters/crispr2023_spacerplacer.pdf).
 
 [//]: # ( and the related CRISPR-evo-inator tool to predict the direction of transcription of CRISPR arrays)
 
