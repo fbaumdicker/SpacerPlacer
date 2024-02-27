@@ -17,7 +17,7 @@ SpacerPlacer is respecting the chronological timeline of spacer insertions as de
 
 
 
-## Conference Posters & corresponding Paper
+## Conference Poster & corresponding Paper
 The preprint of the paper is available on bioRxiv: [https://www.biorxiv.org/content/10.1101/2024.02.20.581079v1](https://www.biorxiv.org/content/10.1101/2024.02.20.581079v1).
 
 We presented posters at the conference CRISPR2023, showcasing the features and applications of SpacerPlacer and the related CRISPR-evo-inator tool to predict the direction of transcription of CRISPR arrays. You can find the PDF versions of the posters below:
