@@ -75,7 +75,6 @@ Download a conda installer and install conda using the following command:
    ```
    With -n <myenv> you can name the environment. You can choose any name you like or leave it out, as environment.yml provides a default name (spacerplacer_env).
 
-
 4. Activate the environment:
 
    ```bash
@@ -114,7 +113,7 @@ You can use them as a template for your own input data.
 
 ## CRISPR-evo-inator
 CRISPR-evo-inator is a tool to predict the insertion orientation of CRISPR arrays and thus, indirectly, the 
-direction of transcription. 
+transcription orientation and the leader end. 
 It is based on the CRISPR array reconstruction algorithm of SpacerPlacer.
 Currently, the transcription orientation can be predicted within SpacerPlacer using the option 
 "--determine_orientation".
