@@ -58,7 +58,8 @@ parser.add_argument('-it', '--input_type', type=str, choices=['spacer_fasta', 'p
 ############################################################################################################
 # Reconstruction:
 parser.add_argument('--rec_model', type=str, choices=['gtr', ],
-                    default='gtr', help='Determines the reconstruction model. For now, only gtr is implemented.')
+                    default='gtr', help='Determines the reconstruction model. Currently redundant, '
+                                        'as only "gtr" is implemented.')
 parser.add_argument('--insertion_rate', type=float, default=1e-5,
                     help='Insertion rate of the reconstruction model. Generally should be chosen to be small '
                          'compared to the deletion rate. Otherwise may lead to high number of independent '
@@ -89,7 +90,7 @@ parser.add_argument('--extend_branches', type=float, default=0.00001,
 # estimation:
 parser.add_argument('--tree_distance_function', type=str, choices=['likelihood'],
                     default='likelihood', help='Determines the distance function used for the tree estimation '
-                                               'with UPGMA.')
+                                               'with UPGMA. Currently redundant, as only "likelihood" is implemented.')
 parser.add_argument('--tree_insertion_rate', type=float, default=None,
                     help='The user can provide their own insertion rate for the tree estimation based on the '
                          'block deletion likelihood function. '
