@@ -114,12 +114,13 @@ parser.add_argument('--tree_lh_fct', type=str, choices=['simple', 'ode_based'], 
                          'been found to perform better in simulations.')
 parser.add_argument('--combine_non_unique_arrays', action='store_true',
                     help='If given, arrays with the exactly the same spacer content are combined before the '
-                         'tree estimation and reconstruction. This might lead to excessively large trees and '
-                         'performance slowdown (especially in visualization). '
+                         'tree estimation and reconstruction. This might be helpful reduce clutter '
+                         '(especially in visualization).'
                          'Arrays with the same spacer content can not be separated in the tree '
                          'estimation anyway. '
                          'The default is NOT to combine arrays with the same spacer content. '
-                         'If arrays are combined, the combined array names are saved in the results file.')
+                         'If arrays are combined, the combined array names are saved in detailed results csv under '
+                         'column "combined array names".')
 
 ############################################################################################################
 # Visualization:

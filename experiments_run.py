@@ -866,11 +866,15 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                                                                                                  ls_array_names)
             nb_unique_spacer_arrays = len(ls_arrays)
 
-            logger.info(f'Arrays that were combined to one array {dict_combined_arrays}')
-            logger.info(f'Number of arrays before: {prev_len} /  after: {len(ls_arrays)}')
+            # logger.info(f'Arrays that were combined to one array {dict_combined_arrays}')
+            logger.info(f'Note: For completely same arrays only one representative is used for reconstruction and '
+                        f'visualization, due to provided option: --combine_non_unique_arrays. '
+                        f'The classes of combined arrays are found in detailed results csv under '
+                        f'"combined array names".')
+            logger.info(f'Number of arrays before combination: {prev_len} /  after: {len(ls_arrays)}')
             # Be aware: Tree generation or alignment produces an error for single arrays (which are useless anyway)
             if len(ls_arrays) <= 2:
-                logger.info('Skipped because arrays were combined. Too few arrays after combining uniques.\n')
+                logger.info('Skipped because arrays were combined. Too few arrays after combining non-uniques.\n')
                 ls_skipped_protocol.append({'name': crispr_group.name, 'repeat': crispr_group.repeat,
                                             'reason': 'too few after combining uniques'})
                 continue
