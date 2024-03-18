@@ -146,36 +146,19 @@ in parameter estimates.
 The following sections describe the input formats in detail.
 IMPORTANT: the input type should be specified using the option "-it" or "--input_type", default is "spacer_fasta".
 
-### General structure
 SpacerPlacer can run multiple groups of CRISPR arrays sequentially. 
-Each group of CRISPR arrays is represented by a separate folder in the input directory.
-Names are of course arbitrary and can be chosen freely. Even if you only have one group of CRISPR arrays,
-you still need to place them in a subfolder. 
-The following is an example of the general structure of the input directory:
-```bash
-    .
-    ├── experiment              # Top-level directory of run (the input directory provided to SpacerPlacer)
-    │   ├── group_1             # First group of CRISPR arrays
-    │   ├── group_2             # Second group of CRISPR arrays
-    │   ├── group_3             # Third group of CRISPR arrays
-    │   └── ...                 # etc.
-    └── ...                  
-```
+Names are of course arbitrary and can be chosen freely. 
 Each group should contain at least two arrays. If there is no overlap in spacers between the arrays,
 the results of SpacerPlacer will be relatively boring.
 
 ### spacer_fasta input format
-In this format each group of CRISPR arrays should be structured as follows: each group should contain separate 
-"spacer_fasta" files for each strain/CRISPR array. 
+In this format each group of CRISPR arrays should be structured as follows:
 ```bash
     .
     ├── experiment              # Top-level directory of run (the input directory provided to SpacerPlacer)
-    │   ├── group_1             # First group of CRISPR arrays
-    │   │   ├── array_1.fa      # First array
-    │   │   ├── array_2.fa      # Second array
-    │   │   └── ... 
-    │   ├── group_2             # Second group of CRISPR arrays
-    │   │   └── ...             # Arrays in group_2
+    │   ├── group_1.fa          # First group of CRISPR arrays
+    │   ├── group_2.fa          # Second group of CRISPR arrays
+    │   ├── group_3.fa          # Third group of CRISPR arrays
     │   └── ...                 # etc.
     └── ...                  
 ```
@@ -196,8 +179,9 @@ The numbers in the example are the spacer IDs and separated by ",", but can be a
 Each spacer ID corresponds to a unique spacer sequence (or a group of spacer sequences, 
 if you want). Repeats are not part of this format.
 The order of the spacers is important and should be the same for all arrays in the group.
-We expect the spacers to be ordered chronologically, i.e. the first spacer is the youngest 
-and at the acquisition end of the array, while the last spacer is the oldest and at distal end of the array.
+We expect the spacers to be ordered chronologically, where the insertion end is on the left and the distal end on the 
+right, i.e. the first (leftmost) spacer is the youngest,
+while the last (rightmost) spacer is the oldest. 
 Most importantly, the order of the spacers should be consistent for all arrays in the group.
 The order is not as important, if you use SpacerPlacer to determine the orientation, as both directions are run.
 Note, there is no need to provide reversed spacers, as SpacerPlacer will automatically reverse the spacers 
@@ -208,7 +192,7 @@ You can then run SpacerPlacer with the following command:
    ```bash
    python spacerplacer.py <input_path> <output_path> -it spacer_fasta [more_options]
    ```
-or without specfiying the input type, as "spacer_fasta" is the default. "input_path" is the top-level directory 
+or without specifying the input type, as "spacer_fasta" is the default. "input_path" is the top-level directory 
 of the run, in this case "path-to-experiment/experiment".
 
 ### CRISPRCasdb or CRISPRCasFinder input format
@@ -293,9 +277,9 @@ e.g.:
 ```bash
     .
     ├── experiment                  # top-level directory of run
-    │   ├── group_1                 # First group of CRISPR arrays
-    │   ├── group_2                 # Second group of CRISPR arrays
-    │   ├── group_3                 # Third group of CRISPR arrays
+    │   ├── group_1.fa              # First group of CRISPR arrays
+    │   ├── group_2.fa              # Second group of CRISPR arrays
+    │   ├── group_3.fa              # Third group of CRISPR arrays
     │   └── ...                     # etc.
     └── trees                       # optional directory containing the trees
         ├── group_1.nwk             # Tree for the first group of CRISPR arrays
