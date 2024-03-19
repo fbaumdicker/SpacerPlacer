@@ -55,7 +55,7 @@ DEFAULT_MAFFT_OPTIONS_FFT = ['--text',
                              # '--threadit', '0',  # threaded iterative alignment has some randomness (this stops this)
                              ]
 
-MAFFT_PATH = 'mafft-linux64'
+MAFFT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'mafft-linux64')
 
 
 # MAFFT_PATH = '/usr/libexec/mafft'
