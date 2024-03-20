@@ -236,10 +236,16 @@ if args.input_type == 'pickled':
                                           core_genome_trees=True if args.tree_path is not None else False, )
 elif args.input_type in ['ccf', 'crisprcasfinder', 'spacer_fasta']:
     if args.input_type == 'spacer_fasta':
-        if os.path.splitext(args.input_path)[1] in {'.fa', '.fasta', '.fna'}:
+        if os.path.splitext(args.input_path)[-1] in {'.fa', '.fasta', '.fna'}:
             ls_path_to_spacer_fasta = [args.input_path]
         else:
-            ls_path_to_spacer_fasta = [os.path.join(args.input_path, group) for group in os.listdir(args.input_path)]
+            ls_path_to_spacer_fasta = [os.path.join(args.input_path, group) for group in os.listdir(args.input_path)
+                                   if group.split('.')[-1] in {'fa', 'fasta', 'fna'}]
+
+        if not ls_path_to_spacer_fasta:
+            logger.error(f'No fasta file found in {args.input_path}.')
+            raise ValueError(f'No fasta file found in {args.input_path}.')
+
     else:
         ls_path_to_spacer_fasta = []
         path_to_spacer_fasta_folder = os.path.join(args.output_path, 'additional_data', 'spacer_fasta')
