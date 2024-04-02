@@ -50,7 +50,6 @@ Please feel free to explore the paper/poster to learn more about SpacerPlacer an
 
 [//]: # ()
 
-
 ## Installation and Usage
 At the moment, SpacerPlacer is supported on Linux. We do not guarantee that it will work on other operating systems.
 To install SpacerPlacer, follow these steps:
@@ -216,9 +215,10 @@ in the output.
 
 CRISPRCasFinder only provides the forward strand orientation. So in order to ensure the correct representation 
 you need to place all the files classified as forward strand into the "pos_strand" directory,
-and all the files classified as reverse strand into the "neg_strand" directory. 
+and all the files classified as reverse strand into the "neg_strand" directory.
 
 ![saving_reversed](https://user-images.githubusercontent.com/46710688/218799148-5a554064-5b83-4ec9-8bec-cecba3af87fb.gif)
+(Note: the folder names are different in the gifs. See above or in the examples for the correct folder names.)
 
 The CRISPRCasFinder output is a set of files in fasta format containing only the spacers from the corresponding CRISPR arrays.
 
@@ -354,25 +354,51 @@ The "additional_data" folder contains additional data, such as the input/predict
 the CRISPR arrays in SpacerPlacers internal format in a pickle file. The "work_folder" contains the temporary files 
 generated for the alignment step with MAFFT. 
 The "spacer_fasta" folder contains the converted spacer_fasta files, if the input was in CRISPRCasFinder format.
-Then there is also a file (<experiment_name>_spacer_name_to_seq.fa) referencing each spacer name to the corresponding 
+Then there is also a file "<group_name>_spacer_name_to_seq.fa" referencing each spacer name to the corresponding 
 DNA sequence and the orientation of the spacer DNA sequence. Note, this naming is done 
 automatically by SpacerPlacer when converting the CRISPRCasFinder format to the spacer_fasta format.
 
-The folder always contains a dictionary in a json file (<experiment_name>_spacer_name_to_sp_number.json), 
+The folder always contains a dictionary in a json file "<group_name>_spacer_name_to_sp_number.json", 
 detailing the renaming process from the given spacer name to 
 the internal spacer number used by SpacerPlacer (this is the numbering shown in reconstruction and PSIO visualizations).
 
 To reiterate the spacer data is converted/renamed as follows:
 - DNA sequences to spacer names to generate spacer_fasta files and determine spacer overlap between arrays. 
-This step is only done, if the input format is CRISPRCasFinder. The conversion is found in 
-"<experiment_name>_spacer_name_to_seq.fa".
+This step is only done, if the input format is from CRISPRCasFinder. The conversion is found in 
+"<group_name>_spacer_name_to_seq.fa".
 - Spacer names are converted to spacer numbers to run the reconstruction algorithm. 
 This is done to guarantee that spacers numbers are unique during the algorithm. Note, that any additions to the 
-spacer name (A, B, C, ...) show duplicate candidates in the Multiple Spacer Array Alignment as such each of those spacers have the 
+spacer name (A, B, C, ...) show duplicate candidates in the Multiple Spacer Array Alignment. Each of those spacers have the 
 same underlying DNA sequence (e.g. 9A, 9B are the same original spacer 9). 
-This step is done for all input formats. The conversion is found in "<experiment_name>_spacer_name_to_sp_number.json".
-The spacer numbers are the numbers shown in the reconstruction and PSIO visualizations. 
-The spacer names (with duplicate candidates), so the Multiple Spacer Array Alignment is shown in gray in the 
-reconstruction visualizations. Thus, the information found in "<experiment_name>_spacer_name_to_sp_number.json" is also 
-contained in any reconstruction visualization. 
+This step is done for all input formats. The conversion is found in "<group_name>_spacer_name_to_sp_number.json".
+The spacer numbers are the numbers shown in the reconstruction and PSIO visualizations as colored rectangles. 
+The spacer names (with duplicate candidates), are shown in gray as column headings in the Multiple Spacer Array Alignment in the
+visualized reconstructions. Thus, the information found in "<group_name>_spacer_name_to_sp_number.json" is also 
+contained in any visualized reconstruction.
+
+### Known issues, solutions and tips
+
+1. Not all options available for SpacerPlacer are described in this README. For a full list of options, run 
+   `python spacerplacer.py -h`.
+
+2. As SpacerPlacer relies on ETE Toolkit 3, the visualization of the reconstruction will not work on (web) servers without
+   a graphical interface (X backend). If you run into issues you can try X11 forwarding (if available), or running a virtual X server, e.g. with XVFB
+   (see the [ETE Toolkit tutorial](http://etetoolkit.org/docs/latest/tutorial/tutorial_webplugin.html?highlight=x11)).
+   Alternatively, you can skip the visualization step by running SpacerPlacer with the option "--no_plot_reconstruction".
+
+3. Mac OS: SpacerPlacer is currently not supported on Mac OS and reportedly does not work there 
+   (if you experience otherwise, please let us know). We are working on making it compatible with Mac OS.
+
+4. SpacerPlacer is certainly not perfect. If the results are not as expected or errors occur, 
+   it might be helpful to: 
+      - check the logfile for errors/warnings, 
+      - check if the input data is read correctly by SpacerPlacer, particularly, check if the input/output to/by MAFFT (in "additional_data/work_folder") is reasonable, and compare your input with the provided example datasets.
+      - check the orientation of the CRISPR arrays, if you use CRISPRCasFinder format. We aim to provide an easier to use 
+        CRISPRCasFinder integration and comprehensive clustering of provided arrays in the future.
+
+   If you encounter non-informative/unresolvable errors or the results are not as expected (or not understandable), please open an issue 
+   or contact us directly and we will try to help you (and try to resolve the issue for future users).
+
+
+
 

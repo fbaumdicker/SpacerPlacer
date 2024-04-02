@@ -240,7 +240,7 @@ elif args.input_type in ['ccf', 'crisprcasfinder', 'spacer_fasta']:
             ls_path_to_spacer_fasta = [args.input_path]
         else:
             ls_path_to_spacer_fasta = [os.path.join(args.input_path, group) for group in os.listdir(args.input_path)
-                                   if group.split('.')[-1] in {'fa', 'fasta', 'fna'}]
+                                       if group.split('.')[-1] in {'fa', 'fasta', 'fna'}]
 
         if not ls_path_to_spacer_fasta:
             logger.error(f'No fasta file found in {args.input_path}.')
