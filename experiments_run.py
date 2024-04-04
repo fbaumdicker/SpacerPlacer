@@ -40,6 +40,7 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict, lh_fct=None
                         tree_lh_fct=None, tree_insertion_rate=None, tree_deletion_rate=None, tree_alpha=None,
                         alpha_bias_correction=True, rho_bias_correction=True,
                         seed=None,
+                        save_reconstructed_events=False
                         ):
     if seed is not None:
         np.random.seed(seed)
@@ -112,6 +113,7 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict, lh_fct=None
                                                               rho_bias_correction=rho_bias_correction,
                                                               core_genome_trees=False,
                                                               metadata=False,
+                                                              save_reconstructed_events=save_reconstructed_events,
                                                               )
     dict_trees = dict_trees_forward
     df_rec_protocol = df_rec_protocol.set_index('name')
@@ -170,7 +172,8 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict, lh_fct=None
                                       provided_numbering=dict_provided_numbering,
                                       provided_aligned_arrays=dict_provided_aligned_arrays,
                                       provided_dict_duplicated_spacers=dict_provided_duplicated_spacers,
-                                      metadata=False, )
+                                      metadata=False,
+                                      save_reconstructed_events=save_reconstructed_events,)
         dict_trees = {'forward': dict_trees_forward,
                       'reversed': dict_trees_reversed}
 
@@ -256,6 +259,7 @@ def run_pickled_data(rec_parameter_dict, data_path, save_path=None, plot_tree=Tr
                      alpha_bias_correction=False,
                      rho_bias_correction=False,
                      core_genome_trees=False,
+                     save_reconstructed_events=False,
                      ):
     if not os.path.exists(os.path.split(logfile_path)[0]):
         os.makedirs(os.path.split(logfile_path)[0])
@@ -309,7 +313,8 @@ def run_pickled_data(rec_parameter_dict, data_path, save_path=None, plot_tree=Tr
                                                             tree_alpha=tree_alpha,
                                                             alpha_bias_correction=alpha_bias_correction,
                                                             rho_bias_correction=rho_bias_correction,
-                                                            core_genome_trees=core_genome_trees, )
+                                                            core_genome_trees=core_genome_trees,
+                                                            save_reconstructed_events=save_reconstructed_events,)
     dict_trees = dict_trees_forward
     df_rec_protocol = df_rec_protocol.set_index('name')
     df_rec_protocol_boring = df_rec_protocol_boring.set_index('name')
@@ -358,7 +363,8 @@ def run_pickled_data(rec_parameter_dict, data_path, save_path=None, plot_tree=Tr
                                     rho_bias_correction=rho_bias_correction,
                                     core_genome_trees=core_genome_trees,
                                     provided_aligned_arrays=dict_provided_aligned_arrays,
-                                    provided_dict_duplicated_spacers=dict_provided_duplicated_spacers, )
+                                    provided_dict_duplicated_spacers=dict_provided_duplicated_spacers,
+                                    save_reconstructed_events=save_reconstructed_events,)
         dict_trees = {'forward': dict_trees_forward,
                       'reversed': dict_trees_reversed}
         df_rec_protocol_reversed = df_rec_protocol_reversed.set_index('name')
@@ -745,10 +751,12 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                        core_genome_trees=False,
                        metadata=True,
                        alternative_parameter_estimation=False,
+                       save_reconstructed_events=False,
                        ):
     """
 
-    :param tree_lh_fct: 
+    :param save_reconstructed_events:
+    :param tree_lh_fct:
     :param seed:
     :param metadata:
     :param lh_fct:
@@ -999,7 +1007,9 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
 
         rec_m = ReconstructionTree(rec_parameter_dict, save_path, tree, True, model_name=crispr_group.name,
                                    lh_fct=give_lh_fct, sim_as_rec=sim_as_rec,
-                                   sim_gain_loss_dicts=gain_loss_dicts)
+                                   sim_gain_loss_dicts=gain_loss_dicts,
+                                   save_reconstructed_events=save_reconstructed_events,
+                                   logger=logger,)
 
         tree_height = rec_m.distance_to_leafs()
         tree_length = rec_m.total_branch_length()

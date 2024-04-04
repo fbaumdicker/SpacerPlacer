@@ -128,7 +128,7 @@ parser.add_argument('--no_plot_reconstruction', action='store_true',
                     help='If given, the reconstruction is not plotted.')
 parser.add_argument('--no_plot_order_graph', action='store_true',
                     help='If given, the Partial Spacer Insertion Order is not plotted.')
-# Is that actually possible?
+# Does this work?
 parser.add_argument('--do_show', action='store_true',
                     help='If given, the plots are shown directly.')
 
@@ -173,6 +173,13 @@ parser.add_argument('--orientation_decision_boundary', type=float, default=5,
                          'logscale.'
                          'The default value %(default)s was determined empirically and works well for the tested '
                          'datasets.')
+############################################################################################################
+# Additional data:
+parser.add_argument('--save_reconstructed_events', action='store_true',
+                    help='If given, the tree and reconstructed events along the tree are saved in '
+                         '"reconstructed_events". On the basis of this data, the reconstruction is '
+                         'visualized and the events can be analyzed in more detail. Currently only works, if the '
+                         'the reconstruction is visualized.')
 ############################################################################################################
 # Preprocessing:
 # parser.add_argument('--clustering', action='store_true',
@@ -233,7 +240,8 @@ if args.input_type == 'pickled':
                                           orient_boundary=args.orientation_decision_boundary,
                                           alpha_bias_correction=not args.no_alpha_bias_correction,
                                           rho_bias_correction=not args.no_rho_bias_correction,
-                                          core_genome_trees=True if args.tree_path is not None else False, )
+                                          core_genome_trees=True if args.tree_path is not None else False,
+                                          save_reconstructed_events=args.save_reconstructed_events,)
 elif args.input_type in ['ccf', 'crisprcasfinder', 'spacer_fasta']:
     if args.input_type == 'spacer_fasta':
         if os.path.splitext(args.input_path)[-1] in {'.fa', '.fasta', '.fna'}:
@@ -300,6 +308,7 @@ elif args.input_type in ['ccf', 'crisprcasfinder', 'spacer_fasta']:
                                                 rho_bias_correction=not args.no_rho_bias_correction,
                                                 combine_non_unique_arrays=args.combine_non_unique_arrays,
                                                 seed=args.seed,
+                                                save_reconstructed_events=args.save_reconstructed_events,
                                                 )
     summary_dict = compose_summary_dict(df_results_wo_details, dict(vars(args)))
     write_summary(summary_dict, os.path.join(args.output_path, 'summary.txt'))

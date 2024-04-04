@@ -18,7 +18,8 @@ from model import model_tools
 
 class ReconstructionTree(advanced_tree.AdvancedTree):
     def __init__(self, rec_model_config, save_path, root, rooted, model_name=None, lh_fct=None,
-                 sim_as_rec=False, sim_gain_loss_dicts=None, hide_unobserved_spacers=False):
+                 sim_as_rec=False, sim_gain_loss_dicts=None, hide_unobserved_spacers=False,
+                 save_reconstructed_events=False, logger=None):
         """
         We require the tree to have unique names for each node/branch!
         :param rec_model_config: Only GTR is used and implemented. gain_rates, loss_rates should be chosen such that
@@ -75,6 +76,10 @@ class ReconstructionTree(advanced_tree.AdvancedTree):
 
         self.rec_dup_rearr_candidates = {}
         self.order_adj_matrix = None
+
+        self.save_reconstructed_events = save_reconstructed_events
+
+        self.logger = logger
 
     ####################################################################################################################
     # Get things from the tree.
@@ -1283,16 +1288,17 @@ class ReconstructionTree(advanced_tree.AdvancedTree):
                     new_array[spacer_pos] = 1
             df.loc[node.name] = [new_array]
 
-        # self.write_vis_data_to_json(df, df_changes,
-        #                             {'rec_contra_dict': self.rec_contra_dict,
-        #                              'rec_duplications_dict': self.rec_duplications_dict,
-        #                              'rec_rearrangements_dict': self.rec_rearrangements_dict,
-        #                              'rec_reacquisition_dict': self.rec_reacquisition_dict,
-        #                              'rec_indep_gain_dict': self.rec_indep_gain_dict,
-        #                              'rec_other_dup_events_dict': self.rec_other_dup_events_dict, },
-        #                             self.spacer_names_to_numbers,
-        #                             top_order_sorted_by_age,
-        #                             name, path)
+        if self.save_reconstructed_events:
+            self.write_vis_data_to_json(df, df_changes,
+                                        {'rec_contra_dict': self.rec_contra_dict,
+                                         'rec_duplications_dict': self.rec_duplications_dict,
+                                         'rec_rearrangements_dict': self.rec_rearrangements_dict,
+                                         'rec_reacquisition_dict': self.rec_reacquisition_dict,
+                                         'rec_indep_gain_dict': self.rec_indep_gain_dict,
+                                         'rec_other_dup_events_dict': self.rec_other_dup_events_dict, },
+                                        self.spacer_names_to_numbers,
+                                        top_order_sorted_by_age,
+                                        name, os.path.join(path, 'reconstructed_events'))
         if re_plot_order:
             self.visualize_order(path, name, save_path_dot=os.path.join(name + '_order.dot'),
                                  color_dict=provided_bg_colors,
@@ -1322,7 +1328,7 @@ class ReconstructionTree(advanced_tree.AdvancedTree):
 
     def write_vis_data_to_json(self, df, df_changes, dict_other_events, spacer_names_to_numbers,
                                top_order, name, path):
-        print('path', path)
+        self.logger.info(f'Saving reconstructed events to "{path}".')
         if not os.path.exists(os.path.join(path, name)):
             os.makedirs(os.path.join(path, name))
         with open(os.path.join(path, name, name + '_tree.nwk'), 'w') as f:
