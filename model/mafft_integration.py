@@ -3,6 +3,7 @@ import pickle
 import subprocess
 import os
 import numpy as np
+import platform
 
 from model.helpers import import_data
 from additional_data.additional_scripts.model.helpers import raw_data_tools
@@ -55,7 +56,16 @@ DEFAULT_MAFFT_OPTIONS_FFT = ['--text',
                              # '--threadit', '0',  # threaded iterative alignment has some randomness (this stops this)
                              ]
 
-MAFFT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'mafft-linux64')
+# probably don't need windows as extra case, need to try it out (exe make it more annoying?)
+if platform.system() == 'Darwin':
+    MAFFT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'mafft_scripts',
+                              'mafft-mac')
+# elif platform.system() == 'Windows':
+#     MAFFT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'mafft_scripts',
+#                               'mafft-win')
+else:
+    MAFFT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'mafft_scripts',
+                              'mafft-linux64')
 
 
 # MAFFT_PATH = '/usr/libexec/mafft'
