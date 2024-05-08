@@ -36,7 +36,7 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict, lh_fct=None
                         do_show=False, combine_non_unique_arrays=False, determine_orientation=True,
                         orientation_decision_boundary=10,
                         tree_path=None, plot_order=True, significance_level=0.05, extend_branches=False,
-                        tree_distance_fct='likelihood',
+                        tree_distance_fct='likelihood', tree_construction_method='upgma',
                         tree_lh_fct=None, tree_insertion_rate=None, tree_deletion_rate=None, tree_alpha=None,
                         alpha_bias_correction=True, rho_bias_correction=True,
                         seed=None,
@@ -105,6 +105,7 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict, lh_fct=None
                                                               significance_level=significance_level,
                                                               extend_branches=extend_branches,
                                                               tree_lh_fct=tree_lh_fct,
+                                                              tree_construction_method=tree_construction_method,
                                                               tree_distance_function=tree_distance_fct,
                                                               tree_gain_rate=tree_insertion_rate,
                                                               tree_loss_rate=tree_deletion_rate,
@@ -162,6 +163,7 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict, lh_fct=None
                                       significance_level=significance_level,
                                       extend_branches=extend_branches,
                                       tree_lh_fct=tree_lh_fct,
+                                      tree_construction_method=tree_construction_method,
                                       tree_distance_function=tree_distance_fct,
                                       tree_gain_rate=tree_insertion_rate,
                                       tree_loss_rate=tree_deletion_rate,
@@ -738,6 +740,7 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                        extend_branches=False,
                        tree_lh_fct=None,
                        tree_distance_function='likelihood',
+                       tree_construction_method='upgma',
                        tree_gain_rate=None,
                        tree_loss_rate=None,
                        tree_alpha=None,
@@ -755,6 +758,7 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                        ):
     """
 
+    :param tree_construction_method:
     :param save_reconstructed_events:
     :param tree_lh_fct:
     :param seed:
@@ -921,8 +925,10 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                                   logger=logger, distance_fct=tree_distance_function,
                                   gain_rate=tree_gain_rate, loss_rate=tree_loss_rate, alpha=tree_alpha,
                                   provided_lh_fct=give_lh_fct,
-                                  tree_save_path=None)
-        tree = AdvancedTree(tree, True, model_name=crispr_group.name)
+                                  tree_save_path=None,
+                                  tree_construction_method=tree_construction_method)
+        new_tree = AdvancedTree(tree, True, model_name=crispr_group.name)
+
         new_dict_trees[crispr_group.name] = tree.format('newick')
         # print(ls_array_names)
         if core_genome_trees:

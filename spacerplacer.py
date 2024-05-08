@@ -87,10 +87,13 @@ parser.add_argument('--extend_branches', type=float, default=0.00001,
 #                          "computation is used. The stationary distribution might lead to undesired results, "
 #                          "that are not parsimonious. We do not recommend to use this flag.")
 # ########################################################################################################### Tree
-# estimation:
+# tree estimation:
 parser.add_argument('--tree_distance_function', type=str, choices=['likelihood'],
                     default='likelihood', help='Determines the distance function used for the tree estimation '
                                                'with UPGMA. Currently redundant, as only "likelihood" is implemented.')
+parser.add_argument('--tree_construction_method', type=str, choices=['upgma', 'nj'],
+                    default='upgma', help='Determines the tree construction method used for the tree estimation. '
+                    'Currently UPGMA (upgma) and neighbor joining (nj) are implemented.')
 parser.add_argument('--tree_insertion_rate', type=float, default=None,
                     help='The user can provide their own insertion rate for the tree estimation based on the '
                          'block deletion likelihood function. '
@@ -300,6 +303,7 @@ elif args.input_type in ['ccf', 'crisprcasfinder', 'spacer_fasta']:
                                                 significance_level=args.significance_level,
                                                 extend_branches=extend_branches,
                                                 tree_distance_fct=args.tree_distance_function,
+                                                tree_construction_method=args.tree_construction_method,
                                                 tree_lh_fct=args.tree_lh_fct,
                                                 tree_insertion_rate=args.tree_insertion_rate,
                                                 tree_deletion_rate=args.tree_deletion_rate,

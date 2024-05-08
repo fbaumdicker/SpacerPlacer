@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import os
 import pickle
+from Bio.Phylo.TreeConstruction import DistanceTreeConstructor
 
 from model.helpers import misc, import_data
 from additional_data.additional_scripts.model.helpers import raw_data_tools
@@ -192,9 +193,10 @@ def filter_fct(dict_protocol):
 
 
 def construct_tree(ls_array_names, ls_arrays, group_name, logger=None, distance_fct='breakpoint', tree_save_path=None,
-                   gain_rate=None, loss_rate=None, alpha=None, provided_lh_fct=None):
+                   gain_rate=None, loss_rate=None, alpha=None, provided_lh_fct=None, tree_construction_method='upgma'):
     """
     Constructs an upgma tree based on different distance functions.
+    :param tree_construction_method:
     :param ls_array_names:
     :param ls_arrays:
     :param group_name:
@@ -214,11 +216,17 @@ def construct_tree(ls_array_names, ls_arrays, group_name, logger=None, distance_
         raise NotImplementedError('Distance function not implemented!')
 
     tree_constructor = distance_tree_constructor.FixedDistanceTreeConstructor(distance_calculator=distance,
-                                                                              method='upgma')
+                                                                              method=tree_construction_method)
+    # tree_constructor = DistanceTreeConstructor(distance_calculator=distance, method=tree_construction_method)
+
     if logger is not None:
         logger.info(f'Constructing tree of {group_name}...')
+    dm = tree_constructor.distance_calculator.get_distance([ls_array_names, ls_arrays])
     tree = tree_constructor.build_tree([ls_array_names, ls_arrays])
 
+    # for clade in tree.find_clades():
+    #     print(clade.name)
+    #     print(clade.branch_length)
     if tree_save_path:
         if not os.path.exists(tree_save_path):
             os.makedirs(tree_save_path)
