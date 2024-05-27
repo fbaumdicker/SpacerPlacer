@@ -1,5 +1,5 @@
 example_datasets/workflow_example_listeria_monocytogenes_all_strains
-0_result_folder/workflow_example_listeria_monocytogenes_wcgt
+0_result_folder/workflow_example_listeria_monocytogenes_wcgt_nwk
 --input_type
 ccf
 --lh_fct
