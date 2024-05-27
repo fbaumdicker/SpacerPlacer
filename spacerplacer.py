@@ -284,10 +284,10 @@ elif args.input_type in ['ccf', 'crisprcasfinder', 'spacer_fasta']:
                 logger.error(f'No tree found for group {group}. File would be found here {tp}. Or provide json.')
                 raise ValueError(f'No tree found for group {group}. File would be found here {tp}. Or provide json.')
             dict_trees[group_no_ext] = import_data.load_single_tree(tp).format(fmt='newick')
-
+        path_to_tree = os.path.join(args.output_path, 'additional_data')
         tree_path = os.path.join(args.output_path, 'additional_data', 'dict_nwk_trees.json')
-        if not os.path.exists(os.path.dirname(tree_path)):
-            os.makedirs(os.path.dirname(tree_path))
+        if not os.path.exists(os.path.dirname(path_to_tree)):
+            os.makedirs(os.path.dirname(path_to_tree))
         json.dump(dict_trees, open(tree_path, 'w'))
 
     df_results_wo_details = run_multiple_groups(ls_path_to_spacer_fasta, args.output_path,
