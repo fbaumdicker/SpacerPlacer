@@ -403,8 +403,8 @@ contained in any visualized reconstruction.
    (see the [ETE Toolkit tutorial](http://etetoolkit.org/docs/latest/tutorial/tutorial_webplugin.html?highlight=x11)).
    Alternatively, you can skip the visualization step by running SpacerPlacer with the option "--no_plot_reconstruction".
 
-3. Mac OS: SpacerPlacer is currently not supported on Mac OS and reportedly does not work there 
-   (if you experience otherwise, please let us know). We are working on making it compatible with Mac OS.
+3. Mac OS: We introduced an additional Mac OS script for mafft. We hope this allows the use of SpacerPlacer with Mac OS. 
+   If you encounter any issues, please let us know.
 
 4. SpacerPlacer is certainly not perfect. If the results are not as expected or errors occur, 
    it might be helpful to: 
@@ -414,8 +414,28 @@ contained in any visualized reconstruction.
         CRISPRCasFinder integration and comprehensive clustering of provided arrays in the future.
 
    If you encounter non-informative/unresolvable errors or the results are not as expected (or not understandable), please open an issue 
-   or contact us directly and we will try to help you (and try to resolve the issue for future users).
+   or contact us directly, and we will try to help you (and try to resolve the issue for future users).
 
+### Notes on dataset quality on reconstructions and parameter estimates
+The impact of a wrongly estimated tree on the reconstructed ancestral arrays can be quite large.
+Consider two close sister arrays are placed far apart in the tree. Then the reconstruction might lead to an accumulation of spacer acquisitions in the root.
+In turn, these can produce a lot of "hallucinatory" contradictions and pull up more spacers to the root.
+In most cases, these issues are either not too sever or can be seen and addressed by the user.
+First, misplacement of sister arrays is generally not too egregious, i.e. the misplacement happens in close sister clades. 
+Then not too many "hallucinatory" contradictions are produced and the damage is limited to the few arrays contained in the same clades.
+Second, these "hallucinatory" contradictions are very likely to be observed by a knowledgeable user due to multiple reasons: a) arrays with large overlap are likely to stand out by themselves, b) there is an excess of insertion events at the most recent common ancestor and c) an excess of produced deletion events for all arrays in the clade.
+If such an issue is observed, it can be addressed by either correcting the tree, excluding the offending arrays or adjusting the insertion/deletion rate for the guide reconstruction.
+A large guide insertion rate (compared to the guide deletion rate) will allow the model to independently acquire spacers in far removed clades and can resolve the above issues.
+However, if the guide insertion rate is set too high, it can lead to the model acquiring the spacers only at the 
+respective leafs, and thus producing reconstructions with multiple acquisition events for each spacer and no deletion events.
 
+Note, that parameter estimation is strongly affected by the quality of the tree (and thus the timescale) and by the number of events, i.e. if enough variation is observable in the provided CRISPR arrays.
+In general, sample sizes are quite low for most datasets and thus the parameter estimates have high variance.
+We recommend to trust parameter estimates only for large datasets (multiple groups), in the best case, with high quality trees. 
+Even then we recommend to only trust the median (or the mean, although it can be heavily influenced by outliers) of the parameters, 
+which we found to be fairly accurate.
 
-
+The impact of incomplete arrays is generally not too severe. As long as enough overlap exists to produce a PSIO, 
+that sufficiently reflects the true insertion order, and you are not missing crucial overlap or huge numbers of spacers. 
+Moreover, any issues will likely be very visible for the user. For instance, CRISPR arrays that were wrongly split into 
+two separate arrays can likely be easily found (two rows in the spacer alignment "complete" each other).
