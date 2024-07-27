@@ -170,7 +170,6 @@ def array_to_hex(ls_arrays):
 def pseudo_dna_array_to_hex(ls_arrays):
     new_ls_arrays = []
     unique_val = set().union(*[set(array) for array in ls_arrays])
-    print(unique_val)
     unique_hx_val = dict()
     for val in unique_val:
         hex_val = hex(int(val))[2:]
