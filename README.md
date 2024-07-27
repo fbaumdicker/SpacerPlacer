@@ -416,7 +416,7 @@ contained in any visualized reconstruction.
    If you encounter non-informative/unresolvable errors or the results are not as expected (or not understandable), please open an issue 
    or contact us directly, and we will try to help you (and try to resolve the issue for future users).
 
-### Notes on dataset quality on reconstructions and parameter estimates
+### Notes on impact of dataset quality on reconstructions and parameter estimates
 The impact of a wrongly estimated tree on the reconstructed ancestral arrays can be quite large.
 Consider two close sister arrays are placed far apart in the tree. Then the reconstruction might lead to an accumulation of spacer acquisitions in the root.
 In turn, these can produce a lot of "hallucinatory" contradictions and pull up more spacers to the root.
