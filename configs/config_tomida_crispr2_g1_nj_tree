@@ -1,0 +1,10 @@
+example_datasets/tomida_datasets/CRISPR2/G1.fa
+0_result_folder/tomida_crispr2_g1_nj_tree
+--input_type
+spacer_fasta
+--lh_fct
+simple
+--significance_level
+0.05
+--tree_construction_method
+nj

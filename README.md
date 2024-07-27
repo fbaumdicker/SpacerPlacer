@@ -13,7 +13,7 @@ SpacerPlacer is respecting the chronological timeline of spacer insertions as de
 - **Identification of Ancestral Spacer Acquisitions, Deletions, Duplications, and Rearrangements:** The tool identifies ancestral duplications and rearrangements within the CRISPR array.
 - **Spacer Deletion Rate Estimation:** The software provides an estimation of spacer deletion rates within the CRISPR arrays.
 - **Analysis of Jointly Lost Spacers:** SpacerPlacer calculates the average length of blocks of jointly lost spacers in the array.
-- **optional: Phylogenetic Tree Reconstruction:** In addition to spacer array reconstruction along a given tree, SpacerPlacer can also reconstruct phylogenetic trees based on the CRISPR spacer data.
+- **Optional: Phylogenetic Tree Reconstruction:** In addition to spacer array reconstruction along a given tree, SpacerPlacer can also reconstruct phylogenetic trees based on the CRISPR spacer data.
 
 
 
@@ -145,23 +145,13 @@ in parameter estimates.
 The following sections describe the input formats in detail.
 IMPORTANT: the input type should be specified using the option "-it" or "--input_type", default is "spacer_fasta".
 
-SpacerPlacer can run multiple groups of CRISPR arrays sequentially. 
+SpacerPlacer can either run a single group or multiple groups of CRISPR arrays sequentially. 
 Names are of course arbitrary and can be chosen freely. 
 Each group should contain at least two arrays. If there is no overlap in spacers between the arrays,
 the results of SpacerPlacer will be relatively boring.
 
 ### spacer_fasta input format
-In this format each group of CRISPR arrays should be structured as follows:
-```bash
-    .
-    ├── experiment              # Top-level directory of run (the input directory provided to SpacerPlacer)
-    │   ├── group_1.fa          # First group of CRISPR arrays
-    │   ├── group_2.fa          # Second group of CRISPR arrays
-    │   ├── group_3.fa          # Third group of CRISPR arrays
-    │   └── ...                 # etc.
-    └── ...                  
-```
-Note that the file extensions should be ".fa", ".fasta", ".fna". Each fasta file contains the spacers of the 
+Note, that the group should be in a file with extensions ".fa", ".fasta", ".fna". Each fasta file contains the spacers of the 
 corresponding arrays in the group structured as follows:
 ```
     >array_1
@@ -186,16 +176,35 @@ The order is not as important, if you use SpacerPlacer to determine the orientat
 Note, there is no need to provide reversed spacers, as SpacerPlacer will automatically reverse the spacers 
 to run a reconstruction in reverse orientation (if the option is provided).
 
+You may run a single group of CRISPR arrays in spacer_fasta format by running:
+   ```bash
+   python spacerplacer.py <spacer_fasta_path> <output_path> -it spacer_fasta [more_options]
+   ```
+or without specifying the input type, as "spacer_fasta" is the default.
+
+If you want to run multiple groups subsequently in this format, the files should be structured as follows:
+```bash
+    .
+    ├── experiment              # Top-level directory of run (the input directory provided to SpacerPlacer)
+    │   ├── group_1.fa          # First group of CRISPR arrays
+    │   ├── group_2.fa          # Second group of CRISPR arrays
+    │   ├── group_3.fa          # Third group of CRISPR arrays
+    │   └── ...                 # etc.
+    └── ...                  
+```
+
 You can then run SpacerPlacer with the following command:
 
    ```bash
    python spacerplacer.py <input_path> <output_path> -it spacer_fasta [more_options]
    ```
 or without specifying the input type, as "spacer_fasta" is the default. "input_path" is the top-level directory 
-of the run, in this case "path-to-experiment/experiment".
+of the run, in this example "<path-to-experiment>/experiment".
+
+
 
 ### CRISPRCasdb or CRISPRCasFinder input format
-Currently, SpacerPlacer can use data in CRISPRCasdb/CRISPRCasFinder output format.
+SpacerPlacer can use data in CRISPRCasdb/CRISPRCasFinder output format.
 To get files in this format you can e.g. submit the genomic sequences to the CRISPRCasFinder web server 
 (or extract existing arrays from CRISPRCasdb).
 
@@ -264,15 +273,23 @@ You can then run SpacerPlacer with the following command:
    python spacerplacer.py <input_path> <output_path> -it ccf [more_options]
    ```
 alternatively for "ccf" you can use "crisprcasfinder". "input_path" is the top-level directory 
-of the run, in this case "path-to-experiment/experiment".
+of the run, in this case "path-to-experiment/experiment". Note, that currently you need to specify the top-level 
+directory not an individual group directory (even if you are only running one group).
 
 SpacerPlacer will automatically convert the CRISPRCasFinder format into "spacer_fasta" format. The converted files will 
 be saved in the output directory, with dictionaries detailing the renaming process. 
 For more details see the section "Output".
 
 ### (optional) Tree input format
-Trees can be provided by the user. The trees MUST be in newick format. The trees can be provided as separate files
-containing the tree as string in newick format. The file names need to be the same as the group names with ending ".nwk", 
+Trees can be provided by the user. The trees MUST be in newick format. 
+
+If only a single fasta is run, the direct path to the tree can be provided using the option "--tree_path <path_to_tree>".
+
+There are two ways to provide trees for multiple groups of CRISPR arrays. NOTE: in both cases the names of the trees
+need to be the same as the group names.
+1) The trees can be provided as separate files
+containing the tree as string in newick format (the choice of filename extension is irrelevant). 
+The file names need to be the same as the group names, 
 e.g.:
 ```bash
     .
@@ -282,12 +299,12 @@ e.g.:
     │   ├── group_3.fa              # Third group of CRISPR arrays
     │   └── ...                     # etc.
     └── trees                       # optional directory containing the trees
-        ├── group_1.nwk             # Tree for the first group of CRISPR arrays
-        ├── group_2.nwk             # Tree for the second group of CRISPR arrays
-        ├── group_3.nwk             # Tree for the third group of CRISPR arrays
+        ├── group_1.tree             # Tree for the first group of CRISPR arrays
+        ├── group_2.tree             # Tree for the second group of CRISPR arrays
+        ├── group_3.tree             # Tree for the third group of CRISPR arrays
         └── ...                     # etc.
 ```
-OR you can provide the trees in a dictionary in a json file providing for each group (string) a newick tree (as string), 
+2) OR you can provide the trees in a dictionary in a json file providing for each group (string) a newick tree (as string), 
 e.g.:
 ```json
 {
@@ -299,9 +316,9 @@ e.g.:
 The leafs of the trees MUST be named like the array names in the CRISPR array files. 
 Inner nodes do not need to be named (then SpacerPlacer names them during the algorithm).
 
-Then you can run SpacerPlacer by referencing to the folder containing the newick trees using the option 
+1) Then you can run SpacerPlacer by referencing to the folder containing the newick trees using the option 
 "--tree_path <path_to_tree_folder>".
-OR you can run SpacerPlacer by referencing to the json file (containing the trees for all experiments)
+2) OR you can run SpacerPlacer by referencing to the json file (containing the trees for all experiments)
 using the option "--tree_path <path-to-json>/<tree-file-name>.json".
 
 An example for one tree in json format is given in 

@@ -8,10 +8,16 @@ class ArgumentParser(argparse.ArgumentParser):
 
 
 class InputParser:
-    def __init__(self, input_folder, restructured_input_file, spacer_number_to_seq_file=None):
+    def __init__(self, input_folder, restructured_input_file, spacer_number_to_seq_file=None,
+                 cluster_spacers=False, check_orientation_for_highest_spacer_overlap=False,
+                 split_into_groups_by_spacer_overlap=False):
         self.input_folder = input_folder
         self.restructured_input_file = restructured_input_file
         self.spacer_number_to_seq_file = spacer_number_to_seq_file
+
+        self.cluster_spacers = cluster_spacers
+        self.check_orientation_for_highest_spacer_overlap = check_orientation_for_highest_spacer_overlap
+        self.split_into_groups_by_spacer_overlap = split_into_groups_by_spacer_overlap
 
         self.enumerate_spacers_and_create_file()
 
@@ -64,6 +70,26 @@ class InputParser:
                     file.write(f">{spacer_number}, {spacers_ori[spacer_seq]}\n")
                     file.write(f"{spacer_seq}")
                     file.write("\n")
+
+    def cluster_spacers(self):
+        """
+        :return:
+        """
+        if self.check_orientation_for_highest_spacer_overlap:
+            # Accept the orientation as is, as a start. Then check for each array, if reversing would increase overlap.
+            # If so, reverse the array. If not, keep as is. Run whole ls of arrays this way one after the other.
+            # Could be problematic, if the arrays are split in orientation. But probably most efficient.
+            # Can cluster spacers in each step. But probably sufficient to cluster at the end.
+            raise NotImplementedError
+        if self.cluster_spacers:
+            # cluster spacers with levenstein distance. Start with single clusters. Then merge clusters with some
+            # distance (1) in mutations iteratively, until no clusters are mergeable.
+            raise NotImplementedError
+        if self.split_into_groups_by_spacer_overlap:
+            # Split arrays, if they have no overlap in spacers. Need extra cases for no overlap. Throw warning and then
+            # run whole group (w/o split)? Or run only overlapping groups and have additional group without overlap?
+            raise NotImplementedError
+        raise NotImplementedError
 
     @staticmethod
     def _rev_com(sequence):

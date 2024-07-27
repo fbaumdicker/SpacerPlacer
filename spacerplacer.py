@@ -87,10 +87,13 @@ parser.add_argument('--extend_branches', type=float, default=0.00001,
 #                          "computation is used. The stationary distribution might lead to undesired results, "
 #                          "that are not parsimonious. We do not recommend to use this flag.")
 # ########################################################################################################### Tree
-# estimation:
+# tree estimation:
 parser.add_argument('--tree_distance_function', type=str, choices=['likelihood'],
                     default='likelihood', help='Determines the distance function used for the tree estimation '
                                                'with UPGMA. Currently redundant, as only "likelihood" is implemented.')
+parser.add_argument('--tree_construction_method', type=str, choices=['upgma', 'nj'],
+                    default='upgma', help='Determines the tree construction method used for the tree estimation. '
+                                          'Currently UPGMA (upgma) and neighbor joining (nj) are implemented.')
 parser.add_argument('--tree_insertion_rate', type=float, default=None,
                     help='The user can provide their own insertion rate for the tree estimation based on the '
                          'block deletion likelihood function. '
@@ -241,7 +244,7 @@ if args.input_type == 'pickled':
                                           alpha_bias_correction=not args.no_alpha_bias_correction,
                                           rho_bias_correction=not args.no_rho_bias_correction,
                                           core_genome_trees=True if args.tree_path is not None else False,
-                                          save_reconstructed_events=args.save_reconstructed_events,)
+                                          save_reconstructed_events=args.save_reconstructed_events, )
 elif args.input_type in ['ccf', 'crisprcasfinder', 'spacer_fasta']:
     if args.input_type == 'spacer_fasta':
         if os.path.splitext(args.input_path)[-1] in {'.fa', '.fasta', '.fna'}:
@@ -267,24 +270,33 @@ elif args.input_type in ['ccf', 'crisprcasfinder', 'spacer_fasta']:
                                      spacer_number_to_seq_file=path_to_n_seq_file)
             ls_path_to_spacer_fasta.append(path_to_spacer_fasta)
 
+    path_to_tree = os.path.join(args.output_path, 'additional_data')
+    tree_path = os.path.join(args.output_path, 'additional_data', 'dict_nwk_trees.json')
     if args.tree_path is None:
         tree_path = None
     elif os.path.isfile(args.tree_path):
+        logger.info(f'Using tree file {args.tree_path}.')
         if os.path.splitext(args.tree_path)[1] in ['.json', '.pkl', '.pickle']:
             tree_path = args.tree_path
+        elif len(ls_path_to_spacer_fasta) == 1:
+            dict_trees = {os.path.splitext(os.path.basename(ls_path_to_spacer_fasta[0]))[0]:
+                              import_data.load_single_tree(args.tree_path).format(fmt='newick')}
+            if not os.path.exists(os.path.dirname(path_to_tree)):
+                os.makedirs(os.path.dirname(path_to_tree))
+            json.dump(dict_trees, open(tree_path, 'w'))
     else:
+        logger.info(f'Using tree folder {args.tree_path}.')
         dict_trees = {}
         for group in os.listdir(args.input_path):
             group_no_ext = os.path.splitext(group)[0]
-            tp = os.path.join(args.tree_path, group_no_ext + '.nwk')
+            print(group_no_ext)
+            tp = os.path.join(args.tree_path, group)
             if not os.path.exists(tp):
                 logger.error(f'No tree found for group {group}. File would be found here {tp}. Or provide json.')
                 raise ValueError(f'No tree found for group {group}. File would be found here {tp}. Or provide json.')
             dict_trees[group_no_ext] = import_data.load_single_tree(tp).format(fmt='newick')
-
-        tree_path = os.path.join(args.output_path, 'additional_data', 'dict_nwk_trees.json')
-        if not os.path.exists(os.path.dirname(tree_path)):
-            os.makedirs(os.path.dirname(tree_path))
+        if not os.path.exists(os.path.dirname(path_to_tree)):
+            os.makedirs(os.path.dirname(path_to_tree))
         json.dump(dict_trees, open(tree_path, 'w'))
 
     df_results_wo_details = run_multiple_groups(ls_path_to_spacer_fasta, args.output_path,
@@ -300,6 +312,7 @@ elif args.input_type in ['ccf', 'crisprcasfinder', 'spacer_fasta']:
                                                 significance_level=args.significance_level,
                                                 extend_branches=extend_branches,
                                                 tree_distance_fct=args.tree_distance_function,
+                                                tree_construction_method=args.tree_construction_method,
                                                 tree_lh_fct=args.tree_lh_fct,
                                                 tree_insertion_rate=args.tree_insertion_rate,
                                                 tree_deletion_rate=args.tree_deletion_rate,

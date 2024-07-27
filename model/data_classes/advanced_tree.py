@@ -1,5 +1,5 @@
 import numpy as np
-from Bio.Phylo.Newick import Clade, Tree
+from Bio.Phylo.Newick import Tree
 
 
 class AdvancedTree(Tree):
@@ -7,11 +7,13 @@ class AdvancedTree(Tree):
     Implements some basic functions for trees. If a tree is not rooted, it will be rooted at the midpoint.
     """
     def __init__(self, root, rooted, model_name=None, *args, **kwargs):
-        root = root.root if isinstance(root, Tree) else root
         super(AdvancedTree, self).__init__(root=root,
                                            rooted=rooted,
                                            *args,
                                            **kwargs)
+        # I don't like this at all and it doesn't help (yet).
+        if isinstance(root, AdvancedTree.__bases__[0].__bases__[0]):
+            self.root = root.root
         self.parents = self.determine_parents()
         self.model_name = model_name if model_name is not None else 'advanced_tree'
         if not rooted:
