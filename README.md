@@ -403,12 +403,12 @@ contained in any visualized reconstruction.
    (see the [ETE Toolkit tutorial](http://etetoolkit.org/docs/latest/tutorial/tutorial_webplugin.html?highlight=x11)).
    Alternatively, you can skip the visualization step by running SpacerPlacer with the option "--no_plot_reconstruction".
 
-3. Mac OS: We introduced an additional Mac OS script for mafft. We hope this allows the use of SpacerPlacer with Mac OS. 
+3. macOS: We introduced an additional macOS script for mafft. We hope this allows the use of SpacerPlacer with Mac OS. 
    If you encounter any issues, please let us know.
 
 4. SpacerPlacer is certainly not perfect. If the results are not as expected or errors occur, 
    it might be helpful to: 
-      - check the logfile for errors/warnings, 
+      - check the logfile (0_logger.log) for errors/warnings, 
       - check "0_forward/0_protocol_skipped.csv" and/or "0_reversed/0_protocol_skipped.csv" for skipped groups and the reason (e.g. groups with fewer than 3 arrays are skipped),
       - check if the input data is read correctly by SpacerPlacer, particularly, check if the input/output to/by MAFFT (in "additional_data/work_folder") is reasonable, and compare your input with the provided example datasets.
       - check the orientation of the CRISPR arrays, if you use CRISPRCasFinder format. We aim to provide an easier to use 
