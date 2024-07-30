@@ -868,7 +868,7 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                                                selection_parameters=selection_fct[1] if selection_fct else None)
 
         if skip:
-            logger.info('Skipped\n for reason: %s', reason)
+            logger.warning('Skipped\n for reason: %s', reason)
             ls_skipped_protocol.append({'name': crispr_group.name, 'repeat': crispr_group.repeat,
                                         'reason': reason})
             continue
@@ -892,7 +892,7 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
             logger.info(f'Number of arrays before combination: {prev_len} /  after: {len(ls_arrays)}')
             # Be aware: Tree generation or alignment produces an error for single arrays (which are useless anyway)
             if len(ls_arrays) <= 2:
-                logger.info('Skipped because arrays were combined. Too few arrays after combining non-uniques.\n')
+                logger.warning('Skipped because arrays were combined. Too few arrays after combining non-uniques.\n')
                 ls_skipped_protocol.append({'name': crispr_group.name, 'repeat': crispr_group.repeat,
                                             'reason': 'too few after combining uniques'})
                 continue
@@ -904,7 +904,7 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
             logger.info(f'Loading tree from imported tree dictionary...')
             if crispr_group.name not in dict_trees:
                 skip, reason = True, 'No tree provided for this group'
-                logger.info('Skipped\n for reason: %s', reason)
+                logger.warning('Skipped\n for reason: %s', reason)
                 ls_skipped_protocol.append({'name': crispr_group.name, 'repeat': crispr_group.repeat,
                                             'reason': reason})
                 continue
@@ -943,7 +943,7 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
             ls_arrays = [crispr_array.spacer_array for crispr_array in crispr_group.crispr_dict.values()]
             ls_array_names = list(crispr_group.crispr_dict.keys())
             if len(ls_arrays) <= 2:
-                logger.info('Skipped because too few arrays after pruning.\n')
+                logger.warning('Skipped because too few arrays after pruning.\n')
                 ls_skipped_protocol.append({'name': crispr_group.name, 'repeat': crispr_group.repeat,
                                             'reason': 'Skipped because too few arrays after pruning.'})
                 continue

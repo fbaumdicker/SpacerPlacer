@@ -409,6 +409,7 @@ contained in any visualized reconstruction.
 4. SpacerPlacer is certainly not perfect. If the results are not as expected or errors occur, 
    it might be helpful to: 
       - check the logfile for errors/warnings, 
+      - check "0_forward/0_protocol_skipped.csv" and/or "0_reversed/0_protocol_skipped.csv" for skipped groups and the reason (e.g. groups with fewer than 3 arrays are skipped),
       - check if the input data is read correctly by SpacerPlacer, particularly, check if the input/output to/by MAFFT (in "additional_data/work_folder") is reasonable, and compare your input with the provided example datasets.
       - check the orientation of the CRISPR arrays, if you use CRISPRCasFinder format. We aim to provide an easier to use 
         CRISPRCasFinder integration and comprehensive clustering of provided arrays in the future.
