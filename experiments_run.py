@@ -809,6 +809,7 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
     or only events that are in blocks with spacers existing at root).
     :return:
     """
+    minimum_nb_of_arrays = 2
     if not os.path.exists(save_path):
         os.makedirs(save_path)
     if logger is None:
@@ -891,7 +892,7 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                         f'"combined array names".')
             logger.info(f'Number of arrays before combination: {prev_len} /  after: {len(ls_arrays)}')
             # Be aware: Tree generation or alignment produces an error for single arrays (which are useless anyway)
-            if len(ls_arrays) <= 2:
+            if len(ls_arrays) < minimum_nb_of_arrays:
                 logger.warning('Skipped because arrays were combined. Too few arrays after combining non-uniques.\n')
                 ls_skipped_protocol.append({'name': crispr_group.name, 'repeat': crispr_group.repeat,
                                             'reason': 'too few after combining uniques'})
@@ -942,15 +943,14 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
             tree, crispr_group = tree_handling(tree, crispr_group, name_inner_nodes=True, bl_eps=0)
             ls_arrays = [crispr_array.spacer_array for crispr_array in crispr_group.crispr_dict.values()]
             ls_array_names = list(crispr_group.crispr_dict.keys())
-            if len(ls_arrays) <= 2:
+            if len(ls_arrays) < minimum_nb_of_arrays:
                 logger.warning('Skipped because too few arrays after pruning.\n')
                 ls_skipped_protocol.append({'name': crispr_group.name, 'repeat': crispr_group.repeat,
                                             'reason': 'Skipped because too few arrays after pruning.'})
                 continue
         else:
             tree = name_inner_nodes_if_unnamed(tree)
-
-        if len(ls_arrays) <= 1:
+        if len(ls_arrays) < minimum_nb_of_arrays:
             logger.warning(f'{crispr_group.name} was skipped because there is only one array.')
             ls_skipped_protocol.append({'name': crispr_group.name, 'repeat': crispr_group.repeat,
                                         'reason': 'Skipped because there is only one array.'})
