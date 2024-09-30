@@ -288,7 +288,8 @@ If only a single fasta is run, the direct path to the tree can be provided using
 There are two ways to provide trees for multiple groups of CRISPR arrays. NOTE: in both cases the names of the trees
 need to be the same as the group names.
 1) The trees can be provided as separate files
-containing the tree as string in newick format (the choice of filename extension is irrelevant). 
+containing the tree as string in newick format (the choice of extension is irrelevant). 
+To avoid issues, keep the tree files in a separate directory of the fasta files (or together in a subdirectory).
 The file names need to be the same as the group names, 
 e.g.:
 ```bash
@@ -304,6 +305,7 @@ e.g.:
         ├── group_3.tree             # Tree for the third group of CRISPR arrays
         └── ...                     # etc.
 ```
+
 2) OR you can provide the trees in a dictionary in a json file providing for each group (string) a newick tree (as string), 
 e.g.:
 ```json
@@ -324,7 +326,8 @@ using the option "--tree_path <path-to-json>/<tree-file-name>.json".
 An example for one tree in json format is given in 
 "example_datasets/workflow_example_core_genome_tree" used in "configs/config_workflow_example_lm_wcgt".
 
-SpacerPlacer will automatically save the input trees or predicted trees in the output directory as a json file.
+SpacerPlacer will automatically save the input trees or predicted trees in the output directory (as a dictionary 
+{group_name: tree in nwk}) in a json file.
 
 ## Output
 The output of SpacerPlacer is saved in the output directory provided by the user. The folder contains a "summary.txt", 

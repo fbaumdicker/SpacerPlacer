@@ -287,13 +287,25 @@ elif args.input_type in ['ccf', 'crisprcasfinder', 'spacer_fasta']:
     else:
         logger.info(f'Using tree folder {args.tree_path}.')
         dict_trees = {}
+        list_dir_os_path = os.listdir(args.tree_path)
+        list_dir_os_path_no_ext = set([os.path.splitext(o)[0] for o in os.listdir(args.tree_path)])
         for group in os.listdir(args.input_path):
             group_no_ext = os.path.splitext(group)[0]
-            print(group_no_ext)
-            tp = os.path.join(args.tree_path, group)
-            if not os.path.exists(tp):
-                logger.error(f'No tree found for group {group}. File would be found here {tp}. Or provide json.')
-                raise ValueError(f'No tree found for group {group}. File would be found here {tp}. Or provide json.')
+            tp = None
+            for file in list_dir_os_path:
+                if file.startswith(group_no_ext) and not file.endswith(('.fa', '.fasta', '.fna')):
+                    tp = os.path.join(args.tree_path, file)
+                    break
+
+            if tp is None:
+                logger.error(f'No tree found for group {group}. '
+                             f'File would be found in folder {args.tree_path} '
+                             f'with filename {group_no_ext} (+ extension).')
+                raise ValueError(f'No tree found for group {group}. '
+                                 f'File would be found in folder {args.tree_path} '
+                                 f'with filename {group_no_ext} (+ extension).')
+
+
             dict_trees[group_no_ext] = import_data.load_single_tree(tp).format(fmt='newick')
         if not os.path.exists(os.path.dirname(path_to_tree)):
             os.makedirs(os.path.dirname(path_to_tree))
