@@ -281,8 +281,8 @@ elif args.input_type in ['ccf', 'crisprcasfinder', 'spacer_fasta']:
         elif len(ls_path_to_spacer_fasta) == 1:
             dict_trees = {os.path.splitext(os.path.basename(ls_path_to_spacer_fasta[0]))[0]:
                               import_data.load_single_tree(args.tree_path).format(fmt='newick')}
-            if not os.path.exists(os.path.dirname(path_to_tree)):
-                os.makedirs(os.path.dirname(path_to_tree))
+            if not os.path.exists(path_to_tree):
+                os.makedirs(path_to_tree)
             json.dump(dict_trees, open(tree_path, 'w'))
     else:
         logger.info(f'Using tree folder {args.tree_path}.')
@@ -307,8 +307,8 @@ elif args.input_type in ['ccf', 'crisprcasfinder', 'spacer_fasta']:
 
 
             dict_trees[group_no_ext] = import_data.load_single_tree(tp).format(fmt='newick')
-        if not os.path.exists(os.path.dirname(path_to_tree)):
-            os.makedirs(os.path.dirname(path_to_tree))
+        if not os.path.exists(path_to_tree):
+            os.makedirs(path_to_tree)
         json.dump(dict_trees, open(tree_path, 'w'))
 
     df_results_wo_details = run_multiple_groups(ls_path_to_spacer_fasta, args.output_path,
