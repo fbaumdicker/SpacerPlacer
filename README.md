@@ -407,7 +407,7 @@ contained in any visualized reconstruction.
    Alternatively, you can skip the visualization step by running SpacerPlacer with the option "--no_plot_reconstruction".
 
 3. Parts of the reconstruction visualization png may be missing, if the size of the image exceeds 2^15 pixels in width 
-and/or height. Solution: Either use the pdf output or manually adjust the width and height by 
+and/or height. Solution: Either use the pdf output, which should be fine, or manually adjust the width and height by 
 using the custom figure size options ("--figsize_rec" and "--dpi_rec"). 
 
 4. macOS: We introduced an additional macOS script for mafft. We hope this allows the use of SpacerPlacer with Mac OS. 
