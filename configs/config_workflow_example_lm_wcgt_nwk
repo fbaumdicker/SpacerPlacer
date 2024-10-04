@@ -8,9 +8,3 @@ simple
 0.05
 --tree_path
 example_datasets/workflow_example_core_genome_tree_nwk/workflow_example_wCGT.tree
---figsize
-1000
-500
-mm
---dpi
-30

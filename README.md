@@ -406,10 +406,14 @@ contained in any visualized reconstruction.
    (see the [ETE Toolkit tutorial](http://etetoolkit.org/docs/latest/tutorial/tutorial_webplugin.html?highlight=x11)).
    Alternatively, you can skip the visualization step by running SpacerPlacer with the option "--no_plot_reconstruction".
 
-3. macOS: We introduced an additional macOS script for mafft. We hope this allows the use of SpacerPlacer with Mac OS. 
+3. Parts of the reconstruction visualization png may be missing, if the size of the image exceeds 2^15 pixels in width 
+and/or height. Solution: Either use the pdf output or manually adjust the width and height by 
+using the custom figure size options ("--figsize_rec" and "--dpi_rec"). 
+
+4. macOS: We introduced an additional macOS script for mafft. We hope this allows the use of SpacerPlacer with Mac OS. 
    If you encounter any issues, please let us know.
 
-4. SpacerPlacer is certainly not perfect. If the results are not as expected or errors occur, 
+5. SpacerPlacer is certainly not perfect. If the results are not as expected or errors occur, 
    it might be helpful to: 
       - check the logfile (0_logger.log) for errors/warnings, 
       - check "0_forward/0_protocol_skipped.csv" and/or "0_reversed/0_protocol_skipped.csv" for skipped groups and the reason (e.g. groups with only one array are skipped),
