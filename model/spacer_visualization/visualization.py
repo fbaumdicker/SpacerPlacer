@@ -43,7 +43,9 @@ def visualize_tree_rec_spacers(newick_tree, df_rec_spacers=None, df_gains_losses
                                fsize=6, col_w=9, row_h=13, determine_fsizes_by_str_len=True,
                                events_fsize=4, events_col_w=7, events_row_h=7, show_spacer_name_column=True,
                                indicate_joint_del=False,
-                               spacer_labels_num=True, provided_numbering=None, provided_bg_colors=None):
+                               spacer_labels_num=True, provided_numbering=None, provided_bg_colors=None,
+                               dpi=90,
+                               figsize=(None, None, 'px')):
     ete_tree_rec = ete3.Tree(newick_tree, format=3)
 
     ts_rec = ete3.TreeStyle()
@@ -270,8 +272,10 @@ def visualize_tree_rec_spacers(newick_tree, df_rec_spacers=None, df_gains_losses
 
     ts_rec.legend_position = 3
 
-    ete_tree_rec.render(os.path.join(path, name + '.pdf'), tree_style=ts_rec)
-    ete_tree_rec.render(os.path.join(path, name + '.png'), tree_style=ts_rec)
+    ete_tree_rec.render(os.path.join(path, name + '.pdf'), tree_style=ts_rec, dpi=dpi, w=figsize[0], h=figsize[1],
+                        units=figsize[2]) # dpi works here
+    ete_tree_rec.render(os.path.join(path, name + '.png'), tree_style=ts_rec, dpi=dpi, w=figsize[0], h=figsize[1],
+                        units=figsize[2]) # but not here requires fitting h, w
 
     if do_show:
         ete_tree_rec.show(tree_style=ts_rec, name='Reconstructed ancestors')

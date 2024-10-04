@@ -40,7 +40,9 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict, lh_fct=None
                         tree_lh_fct=None, tree_insertion_rate=None, tree_deletion_rate=None, tree_alpha=None,
                         alpha_bias_correction=True, rho_bias_correction=True,
                         seed=None,
-                        save_reconstructed_events=False
+                        save_reconstructed_events=False,
+                        dpi=90,
+                        figsize_rec=(None, None, 'px'),
                         ):
     if seed is not None:
         np.random.seed(seed)
@@ -115,6 +117,8 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict, lh_fct=None
                                                               core_genome_trees=False,
                                                               metadata=False,
                                                               save_reconstructed_events=save_reconstructed_events,
+                                                              dpi=dpi,
+                                                              figsize_rec=figsize_rec,
                                                               )
     dict_trees = dict_trees_forward
     df_rec_protocol = df_rec_protocol.set_index('name')
@@ -175,7 +179,9 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict, lh_fct=None
                                       provided_aligned_arrays=dict_provided_aligned_arrays,
                                       provided_dict_duplicated_spacers=dict_provided_duplicated_spacers,
                                       metadata=False,
-                                      save_reconstructed_events=save_reconstructed_events,)
+                                      save_reconstructed_events=save_reconstructed_events,
+                                      dpi=dpi,
+                                      figsize_rec=figsize_rec,)
         dict_trees = {'forward': dict_trees_forward,
                       'reversed': dict_trees_reversed}
 
@@ -262,6 +268,8 @@ def run_pickled_data(rec_parameter_dict, data_path, save_path=None, plot_tree=Tr
                      rho_bias_correction=False,
                      core_genome_trees=False,
                      save_reconstructed_events=False,
+                     dpi=90,
+                     figsize_rec=(None, None, 'px'),
                      ):
     if not os.path.exists(os.path.split(logfile_path)[0]):
         os.makedirs(os.path.split(logfile_path)[0])
@@ -316,7 +324,9 @@ def run_pickled_data(rec_parameter_dict, data_path, save_path=None, plot_tree=Tr
                                                             alpha_bias_correction=alpha_bias_correction,
                                                             rho_bias_correction=rho_bias_correction,
                                                             core_genome_trees=core_genome_trees,
-                                                            save_reconstructed_events=save_reconstructed_events,)
+                                                            save_reconstructed_events=save_reconstructed_events,
+                                                            dpi=dpi,
+                                                            figsize_rec=figsize_rec,)
     dict_trees = dict_trees_forward
     df_rec_protocol = df_rec_protocol.set_index('name')
     df_rec_protocol_boring = df_rec_protocol_boring.set_index('name')
@@ -366,7 +376,9 @@ def run_pickled_data(rec_parameter_dict, data_path, save_path=None, plot_tree=Tr
                                     core_genome_trees=core_genome_trees,
                                     provided_aligned_arrays=dict_provided_aligned_arrays,
                                     provided_dict_duplicated_spacers=dict_provided_duplicated_spacers,
-                                    save_reconstructed_events=save_reconstructed_events,)
+                                    save_reconstructed_events=save_reconstructed_events,
+                                    dpi=dpi,
+                                    figsize_rec=figsize_rec,)
         dict_trees = {'forward': dict_trees_forward,
                       'reversed': dict_trees_reversed}
         df_rec_protocol_reversed = df_rec_protocol_reversed.set_index('name')
@@ -466,9 +478,12 @@ def run_simulation_and_reconstruction(sim_parameter_dict, rec_parameter_dict, sa
                                       load_sim_param_from_pkl=None,
                                       alpha_bias_correction=False,
                                       rho_bias_correction=False,
+                                      dpi=90,
+                                      figsize_rec=(None, None, 'px'),
                                       ):
     """
     This function runs a simulation and a reconstruction and compares the results.
+    :param figsize_rec:
     :param rho_bias_correction:
     :param alpha_bias_correction:
     :param sim_parameter_dict:
@@ -585,6 +600,8 @@ def run_simulation_and_reconstruction(sim_parameter_dict, rec_parameter_dict, sa
         tree_alpha=tree_alpha,
         alpha_bias_correction=alpha_bias_correction,
         rho_bias_correction=rho_bias_correction,
+        dpi=dpi,
+        figsize_rec=figsize_rec,
     )
 
     dict_trees = dict_trees_forward
@@ -637,6 +654,8 @@ def run_simulation_and_reconstruction(sim_parameter_dict, rec_parameter_dict, sa
                                     rho_bias_correction=rho_bias_correction,
                                     provided_aligned_arrays=dict_provided_aligned_arrays,
                                     provided_dict_duplicated_spacers=dict_provided_duplicated_spacers,
+                                    dpi=dpi,
+                                    figsize_rec=figsize_rec,
                                     )
         dict_trees = {'forward': dict_trees_forward, 'reversed': dict_tree_reversed}
 
@@ -761,9 +780,13 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                        metadata=True,
                        alternative_parameter_estimation=False,
                        save_reconstructed_events=False,
+                       dpi=90,
+                       figsize_rec=(None, None, 'px'),
                        ):
     """
 
+    :param figsize_rec:
+    :param dpi:
     :param tree_construction_method:
     :param save_reconstructed_events:
     :param tree_lh_fct:
@@ -1067,6 +1090,8 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                                                   else provided_numbering[crispr_group.name][1],
                                                   spacer_labels_num=spacer_labels_num,
                                                   re_plot_order=False,
+                                                  dpi=dpi,
+                                                  figsize=figsize_rec,
                                                   )
 
         if not sim_as_rec:
@@ -1155,6 +1180,8 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                                                   else provided_numbering[crispr_group.name][1],
                                                   spacer_labels_num=spacer_labels_num,
                                                   re_plot_order=False,
+                                                  dpi=dpi,
+                                                  figsize=figsize_rec,
                                                   )
         else:
             dict_bg_colors = None

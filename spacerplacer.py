@@ -131,6 +131,13 @@ parser.add_argument('--no_plot_reconstruction', action='store_true',
                     help='If given, the reconstruction is not plotted.')
 parser.add_argument('--no_plot_order_graph', action='store_true',
                     help='If given, the Partial Spacer Insertion Order is not plotted.')
+parser.add_argument('--dpi_rec', type=int, default=90,
+                    help='DPI for the reconstruction plot pdf. Default is 90.')
+parser.add_argument('--figsize_rec', nargs=3, default=[None, None, 'px'], metavar=('WIDTH', 'HEIGHT',
+                                                                                   '{px, mm, in}'),
+                    help='Provide the width and height of the reconstruction plot in the provided unit "px" (pixel), "mm" '
+                         '(millimeter) or "in" (inches). '
+                         'By default the size is determined by the drawing function.')
 # Does this work?
 parser.add_argument('--do_show', action='store_true',
                     help='If given, the plots are shown directly.')
@@ -183,6 +190,7 @@ parser.add_argument('--save_reconstructed_events', action='store_true',
                          '"reconstructed_events". On the basis of this data, the reconstruction is '
                          'visualized and the events can be analyzed in more detail. Currently only works, if the '
                          'the reconstruction is visualized.')
+
 ############################################################################################################
 # Preprocessing:
 # parser.add_argument('--clustering', action='store_true',
@@ -217,6 +225,15 @@ logger.debug(vars(args))
 tree_path = None
 extend_branches = args.extend_branches
 
+figsize_rec = [float(args.figsize_rec[0]) if args.figsize_rec[0] is not None else None,
+               float(args.figsize_rec[1]) if args.figsize_rec[1] is not None else None,
+               args.figsize_rec[2]]
+if args.figsize_rec[2] not in ['px', 'mm', 'in']:
+    logger.error(f'Figure size unit {args.figsize_rec[2]} not recognized. '
+                 f'Please use "px", "mm" or "in".')
+    raise ValueError(f'Figure size unit {args.figsize_rec[2]} not recognized. '
+                     f'Please use "px", "mm" or "in".')
+
 if args.input_type == 'pickled':
     dict_crispr_groups = run_pickled_data(rec_parameter_dict,
                                           lh_fct=args.lh_fct,
@@ -244,7 +261,10 @@ if args.input_type == 'pickled':
                                           alpha_bias_correction=not args.no_alpha_bias_correction,
                                           rho_bias_correction=not args.no_rho_bias_correction,
                                           core_genome_trees=True if args.tree_path is not None else False,
-                                          save_reconstructed_events=args.save_reconstructed_events, )
+                                          save_reconstructed_events=args.save_reconstructed_events,
+                                          dpi=args.dpi_rec,
+                                          figsize_rec=figsize_rec,
+                                          )
 elif args.input_type in ['ccf', 'crisprcasfinder', 'spacer_fasta']:
     if args.input_type == 'spacer_fasta':
         if os.path.splitext(args.input_path)[-1] in {'.fa', '.fasta', '.fna'}:
@@ -334,6 +354,8 @@ elif args.input_type in ['ccf', 'crisprcasfinder', 'spacer_fasta']:
                                                 combine_non_unique_arrays=args.combine_non_unique_arrays,
                                                 seed=args.seed,
                                                 save_reconstructed_events=args.save_reconstructed_events,
+                                                dpi=args.dpi_rec,
+                                                figsize_rec=figsize_rec
                                                 )
     summary_dict = compose_summary_dict(df_results_wo_details, dict(vars(args)))
     write_summary(summary_dict, os.path.join(args.output_path, 'summary.txt'))

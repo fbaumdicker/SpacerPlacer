@@ -1210,7 +1210,8 @@ class ReconstructionTree(advanced_tree.AdvancedTree):
 
     def visualize_tree(self, name='default', do_show=True, path='pictures', sort_top_order='nb_leafs',
                        determine_fsizes_by_str_len=True, indicate_joint_del=False, provided_numbering=None,
-                       provided_bg_colors=None, spacer_labels_num=True, re_plot_order=True):
+                       provided_bg_colors=None, spacer_labels_num=True, re_plot_order=True, dpi=90,
+                       figsize=(None, None, 'px')):
         df = pd.DataFrame(columns=['rec_spacers'])
         df_changes = pd.DataFrame(columns=['rec_gains', 'rec_losses'])
         rec_losses_dict = self.rec_joint_losses_dict if indicate_joint_del else self.rec_loss_dict
@@ -1323,6 +1324,8 @@ class ReconstructionTree(advanced_tree.AdvancedTree):
                                                         provided_numbering=provided_numbering,
                                                         provided_bg_colors=provided_bg_colors,
                                                         spacer_labels_num=spacer_labels_num,
+                                                        dpi=dpi,
+                                                        figsize=figsize,
                                                         )
         return dict_bg_colors
 
