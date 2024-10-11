@@ -18,7 +18,9 @@ SpacerPlacer is respecting the chronological timeline of spacer insertions as de
 
 
 ## Corresponding Paper & Conference Poster
-The preprint of the corresponding paper is available on bioRxiv: [SpacerPlacer: Ancestral reconstruction of CRISPR arrays reveals the evolutionary dynamics of spacer deletions](https://www.biorxiv.org/content/10.1101/2024.02.20.581079v1).
+The corresponding paper to SpacerPlacer is now published in Nucleic Acids Research: [SpacerPlacer: Ancestral reconstruction of CRISPR arrays reveals the evolutionary dynamics of spacer deletions](https://doi.org/10.1093/nar/gkae772).
+
+The paper is also available on bioRxiv: [SpacerPlacer: Ancestral reconstruction of CRISPR arrays reveals the evolutionary dynamics of spacer deletions](https://www.biorxiv.org/content/10.1101/2024.02.20.581079v2).
 
 We presented a poster at the conference CRISPR2023, showcasing the features and applications of SpacerPlacer: [SpacerPlacer Poster](doc/posters/crispr2023_spacerplacer.pdf).
 
@@ -413,7 +415,9 @@ using the custom figure size options ("--figsize_rec" and "--dpi_rec").
 4. macOS: We introduced an additional macOS script for mafft. We hope this allows the use of SpacerPlacer with Mac OS. 
    If you encounter any issues, please let us know.
 
-5. SpacerPlacer is certainly not perfect. If the results are not as expected or errors occur, 
+5. The estimation of the tree based on the spacer arrays is not optimized and thus can be quite slow, especially for larger group sizes. 
+
+6. SpacerPlacer is certainly not perfect. If the results are not as expected or errors occur, 
    it might be helpful to: 
       - check the logfile (0_logger.log) for errors/warnings, 
       - check "0_forward/0_protocol_skipped.csv" and/or "0_reversed/0_protocol_skipped.csv" for skipped groups and the reason (e.g. groups with only one array are skipped),
