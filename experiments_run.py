@@ -329,7 +329,8 @@ def run_pickled_data(rec_parameter_dict, data_path, save_path=None, plot_tree=Tr
                                                             figsize_rec=figsize_rec,)
     dict_trees = dict_trees_forward
     df_rec_protocol = df_rec_protocol.set_index('name')
-    df_rec_protocol_boring = df_rec_protocol_boring.set_index('name')
+    if not df_rec_protocol_boring.empty:
+        df_rec_protocol_boring = df_rec_protocol_boring.set_index('name')
     if determine_orientation:
         if not os.path.exists(os.path.join(save_path, '0_reversed')):
             os.makedirs(os.path.join(save_path, '0_reversed'))
@@ -382,7 +383,8 @@ def run_pickled_data(rec_parameter_dict, data_path, save_path=None, plot_tree=Tr
         dict_trees = {'forward': dict_trees_forward,
                       'reversed': dict_trees_reversed}
         df_rec_protocol_reversed = df_rec_protocol_reversed.set_index('name')
-        df_rec_protocol_reversed_boring = df_rec_protocol_reversed_boring.set_index('name')
+        if not df_rec_protocol_reversed_boring.empty:
+            df_rec_protocol_reversed_boring = df_rec_protocol_reversed_boring.set_index('name')
 
         df_rec_protocol, df_oriented_rec_protocol, dict_trees = orientation_tools.compare_likelihoods_for_orientation(
             df_rec_protocol,
