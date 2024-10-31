@@ -56,7 +56,9 @@ def visualize_tree_rec_spacers(newick_tree, df_rec_spacers=None, df_gains_losses
     ts_rec.show_branch_length = False
 
     nstyle = ete3.NodeStyle()
-    nstyle["size"] = 1
+    nstyle["size"] = 2
+    nstyle["vt_line_width"] = 1
+    nstyle["hz_line_width"] = 1
     # nstyle['fgcolor'] = 'blue'
     # nstyle['partition_bgcolor'] = 'blue'
 
