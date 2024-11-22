@@ -1,5 +1,6 @@
 import copy
 import numpy as np
+from dataclasses import dataclass
 
 
 class CRISPRGroup:
@@ -213,3 +214,13 @@ class CRISPRArray:
         return
 
 
+@dataclass
+class Species:
+    acc_number: str
+    kingdom: str
+    phylum: str
+    class_: str
+    order: str
+    family: str
+    genus: str
+    species: str

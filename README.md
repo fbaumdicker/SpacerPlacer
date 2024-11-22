@@ -126,18 +126,17 @@ of the given CRISPR arrays in the given (forward) orientation and by reversing t
 reconstruction again. These two reconstructions are then compared. 
 If the difference in likelihoods between the forward and reverse reconstructions exceeds a threshold, 
 which can be provided by the user with "--orientation_threshold <threshold>", 
-SpacerPlacer will predict the orientation accordingly.
+SpacerPlacer will predict the orientation accordingly. (the likelihoods + ratio are returned as well so you can do your own 
+analysis).
 This orientation is then used for reporting details about the reconstruction and parameter estimates 
 in the summary and result files.
 
+Note, that the orientation predictions only impacts the "0_results.csv" and the "0_forward" and "0_reversed" folders 
+refer to the provided orientation.
 As described in the section "Output" section, all information for reconstructions with both orientations is accessible 
 in the respective directories.
 If the difference in likelihoods is below the threshold, SpacerPlacer will use the forward/provided orientation as 
 default.
-
-It is important to provide the CRISPR arrays in consistent orientations, as spacers might not be recognized as the same,
-if the orientations are not consistent.
-
 
 ## Input data
 The CRISPR array input data has to be provided in a specific format. We provide two alternative input formats:
@@ -174,7 +173,6 @@ We expect the spacers to be ordered chronologically, where the insertion end is 
 right, i.e. the first (leftmost) spacer is the youngest,
 while the last (rightmost) spacer is the oldest. 
 Most importantly, the order of the spacers should be consistent for all arrays in the group.
-The order is not as important, if you use SpacerPlacer to determine the orientation, as both directions are run.
 Note, there is no need to provide reversed spacers, as SpacerPlacer will automatically reverse the spacers 
 to run a reconstruction in reverse orientation (if the option is provided).
 
@@ -215,8 +213,8 @@ To get files in this format you can e.g. submit the genomic sequences to the CRI
 
 
 You then need to carefully select the output CRISPR array and place them into two folders as the 
-CRISPRCasFinder interface is capable of predicting the orientation but always provides the spacers in the forward 
-strand orientation.
+CRISPRCasdb/CRISPRCasFinder interface is capable of predicting the orientation but always provides the spacers in the forward 
+strand orientation (and does not change their ordering). 
 Be aware that since CRISPRCasFinder predicts the orientation internally the consensus repeat will appear different 
 in the output.
 
@@ -226,7 +224,10 @@ in the output.
 
 CRISPRCasFinder only provides the forward strand orientation. So in order to ensure the correct representation 
 you need to place all the files classified as forward strand into the "pos_strand" directory,
-and all the files classified as reverse strand into the "neg_strand" directory.
+and all the files classified as reverse strand into the "neg_strand" directory. 
+Important: SpacerPlacer automatically reverse complements the spacers in the "neg_strand" directory in the parsing step. 
+There is need to download the reverse complement file (on CRISPRCasdb) or to reverse the spacers manually. SpacerPlacer 
+also reverses the order of the arrays in "neg_strand" (since CRISPRCasFinder/db does not).
 
 ![saving_reversed](https://user-images.githubusercontent.com/46710688/218799148-5a554064-5b83-4ec9-8bec-cecba3af87fb.gif)
 (Note: the folder names are different in the gifs. See above or in the examples for the correct folder names.)
@@ -274,7 +275,7 @@ You can then run SpacerPlacer with the following command:
    ```bash
    python spacerplacer.py <input_path> <output_path> -it ccf [more_options]
    ```
-alternatively for "ccf" you can use "crisprcasfinder". "input_path" is the top-level directory 
+ "input_path" is the top-level directory 
 of the run, in this case "path-to-experiment/experiment". Note, that currently you need to specify the top-level 
 directory not an individual group directory (even if you are only running one group).
 
@@ -330,6 +331,9 @@ An example for one tree in json format is given in
 
 SpacerPlacer will automatically save the input trees or predicted trees in the output directory (as a dictionary 
 {group_name: tree in nwk}) in a json file.
+
+Avoid putting the trees in the "experiment" directory, 
+as SpacerPlacer might try to process them as "experiment" (and return an error). 
 
 ## Output
 The output of SpacerPlacer is saved in the output directory provided by the user. The folder contains a "summary.txt", 
@@ -404,7 +408,10 @@ contained in any visualized reconstruction.
    `python spacerplacer.py -h`.
 
 2. As SpacerPlacer relies on ETE Toolkit 3, the visualization of the reconstruction will not work on (web) servers without
-   a graphical interface (X backend). If you run into issues you can try X11 forwarding (if available), or running a virtual X server, e.g. with XVFB
+   a graphical interface (X backend). If you run into issues you can try:
+   (1) adding the environment variable "QT_QPA_PLATFORM=offscreen" to your shell (running "export QT_QPA_PLATFORM=offscreen" (linux), see [source](https://github.com/NVlabs/instant-ngp/discussions/300)),
+   (2) X11 forwarding (if available), or 
+   (3) running a virtual X server, e.g. with XVFB
    (see the [ETE Toolkit tutorial](http://etetoolkit.org/docs/latest/tutorial/tutorial_webplugin.html?highlight=x11)).
    Alternatively, you can skip the visualization step by running SpacerPlacer with the option "--no_plot_reconstruction".
 

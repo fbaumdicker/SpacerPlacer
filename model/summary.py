@@ -26,7 +26,7 @@ def compose_summary_dict(df_results, supplied_parameters):
                              'nb of leafs (after combining non-uniques)',
                              }
     general_information_keys = {'nb of unique spacer arrays',
-                                'run time'}
+                                'run_time'}
 
     dict_results = df_results.to_dict(orient='index')
     ordered_results = dict()

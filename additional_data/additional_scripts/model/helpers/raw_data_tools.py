@@ -1,16 +1,3 @@
-from dataclasses import dataclass
-
-
-@dataclass
-class Species:
-    acc_number: str
-    kingdom: str
-    phylum: str
-    class_: str
-    order: str
-    family: str
-    genus: str
-    species: str
 
 
 def reverse_complement(dna_seq):

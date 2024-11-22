@@ -7,4 +7,4 @@ simple
 --significance_level
 0.05
 --tree_path
-example_datasets/workflow_example_core_genome_tree_nwk/workflow_example_wCGT.tree
+example_datasets/trees/workflow_example_core_genome_tree_nwk/workflow_example_wCGT.tree

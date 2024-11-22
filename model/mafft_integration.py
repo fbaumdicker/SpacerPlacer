@@ -1,13 +1,10 @@
 import itertools
-import pickle
 import subprocess
 import os
 import numpy as np
 import platform
 
 from model.helpers import import_data
-from additional_data.additional_scripts.model.helpers import raw_data_tools
-from model.data_classes.crisprdata import CRISPRArray
 
 # Excluded characters that are not allowed by mafft.
 EXCLUDED_CHARACTERS = {'3e': 'ff', '3d': 'fe', '3c': 'fd',
@@ -58,13 +55,13 @@ DEFAULT_MAFFT_OPTIONS_FFT = ['--text',
 
 # probably don't need windows as extra case, need to try it out (exe make it more annoying?)
 if platform.system() == 'Darwin':
-    MAFFT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'mafft_scripts',
+    MAFFT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'model', 'mafft_scripts',
                               'mafft-mac')
 # elif platform.system() == 'Windows':
 #     MAFFT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'mafft_scripts',
 #                               'mafft-win')
 else:
-    MAFFT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'mafft_scripts',
+    MAFFT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'model', 'mafft_scripts',
                               'mafft-linux64')
 
 
@@ -366,62 +363,62 @@ def reverse_renaming(ls_arrays, dict_reversed_renaming):
     return renamed_ls_arrays
 
 
-def pickle_to_aligned_group(pickle_path, intermediate_save_path, save_path, save_name='0_data.pickle',
-                            mafft_options=None):
-    too_long_arrays = []
-    if mafft_options is None:
-        mafft_options = ['--text']
-    dict_crispr_by_repeats = import_data.load_crispr_arrays_from_pickle(pickle_path)
-    for key, value in dict_crispr_by_repeats.items():
-        print(key)
-        print(value)
-    dict_crispr_by_repeats = raw_data_tools.remove_non_level_4(dict_crispr_by_repeats)
-    dict_crispr_aligned = {}
-
-    for repeat, ls_crispr_arrays in dict_crispr_by_repeats.items():
-        if ls_crispr_arrays:
-            ls_arrays = []
-            ls_array_names = ['_'.join([ls_crispr_arrays[i].acc_num, str(i)]) for i in range(len(ls_crispr_arrays))]
-            for i, crispr_array in enumerate(ls_crispr_arrays):
-                ls_arrays.append(crispr_array.spacer_indexes)
-            renamed_ls_arrays, dict_renaming, dict_reversed_renaming = rename_spacers_for_mafft(ls_arrays)
-            ls_hex_arrays, unique_hx_values = array_to_hex(renamed_ls_arrays)
-
-            if len(unique_hx_values) > 248:
-                too_long_arrays.append((repeat, unique_hx_values))
-                print(f'There are more than 248 spacers: {len(unique_hx_values)}')
-                continue
-
-            if not os.path.exists(intermediate_save_path):
-                os.makedirs(intermediate_save_path)
-            mx_path = write_matrixfile(unique_hx_values, intermediate_save_path, repeat + '_mx')
-            write_fasta(ls_hex_arrays, ls_array_names, intermediate_save_path, repeat)
-            run_mafft(os.path.join(intermediate_save_path, repeat),
-                      os.path.join(intermediate_save_path, repeat),
-                      mafft_options,
-                      mx_path)
-
-            ls_aligned_arrays, ls_aligned_names = convert_mafft_output(
-                os.path.join(intermediate_save_path, repeat + '_output.txt'))
-
-            ls_reversed_renaming_aligned_arrays = reverse_renaming(ls_aligned_arrays, dict_reversed_renaming)
-            dict_crispr_aligned[repeat] = [
-                CRISPRArray(name, crispr.acc_num, crispr.orientation, crispr.evidence_level, crispr.drconsensus,
-                            crispr.chromosome_plasmid,
-                            crispr.kingdom, crispr.organism_name, array, crispr.cas_type, crispr.cas_gene_info,
-                            crispr.cas_gene_sequences) for name, array, crispr in
-                zip(ls_aligned_names, ls_reversed_renaming_aligned_arrays, ls_crispr_arrays)]
-
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-    with open(os.path.join(save_path, save_name), 'wb') as handle:
-        pickle.dump(dict_crispr_aligned, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    # print('Arrays that were too long: ', too_long_arrays)
-    print('Number of repeats: ', len(dict_crispr_by_repeats))
-    print('Number of aligned repeats: ', len(dict_crispr_aligned),
-          'Number of aligned spacer arrays: ', sum([len(val) for val in dict_crispr_aligned.values()]))
-    print('Number of repeats with arrays that were too long: ', len(too_long_arrays))
-    return dict_crispr_aligned
+# def pickle_to_aligned_group(pickle_path, intermediate_save_path, save_path, save_name='0_data.pickle',
+#                             mafft_options=None):
+#     too_long_arrays = []
+#     if mafft_options is None:
+#         mafft_options = ['--text']
+#     dict_crispr_by_repeats = import_data.load_crispr_arrays_from_pickle(pickle_path)
+#     for key, value in dict_crispr_by_repeats.items():
+#         print(key)
+#         print(value)
+#     dict_crispr_by_repeats = raw_data_tools.remove_non_level_4(dict_crispr_by_repeats)
+#     dict_crispr_aligned = {}
+#
+#     for repeat, ls_crispr_arrays in dict_crispr_by_repeats.items():
+#         if ls_crispr_arrays:
+#             ls_arrays = []
+#             ls_array_names = ['_'.join([ls_crispr_arrays[i].acc_num, str(i)]) for i in range(len(ls_crispr_arrays))]
+#             for i, crispr_array in enumerate(ls_crispr_arrays):
+#                 ls_arrays.append(crispr_array.spacer_indexes)
+#             renamed_ls_arrays, dict_renaming, dict_reversed_renaming = rename_spacers_for_mafft(ls_arrays)
+#             ls_hex_arrays, unique_hx_values = array_to_hex(renamed_ls_arrays)
+#
+#             if len(unique_hx_values) > 248:
+#                 too_long_arrays.append((repeat, unique_hx_values))
+#                 print(f'There are more than 248 spacers: {len(unique_hx_values)}')
+#                 continue
+#
+#             if not os.path.exists(intermediate_save_path):
+#                 os.makedirs(intermediate_save_path)
+#             mx_path = write_matrixfile(unique_hx_values, intermediate_save_path, repeat + '_mx')
+#             write_fasta(ls_hex_arrays, ls_array_names, intermediate_save_path, repeat)
+#             run_mafft(os.path.join(intermediate_save_path, repeat),
+#                       os.path.join(intermediate_save_path, repeat),
+#                       mafft_options,
+#                       mx_path)
+#
+#             ls_aligned_arrays, ls_aligned_names = convert_mafft_output(
+#                 os.path.join(intermediate_save_path, repeat + '_output.txt'))
+#
+#             ls_reversed_renaming_aligned_arrays = reverse_renaming(ls_aligned_arrays, dict_reversed_renaming)
+#             dict_crispr_aligned[repeat] = [
+#                 CRISPRArray(name, crispr.acc_num, crispr.orientation, crispr.evidence_level, crispr.drconsensus,
+#                             crispr.chromosome_plasmid,
+#                             crispr.kingdom, crispr.organism_name, array, crispr.cas_type, crispr.cas_gene_info,
+#                             crispr.cas_gene_sequences) for name, array, crispr in
+#                 zip(ls_aligned_names, ls_reversed_renaming_aligned_arrays, ls_crispr_arrays)]
+#
+#     if not os.path.exists(save_path):
+#         os.makedirs(save_path)
+#     with open(os.path.join(save_path, save_name), 'wb') as handle:
+#         pickle.dump(dict_crispr_aligned, handle, protocol=pickle.HIGHEST_PROTOCOL)
+#     # print('Arrays that were too long: ', too_long_arrays)
+#     print('Number of repeats: ', len(dict_crispr_by_repeats))
+#     print('Number of aligned repeats: ', len(dict_crispr_aligned),
+#           'Number of aligned spacer arrays: ', sum([len(val) for val in dict_crispr_aligned.values()]))
+#     print('Number of repeats with arrays that were too long: ', len(too_long_arrays))
+#     return dict_crispr_aligned
 
 
 def pickled_group_to_mafft(path, ls_files, options=None, remove_same_arrays=True):

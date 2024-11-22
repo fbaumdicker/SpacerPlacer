@@ -4,15 +4,13 @@ import pandas as pd
 import numpy as np
 import os
 import pickle
-from Bio.Phylo.TreeConstruction import DistanceTreeConstructor
 
 from model.helpers import misc, import_data
-from additional_data.additional_scripts.model.helpers import raw_data_tools
 from model import model_tools
-from additional_data.additional_scripts.model.coalescent_tree_sim import mult_rnd_coalescent_tree, rnd_coalescent_tree
+from model.coalescent_tree_sim import mult_rnd_coalescent_tree, rnd_coalescent_tree
 from model import distance_tree_constructor
 from model import mafft_integration
-from model.data_classes.crisprdata import CRISPRGroup, CRISPRArray
+from model.data_classes.crisprdata import CRISPRGroup, CRISPRArray, Species
 from model.data_classes.advanced_tree import AdvancedTree
 
 GROUPS_TO_EXCLUDE = ['g_39', 'g_284', 'g_690', 'g_140', 'g_719', 'g_931', 'g_598',
@@ -43,7 +41,7 @@ def load_align_pickled_data(path, mafft_options=None, exclude_files=None, save_p
             crispr_array = CRISPRArray(name, '', None, 4, head[1],
                                        'chromosome', 'Bacteria', head[0], array, head[2],
                                        cas_genes=[], all_cas_types=[], all_cas_genes=[],
-                                       species=raw_data_tools.Species('', 'Bacteria', 'sim', 'sim', 'sim', 'sim',
+                                       species=Species('', 'Bacteria', 'sim', 'sim', 'sim', 'sim',
                                                                       'sim', 'sim'),
                                        species_fc='sim')
             ls_crispr_arrays.append(crispr_array)

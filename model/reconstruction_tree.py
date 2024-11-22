@@ -7,7 +7,7 @@ import collections
 import json
 
 from model.data_classes import advanced_tree
-from additional_data.additional_scripts.model.evolution import GTR
+from model.evolution import GTR
 from model.model_tools import seq2prof, prof2seq, differences_child_parent_pos, \
     compute_tree_lh, \
     minimize_fct, minimize_scalar_fct

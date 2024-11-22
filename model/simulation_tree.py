@@ -5,10 +5,9 @@ import pickle
 import itertools
 import pandas as pd
 
-from additional_data.additional_scripts.model.helpers.raw_data_tools import Species as Species
 from model.data_classes.advanced_tree import AdvancedTree
 from model.spacer_visualization import visualization as vis
-from model.data_classes.crisprdata import CRISPRGroup, CRISPRArray
+from model.data_classes.crisprdata import CRISPRGroup, CRISPRArray, Species
 from model.helpers import misc, stats
 from model import model_tools
 

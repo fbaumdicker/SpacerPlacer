@@ -2,7 +2,7 @@ import sys
 import os
 import pandas as pd
 
-import experiments_run
+import run_experiments
 
 MAFFT_OPTIONS = ['--text',
                  # '--genafpair',
@@ -322,7 +322,7 @@ if __name__ == '__main__':
     sys.setrecursionlimit(20000)
     # args = config.load_config()
     # run_real_data()
-    # run()
+    # main()
     # compare_msa()
 
     # run_simulation_experiment()

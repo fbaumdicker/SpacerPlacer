@@ -1,0 +1,14 @@
+example_datasets/orientation_paper_examples
+0_result_folder/orientation_paper_examples
+--input_type
+ccf
+--lh_fct
+simple
+--significance_level
+0.05
+--tree_path
+example_datasets/trees/orientation_paper_examples_nwk_trees.json
+--determine_orientation
+--orientation_decision_boundary
+5
+--cluster_spacers
