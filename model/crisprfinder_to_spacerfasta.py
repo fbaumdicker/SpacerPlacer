@@ -178,17 +178,17 @@ class CRISPRFinderParser:
                                                            'spacers': spacers}
 
 import os
-path_to_crisprfinder_folder = '../../data/2410_amanda_usa_hotspring_data/amanda_nanopore_ccf_results'
+path_to_crisprfinder_folder = '../../../data/2410_amanda_usa_hotspring_data/amanda_nanopore_ccf_results'
 ls_assemblies = [
     'Result_ms50_final_1728918132',
                  'Result_ms55_final_1728978061',
                  'Result_ms60_final_1729003293',
                  'Result_ms65_final_1729061672']
-output_path = '0_result_folder'
+output_path = '../0_result_folder'
 count_group_sizes = []
 
 ls_files = [os.path.join(path_to_crisprfinder_folder, f, 'result.json') for f in ls_assemblies]
-output_folder = os.path.join('0_result_folder', 'amanda_usa_hotspring_nanopore_collected_results_clustered_overlap')
+output_folder = os.path.join('../0_result_folder', 'amanda_usa_hotspring_nanopore_collected_results_clustered_overlap')
 if not os.path.exists(output_folder):
     os.makedirs(output_folder)
 parser = CRISPRFinderParser(ls_files, cluster_by_spacer_overlap=True)

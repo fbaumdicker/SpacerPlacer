@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 import os
 import json
 
-from input_parser import InputParser
+from model.input_parser import InputParser
 from model.helpers.misc import create_logger
 from model.summary import compose_summary_dict, write_summary
 from run_experiments import run_pickled_data, run_multiple_groups

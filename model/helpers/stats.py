@@ -36,7 +36,7 @@ def p_stationary_frag_length(n, rate):
 def sample_stationary_frag_length(sample_size, rate, dist_limit=1000):
     """
     Samples the stationary distribution of the fragment model. This distribution is created empirically, the dist_limit
-    determines the precision (in theory dist_limit = \infty). (see Kupczok et al.)
+    determines the precision (in theory dist_limit = infty). (see Kupczok et al.)
     :param sample_size:
     :param rate:
     :param dist_limit:
