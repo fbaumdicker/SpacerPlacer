@@ -66,13 +66,13 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict=None, lh_fct
         os.makedirs(save_data_folder)
     pickle.dump(dict_crispr_groups, open(os.path.join(save_data_folder, 'dict_crispr_groups.pkl'), 'wb'))
 
-    if lh_fct.lower() in ['ode_based', 'precise']:
+    if lh_fct and lh_fct.lower() in ['ode_based', 'precise']:
         logger.info(f'Loading lh function from {LH_FCT_PATH}')
         # Implement loading a shortened likelihood function depending on something.
         lh_fct = symbolic_lh_computation.load_pickled_lambdified_lh_fct(LH_FCT_PATH)
         logger.info(f'Loading time: {run_timer.time_from_last_checkpoint()}')
 
-    if tree_lh_fct in ['ode_based', 'precise']:
+    if tree_lh_fct and tree_lh_fct in ['ode_based', 'precise']:
         tree_lh_fct = symbolic_lh_computation.load_pickled_lambdified_lh_fct(LH_FCT_PATH) if lh_fct not in ['ode_based',
                                                                                                             'precise'] \
             else lh_fct
