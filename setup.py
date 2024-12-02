@@ -5,7 +5,7 @@ setup(
     version='1.0.0',
     packages=find_packages(),
     package_data={'model': ['mafft_scripts/mafft-linux64/*', 'mafft_scripts/mafft-mac/*', 'mafft_scripts/mafft-win/*']},
-    py_modules=['spacerplacer', 'run_experiments', 'input_parser'],
+    py_modules=['spacerplacer'],
     install_requires=[
     ],
     entry_points={

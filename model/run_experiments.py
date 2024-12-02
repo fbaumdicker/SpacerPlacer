@@ -16,7 +16,7 @@ from model.run_reconstruction import run_reconstruction
 from model.run_simulation import run_simulation
 
 WORK_PATH = os.path.join('data', 'simulation_alignment')
-LH_FCT_PATH = os.path.join('additional_data', '0_lh',
+LH_FCT_PATH = os.path.join('../additional_data', '0_lh',
                            '230329_death_lh_up_to_68_lambdifyed.pickle'
                            )
 

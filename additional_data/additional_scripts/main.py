@@ -2,8 +2,6 @@ import sys
 import os
 import pandas as pd
 
-import run_experiments
-
 MAFFT_OPTIONS = ['--text',
                  # '--genafpair',
                  '--localpair',
