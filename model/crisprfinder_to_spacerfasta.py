@@ -1,8 +1,14 @@
 import json
 
-from additional_data.additional_scripts.model.helpers.raw_data_tools import reverse_complement
 from model.helpers.misc import create_logger
 
+def reverse_complement(dna_seq):
+    """
+    :param dna_seq:
+    :return:
+    """
+    complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
+    return "".join([complement[base] if base in complement else base for base in dna_seq[::-1]])
 
 class CRISPRFinderParser:
     def __init__(self, crisprfinder_result_json_file, min_evidence_level=4, reorient_by_direction_pred=True, logger=None,
