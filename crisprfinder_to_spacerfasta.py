@@ -5,7 +5,8 @@ from model.helpers.misc import create_logger
 
 
 class CRISPRFinderParser:
-    def __init__(self, crisprfinder_result_json_file, min_evidence_level=4, reorient_by_direction_pred=True, logger=None):
+    def __init__(self, crisprfinder_result_json_file, min_evidence_level=4, reorient_by_direction_pred=True, logger=None,
+                 cluster_by_spacer_overlap=True):
         self.crisprfinder_result_json_file = crisprfinder_result_json_file
         self.min_evidence_level = min_evidence_level
         self.reorient_by_direction_pred = reorient_by_direction_pred
@@ -16,11 +17,22 @@ class CRISPRFinderParser:
         self.cluster_spacer_seq_to_spacer_id = {}
         self.sample_summary = {}
         self.logger = logger if logger is not None else create_logger('CRISPRFinderParser', 1)
+        self.cluster_by_spacer_overlap = cluster_by_spacer_overlap
 
-        self._parse_crisprfinder_file()
+        self._parse_ls_crisprfinder_files()
         self._cluster_array_groups_by_repeat()
-        self._cluster_groups_by_spacer_overlap()
+        if self.cluster_by_spacer_overlap:
+            self._cluster_groups_by_spacer_overlap()
         self._distribute_spacer_ids()
+        # self.write_spacer_fasta()
+
+    def write_spacer_fasta(self, output_folder):
+        self.logger.info(f'Writing spacer sequences to FASTA files in {output_folder}')
+        for group_name, ls_array_tuples in self.clustered_groups_spacer_ids.items():
+            with open(f'{output_folder}/{group_name}.fa', 'w') as f:
+                for array_name, spacers, direction in ls_array_tuples:
+                    f.write(f'>{array_name} ' + ' ; ' + f'{direction}' + ' \n')
+                    f.write(f'{', '.join([str(s) for s in spacers])} \n')
 
     def get_clustered_groups_spacer_ids(self):
         return self.clustered_groups_spacer_ids
@@ -32,22 +44,28 @@ class CRISPRFinderParser:
         return {v: k for k, v in self.cluster_spacer_seq_to_spacer_id.items()}
 
     def _distribute_spacer_ids(self):
-        for group_name, ls_array_tuples in self.clustered_groups.items():
-            self.cluster_spacer_seq_to_spacer_id[group_name] = {}
+        self.logger.info('Distributing spacer IDs')
+        if self.cluster_by_spacer_overlap:
+            groups = self.clustered_groups
+        else:
+            groups = self.clustered_by_repeat_arrays
+        for group_name, ls_array_tuples in groups.items():
+            dict_spacer_seq_to_spacer_id = {}
             spacer_counter = 0
+            ls_tuples = []
             for array_name, spacers, direction in ls_array_tuples:
                 spacers_as_id = []
                 for spacer_seq in spacers:
-                    if spacer_seq not in self.cluster_spacer_seq_to_spacer_id[group_name]:
+                    if spacer_seq not in dict_spacer_seq_to_spacer_id:
                         spacer_id = spacer_counter
-                        self.cluster_spacer_seq_to_spacer_id[spacer_seq] = spacer_id
+                        dict_spacer_seq_to_spacer_id[spacer_seq] = spacer_id
                         spacer_counter += 1
                     else:
-                        spacer_id = self.cluster_spacer_seq_to_spacer_id[spacer_seq]
+                        spacer_id = dict_spacer_seq_to_spacer_id[spacer_seq]
                     spacers_as_id.append(spacer_id)
-                self.clustered_groups_spacer_ids[group_name] = (array_name, spacers_as_id, direction)
-
-
+                ls_tuples.append((array_name, spacers_as_id, direction))
+            self.clustered_groups_spacer_ids[group_name] = ls_tuples
+            self.cluster_spacer_seq_to_spacer_id[group_name] = dict_spacer_seq_to_spacer_id
 
 
     def _cluster_array_groups_by_repeat(self):
@@ -69,20 +87,25 @@ class CRISPRFinderParser:
                                                                   array_data['direction']))
 
     def _cluster_groups_by_spacer_overlap(self):
+        self.logger.info('Clustering CRISPR arrays based on spacer overlap')
         for repeat, array_tuples in self.clustered_by_repeat_arrays.items():
             counter = 0
             if len(array_tuples) == 1:
                 self.logger.info(f'Only one array with consensus repeat {repeat} found, skipping clustering.')
-                continue
+                # continue
 
             repeat_clusters = {}
             for (array_name, spacers, direction) in array_tuples:
                 found_in_cluster = False
                 for (cluster_name, ls_array_tuples) in repeat_clusters.items():
+                    if found_in_cluster:
+                        break
                     for cluster_array_name, cluster_spacers, cluster_direction in ls_array_tuples:
                         if len(set(spacers) & set(cluster_spacers)) > 0:
                             repeat_clusters[cluster_name].append((array_name, spacers, direction))
                             found_in_cluster = True
+                            break
+
 
                 if not found_in_cluster:
                     repeat_clusters[array_name + '_' + str(counter)] = [(array_name, spacers, direction)]
@@ -92,10 +115,18 @@ class CRISPRFinderParser:
             for cluster_name, repeat_clusters in repeat_clusters.items():
                 self.clustered_groups[cluster_name] = repeat_clusters
 
+    def _parse_ls_crisprfinder_files(self):
+        if isinstance(self.crisprfinder_result_json_file, list):
+            for file_path in self.crisprfinder_result_json_file:
+                self._parse_crisprfinder_file(file_path)
+        else:
+            self._parse_crisprfinder_file(self.crisprfinder_result_json_file)
 
-    def _parse_crisprfinder_file(self):
-        self.logger.info(f'Parsing CRISPRFinder JSON file: {self.crisprfinder_result_json_file}')
-        with open(self.crisprfinder_result_json_file, 'r') as f:
+
+
+    def _parse_crisprfinder_file(self, file_path):
+        self.logger.info(f'Parsing CRISPRFinder JSON file: {file_path}')
+        with open(file_path, 'r') as f:
             data = json.load(f)
             ls_results = data['Sequences']
 
@@ -148,17 +179,59 @@ class CRISPRFinderParser:
 
 import os
 path_to_crisprfinder_folder = '../../data/2410_amanda_usa_hotspring_data/amanda_nanopore_ccf_results'
-ls_assemblies = ['Result_ms50_final_1728918132', 'Result_ms55_final_1728978061', 'Result_ms60_final_1729003293',
-            'Result_ms65_final_1729061672']
+ls_assemblies = [
+    'Result_ms50_final_1728918132',
+                 'Result_ms55_final_1728978061',
+                 'Result_ms60_final_1729003293',
+                 'Result_ms65_final_1729061672']
 output_path = '0_result_folder'
-for file_path in ls_assemblies:
-    results_json_path = os.path.join(path_to_crisprfinder_folder, file_path, 'result.json')
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
-    parser = CRISPRFinderParser(results_json_path)
-    clustered_groups = parser.get_clustered_groups()
-    for group_name, ls_array_tuples in clustered_groups.items():
-        print(f'Group {group_name}:')
-        for array_name, spacers, direction in ls_array_tuples:
-            print(f'{array_name}: {spacers} ({direction})')
-        print('\n')
+count_group_sizes = []
+
+ls_files = [os.path.join(path_to_crisprfinder_folder, f, 'result.json') for f in ls_assemblies]
+output_folder = os.path.join('0_result_folder', 'amanda_usa_hotspring_nanopore_collected_results_clustered_overlap')
+if not os.path.exists(output_folder):
+    os.makedirs(output_folder)
+parser = CRISPRFinderParser(ls_files, cluster_by_spacer_overlap=True)
+clustered_groups = parser.get_clustered_groups_spacer_ids()
+parser.write_spacer_fasta(output_folder)
+
+print(parser.clustered_by_repeat_arrays,
+      '\n\n',
+      parser.clustered_groups,
+        '\n\n',
+      parser.clustered_groups_spacer_ids,)
+
+for group_name, ls_array_tuples in clustered_groups.items():
+    count_group_sizes.append((group_name, len(ls_array_tuples)))
+    print(f'Group {group_name}:')
+    for array_name, spacers, direction in ls_array_tuples:
+        print(f'{array_name}: {spacers} ({direction})')
+    print('\n')
+
+# for file_path in ls_assemblies:
+#     results_json_path = os.path.join(path_to_crisprfinder_folder, file_path, 'result.json')
+#     output_subfolder = os.path.join(output_path, file_path)
+#     if not os.path.exists(output_subfolder):
+#         os.makedirs(output_subfolder)
+#     parser = CRISPRFinderParser(results_json_path, cluster_by_spacer_overlap=True)
+#     clustered_groups = parser.get_clustered_groups_spacer_ids()
+#     parser.write_spacer_fasta(output_subfolder)
+#
+#     print(parser.clustered_by_repeat_arrays,
+#           '\n\n',
+#           parser.clustered_groups,
+#             '\n\n',
+#           parser.clustered_groups_spacer_ids,)
+#
+#     for group_name, ls_array_tuples in clustered_groups.items():
+#         count_group_sizes.append((group_name, len(ls_array_tuples)))
+#         print(f'Group {group_name}:')
+#         for array_name, spacers, direction in ls_array_tuples:
+#             print(f'{array_name}: {spacers} ({direction})')
+#         print('\n')
+
+print(count_group_sizes)
+import pandas as pd
+series = pd.Series([x[1] for x in count_group_sizes], index=[x[0] for x in count_group_sizes])
+print([(a, s) for a,s in series.items() if s > 2])
+print(series.value_counts())

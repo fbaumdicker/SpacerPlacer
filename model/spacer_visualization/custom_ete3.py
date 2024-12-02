@@ -1,7 +1,8 @@
+import math
 import ete3
 from PyQt5.QtGui import QPen, QFont, QBrush, QColor, QPolygonF
 from PyQt5.QtWidgets import QGraphicsRectItem, QGraphicsSimpleTextItem, QGraphicsEllipseItem, QGraphicsPolygonItem
-from PyQt5.QtCore import Qt, QPointF
+from PyQt5.QtCore import Qt, QPointF, right
 
 
 # fyi F stands for float
@@ -64,6 +65,44 @@ class QGraphicsDiamondItem(QGraphicsPolygonItem):
         self.pol.append(QPointF(x + width / 2.0, y))
         QGraphicsPolygonItem.__init__(self, self.pol, parent=parent)
 
+class QGraphicsHalfEllipseItem(QGraphicsPolygonItem):
+    def __init__(self, x, y, width, height, right_left=0, parent=None):
+        self.pol = QPolygonF()
+        # self.pol.append(QPointF(x, y))
+        # self.pol.append(QPointF(x + width, y))
+        if right_left:
+            self.pol.append(QPointF(x + width, y))
+            self.pol.append(QPointF(x + width / 2, y))
+        else:
+            self.pol.append(QPointF(x, y))
+            self.pol.append(QPointF(x + width / 2, y))
+
+
+        for angle in range(-90, 91, 1):
+            radians = math.radians(angle)
+            x_c = x + width / 2.0 - width / 2.0 * math.cos(radians) if right_left else (
+                    x + width / 2.0 + width / 2.0 * math.cos(radians))
+            y_c = y + height / 2.0 + height / 2.0 * math.sin(radians)
+            self.pol.append(QPointF(x_c,
+                                    y_c))
+        if right_left:
+            self.pol.append(QPointF(x + width / 2, y + height))
+            self.pol.append(QPointF(x + width, y + height))
+        else:
+            self.pol.append(QPointF(x + width / 2, y + height))
+            self.pol.append(QPointF(x, y + height))
+        # if right_left:
+        #     self.pol.append(QPointF(x + width / 2, y + height))
+        #     self.pol.append(QPointF(x + width, y + height))
+        #     self.pol.append(QPointF(x + width, y))
+        #     self.pol.append(QPointF(x + width / 2, y))
+        # else:
+        #     self.pol.append(QPointF(x + width / 2, y + height))
+        #     self.pol.append(QPointF(x, y + height))
+        #     self.pol.append(QPointF(x, y))
+        #     self.pol.append(QPointF(x + width / 2, y))
+
+        QGraphicsPolygonItem.__init__(self, self.pol, parent=parent)
 
 class CustomSequenceFace(ete3.SequenceFace, ete3.StaticItemFace, ete3.Face):
     """
@@ -79,14 +118,7 @@ class CustomSequenceFace(ete3.SequenceFace, ete3.StaticItemFace, ete3.Face):
                                                  codon=codon, col_w=col_w, alt_col_w=alt_col_w,
                                                  special_col=special_col, interactive=interactive)
         self.row_h = row_h
-        if not shape:
-            self.shape = QGraphicsRectItem
-        elif shape == 'ellipse':
-            self.shape = QGraphicsEllipseItem
-        elif shape == 'hexagon':
-            self.shape = QGraphicsHexagonItem
-        elif shape == 'diamond':
-            self.shape = QGraphicsDiamondItem
+        self.pooled_advanced_shape = False
 
         def __init_col(color_dic):
             """to speed up the drawing of colored rectangles and characters"""
@@ -97,29 +129,25 @@ class CustomSequenceFace(ete3.SequenceFace, ete3.StaticItemFace, ete3.Face):
         self.line_style = letter_w_border_line_style
         self.letters_w_border = {} if letters_w_border is None else __init_col(letters_w_border)
 
-    def draw_hexagon(self, x, y, width, height, parent=None):
-        """
-        Should define this as class, but need to understand how to do it first.
-        :param x:
-        :param y:
-        :param width:
-        :param height:
-        :param parent:
-        :return:
-        """
-        # rotated hexagon
-        # ls_points = [QPointF(x + width / 4, y), QPointF(x, y + height / 2),
-        #              QPointF(x + width / 4, y + height), QPointF(x + 3 * width / 4, y + height),
-        #              QPointF(x + width, y + height / 2), QPointF(x + 3 * width / 4, y),
-        #              QPointF(x + width / 4, y)
-        #              ]
-        ls_points = [QPointF(x + width / 2, y), QPointF(x, y + height / 4),
-                     QPointF(x, y + 3 * height / 4), QPointF(x + width / 2, y + height),
-                     QPointF(x + width, y + 3 * height / 4), QPointF(x + width, y + height / 4),
-                     QPointF(x + width / 2, y)
-                     ]
-        q_hexagon = QPolygonF(ls_points)
-        return QGraphicsPolygonItem(q_hexagon, parent=parent)
+        if not shape:
+            self.shape = QGraphicsRectItem
+        elif shape == 'ellipse':
+            self.shape = QGraphicsEllipseItem
+        elif shape == 'hexagon':
+            self.shape = QGraphicsHexagonItem
+        elif shape == 'diamond':
+            self.shape = QGraphicsDiamondItem
+        elif shape == 'pooledRect':
+            self.seq = [self.seq[0], ' - ', self.seq[-1]] if len(self.seq) > 3 else self.seq
+            # self.bg_col.update({' - ': QColor(192, 128, 128)})
+            self.bg_col.update({' - ': QColor('DarkRed')})
+            # self.fg_col.update({' - ': QColor(0, 0, 0)})
+            self.fg_col.update({' - ': QColor(255, 255, 255)})
+            self.shape = QGraphicsRectItem
+        elif shape == 'pooledHalfEllipse':
+            # self.letters_w_border.update({' - ': QColor('YellowGreen')})
+            self.shape = QGraphicsHalfEllipseItem
+            self.pooled_advanced_shape = True
 
     def update_items(self):
         # This does not respect alt_col_w
@@ -142,7 +170,15 @@ class CustomSequenceFace(ete3.SequenceFace, ete3.StaticItemFace, ete3.Face):
                     width = self.alt_col_w
                     break
             # load interactive item if called correspondingly
-            shapeitem = shape_cls(0, 0, width, self.row_h, parent=self.item)
+            if self.pooled_advanced_shape:
+                if i == 0:
+                    shapeitem = shape_cls(0, 0, width, self.row_h, right_left=1, parent=self.item)
+                elif i == len(self.seq) - 1:
+                    shapeitem = shape_cls(0, 0, width, self.row_h, right_left=0, parent=self.item)
+                else:
+                    shapeitem = QGraphicsRectItem(-0.5, 0, width + 1., self.row_h, parent=self.item)
+            else:
+                shapeitem = shape_cls(0, 0, width, self.row_h, parent=self.item)
             shapeitem.setX(seq_width)  # to give correct X to children item
             shapeitem.setBrush(self.bg_col[letter])
             if letter in self.letters_w_border:

@@ -41,11 +41,14 @@ def visualize_tree_rec_spacers(newick_tree, df_rec_spacers=None, df_gains_losses
                                rec_duplications_dict=None, rec_rearrangements_dict=None, rec_double_gains_dict=None,
                                rec_indep_gains_dict=None, rec_other_dup_events_dict=None,
                                fsize=6, col_w=9, row_h=13, determine_fsizes_by_str_len=True,
-                               events_fsize=4, events_col_w=7, events_row_h=7, show_spacer_name_column=True,
+                               events_fsize=4, events_col_w=7, events_row_h=7,
                                indicate_joint_del=False,
                                spacer_labels_num=True, provided_numbering=None, provided_bg_colors=None,
                                dpi=90,
-                               figsize=(None, None, 'px')):
+                               figsize=(None, None, 'px'),
+                               pool_events=True,
+                               show_spacer_name_row=True,
+                               pool_leaf_insertions=True):
     ete_tree_rec = ete3.Tree(newick_tree, format=3)
 
     ts_rec = ete3.TreeStyle()
@@ -134,7 +137,9 @@ def visualize_tree_rec_spacers(newick_tree, df_rec_spacers=None, df_gains_losses
                                            events_fsize=events_fsize, events_col_w=events_col_w,
                                            events_row_h=events_row_h,
                                            joint_del=indicate_joint_del,
-                                           provided_bg_colors=provided_bg_colors)
+                                           provided_bg_colors=provided_bg_colors,
+                                           pool_events=pool_events,
+                                           pool_leaf_insertions=pool_leaf_insertions)
 
     fg_col_dict = {name: 'Black' for name in ls_spacers}
     bg_col_dict = {name: 'Silver' for name in ls_spacers}
@@ -151,16 +156,37 @@ def visualize_tree_rec_spacers(newick_tree, df_rec_spacers=None, df_gains_losses
     else:
         num_bg_col_dict = provided_bg_colors
 
-    face_spacer_nb = custom_ete3.CustomSequenceFace(ls_spacers, fg_colors=fg_col_dict, bg_colors=bg_col_dict,
-                                                    fsize=fsize,
-                                                    col_w=col_w,
-                                                    row_h=row_h)
-    face_spacer_nb.inner_border.color = 'Black'
-    face_spacer_nb.inner_border.width = 1
-    if show_spacer_name_column:
+    # Handle removing consolidated leaf insertions from the visualization
+    if pool_leaf_insertions:
+        all_leaf_insertions = determine_all_leaf_insertions(ete_tree_rec, df_rec_spacers['rec_spacers'],
+                                                            len(ls_spacers))
+        if sum(all_leaf_insertions) > 3:
+            vis_ls_spacers = [s for s, a in zip(ls_spacers, all_leaf_insertions) if a != 1]
+            vis_num_ls_spacers = [s for s, a in zip(num_ls_spacers, all_leaf_insertions) if a != 1]
+            added_placeholder = ['+', '(' + str(sum(all_leaf_insertions)) + ')', '+']
+            vis_ls_spacers = added_placeholder + vis_ls_spacers
+            vis_num_ls_spacers = added_placeholder + vis_num_ls_spacers
+            bg_col_dict.update({name: 'Silver' for name in added_placeholder})
+            fg_col_dict.update({name: 'Black' for name in added_placeholder})
+            num_bg_col_dict.update({name: 'Silver' for name in added_placeholder})
+            num_fg_col_dict.update({name: 'Black' for name in added_placeholder})
+        else:
+            vis_ls_spacers = ls_spacers
+            vis_num_ls_spacers = num_ls_spacers
+    else:
+        vis_ls_spacers = ls_spacers
+        vis_num_ls_spacers = num_ls_spacers
+
+    if show_spacer_name_row:
+        face_spacer_nb = custom_ete3.CustomSequenceFace(vis_ls_spacers, fg_colors=fg_col_dict, bg_colors=bg_col_dict,
+                                                        fsize=fsize,
+                                                        col_w=col_w,
+                                                        row_h=row_h)
+        face_spacer_nb.inner_border.color = 'Black'
+        face_spacer_nb.inner_border.width = 1
         ts_rec.aligned_header.add_face(face_spacer_nb, 1)
     if spacer_labels_num:
-        num_face_spacer_nb = custom_ete3.CustomSequenceFace(num_ls_spacers, fg_colors=num_fg_col_dict,
+        num_face_spacer_nb = custom_ete3.CustomSequenceFace(vis_num_ls_spacers, fg_colors=num_fg_col_dict,
                                                             bg_colors=num_bg_col_dict,
                                                             fsize=fsize,
                                                             col_w=col_w,
@@ -273,11 +299,12 @@ def visualize_tree_rec_spacers(newick_tree, df_rec_spacers=None, df_gains_losses
     ts_rec.legend.add_face(legend_other_dup_events_text, column=15)
 
     ts_rec.legend_position = 3
-
-    ete_tree_rec.render(os.path.join(path, name + '.pdf'), tree_style=ts_rec, dpi=dpi, w=figsize[0], h=figsize[1],
-                        units=figsize[2]) # dpi works here
-    ete_tree_rec.render(os.path.join(path, name + '.png'), tree_style=ts_rec, dpi=dpi, w=figsize[0], h=figsize[1],
-                        units=figsize[2]) # but not here requires fitting h, w
+    addition = '_pooled_events' if pool_leaf_insertions and pool_events else ''
+    save_name = os.path.join(path, name + addition)
+    ete_tree_rec.render(save_name + '.pdf', tree_style=ts_rec, dpi=dpi, w=figsize[0], h=figsize[1],
+                        units=figsize[2])  # dpi works here
+    ete_tree_rec.render(save_name + '.png', tree_style=ts_rec, dpi=dpi, w=figsize[0], h=figsize[1],
+                        units=figsize[2])  # but not here requires fitting h, w
 
     if do_show:
         ete_tree_rec.show(tree_style=ts_rec, name='Reconstructed ancestors')
@@ -370,7 +397,9 @@ def assign_values_to_tree(tree, df_spacers, gain_series, loss_series, rec_contra
                           top_order=None,
                           fsize=6, col_w=9, row_h=13,
                           events_fsize=4, events_col_w=7, events_row_h=7,
-                          provided_bg_colors=None):
+                          provided_bg_colors=None,
+                          pool_events=True,
+                          pool_leaf_insertions=True):
     cmap = infinite_cmap(palettable.colorbrewer.qualitative.Paired_12.hex_colors)
     default_bg_color_dict = {name: next(cmap) for name in top_order} \
         if provided_bg_colors is None else provided_bg_colors
@@ -389,13 +418,34 @@ def assign_values_to_tree(tree, df_spacers, gain_series, loss_series, rec_contra
 
         # This might be very useful for nice pictures for paper/talks! Maybe stack events into columns to lessen the
         # needed horizontal space. Horizontal space is respected by ete (for some reason).
-        face_gains = custom_ete3.CustomSequenceFace([str(c) for c in gain_series[n.name] if c not in set_other],
-                                                    fg_colors={name: 'Black' for name in top_order},
-                                                    bg_colors=default_bg_color_dict,
+        ls_gains = [str(c) for c in gain_series[n.name] if c not in set_other]
+        ls_gains = [str(c) for c in top_order if c in ls_gains]
+
+        fg_colors = {name: 'Black' for name in top_order}
+        bg_colors = default_bg_color_dict.copy()
+        if pool_events:
+            if len(ls_gains) > 3:
+                if n.is_leaf():
+                    ls_gains_vis = ['+', '(' + str(len(ls_gains)) + ')', '+']
+                    bg_colors.update({'+': 'YellowGreen', '(' + str(len(ls_gains)) + ')' : 'YellowGreen'})
+                    fg_colors.update({'+': 'Black', '(' + str(len(ls_gains)) + ')' : 'Black'})
+                else:
+                    ls_gains_vis = [ls_gains[0], ' - ', ls_gains[-1]]
+                    bg_colors.update({' - ': 'YellowGreen'})
+                    fg_colors.update({' - ': 'White'})
+            else:
+                ls_gains_vis = ls_gains
+        else:
+            ls_gains_vis = ls_gains
+
+        face_gains = custom_ete3.CustomSequenceFace(ls_gains_vis,
+                                                    fg_colors=fg_colors,
+                                                    bg_colors=bg_colors,
                                                     fsize=events_fsize,
                                                     col_w=events_col_w,
                                                     row_h=events_row_h,
-                                                    shape='ellipse',
+                                                    shape='pooledHalfEllipse' if pool_events and len(ls_gains_vis) > 1
+                                                    else 'ellipse',
                                                     letters_w_border={str(c): 'YellowGreen' for c in
                                                                       gain_series[n.name]})
         face_gains.margin_bottom = 2
@@ -407,12 +457,16 @@ def assign_values_to_tree(tree, df_spacers, gain_series, loss_series, rec_contra
         if joint_del:
             for i, j_del in enumerate(loss_series[n.name]):
                 if j_del:
-                    face_losses = custom_ete3.CustomSequenceFace([str(c) for c in j_del],
+                    ls_del = [str(c) for c in j_del]
+                    if pool_events:
+                        ls_del = [str(c) for c in top_order if c in ls_del]
+                    face_losses = custom_ete3.CustomSequenceFace(ls_del,
                                                                  fg_colors={name: 'Black' for name in top_order},
                                                                  bg_colors=default_bg_color_dict,
                                                                  fsize=events_fsize,
                                                                  col_w=events_col_w,
-                                                                 row_h=events_row_h)
+                                                                 row_h=events_row_h,
+                                                                 shape='pooledRect' if pool_events else None)
                     face_losses.inner_border.color = 'DarkRed'
                     face_losses.inner_border.width = 1
                     face_losses.margin_top = 2
@@ -422,12 +476,17 @@ def assign_values_to_tree(tree, df_spacers, gain_series, loss_series, rec_contra
 
         else:
             if loss_series[n.name]:
-                face_losses = custom_ete3.CustomSequenceFace([str(c) for c in loss_series[n.name]],
+                ls_del = [str(c) for c in loss_series[n.name]]
+                if pool_events:
+                    ls_del = [str(c) for c in top_order if c in ls_del]
+                face_losses = custom_ete3.CustomSequenceFace(ls_del,
                                                              fg_colors={name: 'Black' for name in top_order},
                                                              bg_colors=default_bg_color_dict,
                                                              fsize=events_fsize,
                                                              col_w=events_col_w,
-                                                             row_h=events_row_h)
+                                                             row_h=events_row_h,
+                                                             shape='pooledRect' if pool_events else None
+                                                             )
                 face_losses.inner_border.color = 'DarkRed'
                 face_losses.inner_border.width = 1
                 face_losses.margin_top = 2
@@ -537,6 +596,9 @@ def assign_values_to_tree(tree, df_spacers, gain_series, loss_series, rec_contra
                 n.add_face(face_other_dup_events, 1, position='branch-top')
                 face_other_dup_events.opacity = opacity
 
+    if pool_leaf_insertions:
+        all_pool_leaf_insertions = determine_all_leaf_insertions(tree, df_spacers, len(top_order))
+
     for n in tree.iter_leaves():
         seen_spacers = list(np.zeros(len(df_spacers.loc[n.name])))
         run_n = n
@@ -561,6 +623,30 @@ def assign_values_to_tree(tree, df_spacers, gain_series, loss_series, rec_contra
             bg_colors = bg_cmap
             fg_colors = fg_cmap
             letters_w_border = {'X': 'DarkRed'}
+
+        if pool_leaf_insertions:
+            if n is None:
+                leaf_insertions = [0]
+            else:
+                leaf_insertions = [1 if a == 1 and b == 0 else 0 for a, b in zip(df_spacers.loc[n.name],
+                                                                                 df_spacers.loc[n.up.name])]
+
+            cons_seq = [a for a, b in zip(seq, leaf_insertions) if b == 1]
+            len_leaf_insertions = len(cons_seq)
+            if len_leaf_insertions > 3:
+                insertions_symbol = '(' + str(sum(leaf_insertions)) + ')' # '-(' + str(len(cons_seq)) + ')-'
+                cons_seq_vis = ['+', insertions_symbol , '+']
+                bg_colors.update({insertions_symbol: 'YellowGreen', '+': 'YellowGreen'})
+                fg_colors.update({insertions_symbol: 'Black', '+': 'Black'})
+            else:
+                if sum(all_pool_leaf_insertions) > len_leaf_insertions:
+                    cons_seq_vis = ['-']*(min(sum(all_pool_leaf_insertions), 3) - len_leaf_insertions)
+                    cons_seq_vis = cons_seq_vis + cons_seq
+                else:
+                    cons_seq_vis = cons_seq
+            seq = [a for a, b in zip(seq, all_pool_leaf_insertions) if b != 1]
+            seq = cons_seq_vis + seq
+
         face = custom_ete3.CustomSequenceFace(seq, fg_colors=fg_colors,
                                               bg_colors=bg_colors, fsize=fsize, col_w=col_w, row_h=row_h,
                                               letters_w_border=letters_w_border, letter_w_border_line_style=1)
@@ -572,8 +658,21 @@ def assign_values_to_tree(tree, df_spacers, gain_series, loss_series, rec_contra
     return default_bg_color_dict
 
 
+def determine_all_leaf_insertions(tree, df_spacers, len_top_order):
+    all_pool_leaf_insertions = list(np.zeros(len_top_order))
+    for n in tree.iter_leaves():
+        if n is None:
+            continue
+        else:
+            all_pool_leaf_insertions = [1 if (a == 1 and b == 0) or c == 1 else 0 for a, b, c in
+                                        zip(df_spacers.loc[n.name],
+                                            df_spacers.loc[n.up.name],
+                                            all_pool_leaf_insertions)]
+    return all_pool_leaf_insertions
+
+
 def determine_fsize(str_ls_spacers, fsize=6, events_fsize=4):
     max_len = max([len(x) for x in str_ls_spacers])
-    col_w = (fsize + 1) * max_len
-    events_col_w = (events_fsize + 1) + max_len
+    col_w = (fsize + 1) * max_len + 2
+    events_col_w = (events_fsize + 1) + max_len + 2
     return col_w, events_col_w

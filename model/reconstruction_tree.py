@@ -1211,7 +1211,7 @@ class ReconstructionTree(advanced_tree.AdvancedTree):
     def visualize_tree(self, name='default', do_show=True, path='pictures', sort_top_order='nb_leafs',
                        determine_fsizes_by_str_len=True, indicate_joint_del=False, provided_numbering=None,
                        provided_bg_colors=None, spacer_labels_num=True, re_plot_order=True, dpi=90,
-                       figsize=(None, None, 'px')):
+                       figsize=(None, None, 'px'), show_spacer_name_row=True):
         df = pd.DataFrame(columns=['rec_spacers'])
         df_changes = pd.DataFrame(columns=['rec_gains', 'rec_losses'])
         rec_losses_dict = self.rec_joint_losses_dict if indicate_joint_del else self.rec_loss_dict
@@ -1305,28 +1305,32 @@ class ReconstructionTree(advanced_tree.AdvancedTree):
                                  color_dict=provided_bg_colors,
                                  spacer_or_number='number' if spacer_labels_num else 'spacer')
 
-        dict_bg_colors = vis.visualize_tree_rec_spacers(str(self.format(fmt='newick')),
-                                                        df_rec_spacers=df,
-                                                        df_gains_losses=df_changes,
-                                                        name=name,
-                                                        do_show=do_show,
-                                                        rec_contra_dict=self.rec_contra_dict,
-                                                        path=path,
-                                                        top_order=top_order_sorted_by_age,
-                                                        alphabet=self.spacer_names_to_numbers,
-                                                        rec_duplications_dict=self.rec_duplications_dict,
-                                                        rec_rearrangements_dict=self.rec_rearrangements_dict,
-                                                        rec_double_gains_dict=self.rec_reacquisition_dict,
-                                                        rec_indep_gains_dict=self.rec_indep_gain_dict,
-                                                        rec_other_dup_events_dict=self.rec_other_dup_events_dict,
-                                                        determine_fsizes_by_str_len=determine_fsizes_by_str_len,
-                                                        indicate_joint_del=indicate_joint_del,
-                                                        provided_numbering=provided_numbering,
-                                                        provided_bg_colors=provided_bg_colors,
-                                                        spacer_labels_num=spacer_labels_num,
-                                                        dpi=dpi,
-                                                        figsize=figsize,
-                                                        )
+        for pool in [True, False]:
+            dict_bg_colors = vis.visualize_tree_rec_spacers(str(self.format(fmt='newick')),
+                                                            df_rec_spacers=df,
+                                                            df_gains_losses=df_changes.copy(),
+                                                            name=name,
+                                                            do_show=do_show,
+                                                            rec_contra_dict=self.rec_contra_dict.copy(),
+                                                            path=path,
+                                                            top_order=top_order_sorted_by_age,
+                                                            alphabet=self.spacer_names_to_numbers.copy(),
+                                                            rec_duplications_dict=self.rec_duplications_dict.copy(),
+                                                            rec_rearrangements_dict=self.rec_rearrangements_dict.copy(),
+                                                            rec_double_gains_dict=self.rec_reacquisition_dict.copy(),
+                                                            rec_indep_gains_dict=self.rec_indep_gain_dict.copy(),
+                                                            rec_other_dup_events_dict=self.rec_other_dup_events_dict.copy(),
+                                                            determine_fsizes_by_str_len=determine_fsizes_by_str_len,
+                                                            indicate_joint_del=indicate_joint_del,
+                                                            provided_numbering=provided_numbering,
+                                                            provided_bg_colors=provided_bg_colors,
+                                                            spacer_labels_num=spacer_labels_num,
+                                                            dpi=dpi,
+                                                            figsize=figsize,
+                                                            pool_events=pool,
+                                                            show_spacer_name_row=show_spacer_name_row,
+                                                            pool_leaf_insertions=pool,
+                                                            )
         return dict_bg_colors
 
     def write_vis_data_to_json(self, df, df_changes, dict_other_events, spacer_names_to_numbers,
