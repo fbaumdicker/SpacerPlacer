@@ -127,6 +127,10 @@ def load_p_from_pickle(save_path):
 
 
 if __name__ == '__main__':
+    load_lambdify_lh_fct(os.path.join('sympy_bdm_lh_fct', '230329_death_lh_up_to_68.pickle'),
+                         save_path=os.path.join('sympy_bdm_lh_fct',
+                                                '230329_death_lh_up_to_68_lambdifyed'),
+                         save_lambdified_lh_fct=True)
     # solve_kolmogorov_backward_eq(4)
     #
     # init_printing()

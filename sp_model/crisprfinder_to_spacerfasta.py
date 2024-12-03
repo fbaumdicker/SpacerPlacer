@@ -1,6 +1,6 @@
 import json
 
-from model.helpers.misc import create_logger
+from sp_model.helpers.misc import create_logger
 
 def reverse_complement(dna_seq):
     """

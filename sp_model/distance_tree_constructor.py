@@ -6,7 +6,7 @@ from scipy.stats import poisson
 from Bio.Phylo.Newick import Clade, Tree
 import copy
 
-from model import model_tools
+from sp_model import model_tools
 
 
 MIN_BL = 1e-6

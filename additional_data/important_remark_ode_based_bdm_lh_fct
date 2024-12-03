@@ -1,0 +1,10 @@
+If error occurs when using ode_based likelihood function, it is possible that the lambdified function is not up to date.
+Lambdification is needed so that numpy can work with the symbolic function (generated with sympy).
+Lambdification of the bdm_lh_fct function is heavily dependent on the version of numpy and sympy. Thus it needs to be
+tested and relambdified for new numpy/sympy versions.
+Just run sp_model/bdm_likelihood_computation/symbolic_lh_computation.py as standalone script
+(in your spacerplacer environment).
+This should replace the lambdifyed version provided in the github repository with a new one.
+
+Might set this up as part of installation process in the future.
+

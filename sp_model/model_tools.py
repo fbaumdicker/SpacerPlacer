@@ -6,8 +6,8 @@ import pandas as pd
 import collections
 import os
 
-from model.helpers import misc
-from model.spacer_visualization import visualization as vis
+from sp_model.helpers import misc
+from sp_model.spacer_visualization import visualization as vis
 
 EPS = 1e-40
 BIG_EPS = 1e20

@@ -6,17 +6,17 @@ import pickle
 import numpy as np
 import json
 
-from model import mafft_integration
-from model.helpers import misc, stats
-from model.orientation import orientation_tools
-from model.bdm_likelihood_computation import symbolic_lh_computation
-from model.experiments_tools import load_align_pickled_data, load_arrays_from_pkl, align_crispr_groups_for_sim_as_rec, pooling_for_parameter_estimation, \
+from sp_model import mafft_integration
+from sp_model.helpers import misc, stats
+from sp_model.orientation import orientation_tools
+from sp_model.bdm_likelihood_computation import symbolic_lh_computation
+from sp_model.experiments_tools import load_align_pickled_data, load_arrays_from_pkl, align_crispr_groups_for_sim_as_rec, pooling_for_parameter_estimation, \
     load_align_single_fasta
-from model.run_reconstruction import run_reconstruction
-from model.run_simulation import run_simulation
+from sp_model.run_reconstruction import run_reconstruction
+from sp_model.run_simulation import run_simulation
 
 WORK_PATH = os.path.join('data', 'simulation_alignment')
-LH_FCT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'model',
+LH_FCT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sp_model',
                            'bdm_likelihood_computation', 'sympy_bdm_lh_fct',
                            '230329_death_lh_up_to_68_lambdifyed.pickle')
 # LH_FCT_PATH = os.path.join('../additional_data', '0_lh',

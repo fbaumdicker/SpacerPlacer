@@ -4,10 +4,10 @@ import pandas as pd
 import pickle
 import random
 
-from model.helpers import misc
-from model.experiments_tools import expand_sim_parameters, expand_sim_parameters_based_on_import
-from model.simulation_tree import SimulationTree
-from model.data_classes.advanced_tree import AdvancedTree
+from sp_model.helpers import misc
+from sp_model.experiments_tools import expand_sim_parameters, expand_sim_parameters_based_on_import
+from sp_model.simulation_tree import SimulationTree
+from sp_model.data_classes.advanced_tree import AdvancedTree
 
 
 def run_simulation(sim_parameter_dict, save_path=None, plot_tree=True, logfile_path=None,

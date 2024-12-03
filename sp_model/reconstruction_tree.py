@@ -6,14 +6,14 @@ import copy
 import collections
 import json
 
-from model.data_classes import advanced_tree
-from model.evolution import GTR
-from model.model_tools import seq2prof, prof2seq, differences_child_parent_pos, \
+from sp_model.data_classes import advanced_tree
+from sp_model.evolution import GTR
+from sp_model.model_tools import seq2prof, prof2seq, differences_child_parent_pos, \
     compute_tree_lh, \
     minimize_fct, minimize_scalar_fct
-from model.spacer_visualization import visualization as vis
-from model.helpers import misc
-from model import model_tools
+from sp_model.spacer_visualization import visualization as vis
+from sp_model.helpers import misc
+from sp_model import model_tools
 
 
 class ReconstructionTree(advanced_tree.AdvancedTree):

@@ -6,14 +6,14 @@ import pickle
 import numpy as np
 import json
 
-from model import model_tools
-from model.helpers import misc, import_data, stats
-from model.bdm_likelihood_computation import symbolic_lh_computation
-from model.experiments_tools import multiple_selection_fcts, construct_tree, filter_fct, \
+from sp_model import model_tools
+from sp_model.helpers import misc, import_data, stats
+from sp_model.bdm_likelihood_computation import symbolic_lh_computation
+from sp_model.experiments_tools import multiple_selection_fcts, construct_tree, filter_fct, \
     pooling_for_parameter_estimation, \
     tree_handling, name_inner_nodes_if_unnamed
-from model.reconstruction_tree import ReconstructionTree
-from model.data_classes.advanced_tree import AdvancedTree
+from sp_model.reconstruction_tree import ReconstructionTree
+from sp_model.data_classes.advanced_tree import AdvancedTree
 
 
 TREE_GENERATION_PARAMETERS = {

@@ -2,11 +2,11 @@ from argparse import ArgumentParser
 import os
 import json
 
-from model.input_parser import InputParser
-from model.helpers.misc import create_logger
-from model.summary import compose_summary_dict, write_summary
-from model.run_experiments import run_pickled_data, run_multiple_groups
-import model.helpers.import_data as import_data
+from sp_model.input_parser import InputParser
+from sp_model.helpers.misc import create_logger
+from sp_model.summary import compose_summary_dict, write_summary
+from sp_model.run_experiments import run_pickled_data, run_multiple_groups
+import sp_model.helpers.import_data as import_data
 
 
 def parse_args():

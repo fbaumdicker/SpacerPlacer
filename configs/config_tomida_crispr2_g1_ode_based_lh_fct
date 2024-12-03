@@ -4,5 +4,7 @@ example_datasets/tomida_datasets/CRISPR2/G1.fa
 spacer_fasta
 --lh_fct
 ode_based
+--tree_lh_fct
+ode_based
 --significance_level
 0.05

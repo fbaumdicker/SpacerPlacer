@@ -4,7 +4,7 @@ import numpy as np
 import palettable
 import graphviz
 
-from model.spacer_visualization import custom_ete3
+from sp_model.spacer_visualization import custom_ete3
 
 
 def plot_order_w_graphviz(adj_matrix, label_dict, do_show=False, save_folder=None, graph_name=None,

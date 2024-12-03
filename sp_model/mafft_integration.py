@@ -4,7 +4,7 @@ import os
 import numpy as np
 import platform
 
-from model.helpers import import_data
+from sp_model.helpers import import_data
 
 # Excluded characters that are not allowed by mafft.
 EXCLUDED_CHARACTERS = {'3e': 'ff', '3d': 'fe', '3c': 'fd',
@@ -55,13 +55,13 @@ DEFAULT_MAFFT_OPTIONS_FFT = ['--text',
 
 # probably don't need windows as extra case, need to try it out (exe make it more annoying?)
 if platform.system() == 'Darwin':
-    MAFFT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'model', 'mafft_scripts',
+    MAFFT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sp_model', 'mafft_scripts',
                               'mafft-mac')
 # elif platform.system() == 'Windows':
 #     MAFFT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'mafft_scripts',
 #                               'mafft-win')
 else:
-    MAFFT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'model', 'mafft_scripts',
+    MAFFT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sp_model', 'mafft_scripts',
                               'mafft-linux64')
 
 

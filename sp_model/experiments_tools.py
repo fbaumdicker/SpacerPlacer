@@ -5,13 +5,13 @@ import numpy as np
 import os
 import pickle
 
-from model.helpers import misc, import_data
-from model import model_tools
-from model.coalescent_tree_sim import mult_rnd_coalescent_tree, rnd_coalescent_tree
-from model import distance_tree_constructor
-from model import mafft_integration
-from model.data_classes.crisprdata import CRISPRGroup, CRISPRArray, Species
-from model.data_classes.advanced_tree import AdvancedTree
+from sp_model.helpers import misc, import_data
+from sp_model import model_tools
+from sp_model.coalescent_tree_sim import mult_rnd_coalescent_tree, rnd_coalescent_tree
+from sp_model import distance_tree_constructor
+from sp_model import mafft_integration
+from sp_model.data_classes.crisprdata import CRISPRGroup, CRISPRArray, Species
+from sp_model.data_classes.advanced_tree import AdvancedTree
 
 GROUPS_TO_EXCLUDE = ['g_39', 'g_284', 'g_690', 'g_140', 'g_719', 'g_931', 'g_598',
                      'g_942']

@@ -5,11 +5,11 @@ import pickle
 import itertools
 import pandas as pd
 
-from model.data_classes.advanced_tree import AdvancedTree
-from model.spacer_visualization import visualization as vis
-from model.data_classes.crisprdata import CRISPRGroup, CRISPRArray, Species
-from model.helpers import misc, stats
-from model import model_tools
+from sp_model.data_classes.advanced_tree import AdvancedTree
+from sp_model.spacer_visualization import visualization as vis
+from sp_model.data_classes.crisprdata import CRISPRGroup, CRISPRArray, Species
+from sp_model.helpers import misc, stats
+from sp_model import model_tools
 
 
 class SimulationTree(AdvancedTree):
