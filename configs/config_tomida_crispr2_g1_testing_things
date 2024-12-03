@@ -27,7 +27,6 @@ simple
 300
 --tree_lh_fct
 simple
---do_show
 --no_alpha_bias_correction
 --no_rho_bias_correction
 --save_reconstructed_events
