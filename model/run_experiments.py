@@ -35,6 +35,7 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict=None, lh_fct
                         save_reconstructed_events=False,
                         dpi=90,
                         figsize_rec=(None, None, 'px'),
+                        show_spacer_name_row=True,
                         ):
     if seed is not None:
         np.random.seed(seed)
@@ -118,6 +119,7 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict=None, lh_fct
                                                               save_reconstructed_events=save_reconstructed_events,
                                                               dpi=dpi,
                                                               figsize_rec=figsize_rec,
+                                                              show_spacer_name_row=show_spacer_name_row,
                                                               )
     dict_trees = dict_trees_forward
     df_rec_protocol = df_rec_protocol.set_index('name')

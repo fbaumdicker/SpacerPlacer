@@ -119,4 +119,5 @@ def write_summary(dict_summary, out_path):
             file.write(f'\tGeneral information:\n')
             for key, value in dict_sum['general_information'].items():
                 file.write(f'\t{key}: {value}\n')
+            file.write('\n')
         return

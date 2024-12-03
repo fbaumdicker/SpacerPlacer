@@ -83,7 +83,7 @@ def parse_args():
                         default='likelihood', help='Determines the distance function used for the tree estimation '
                                                    'with UPGMA. Currently redundant, as only "likelihood" is implemented.')
     parser.add_argument('--tree_construction_method', type=str, choices=['upgma', 'nj'],
-                        default='upgma', help='Determines the tree construction method used for the tree estimation. '
+                        default='nj', help='Determines the tree construction method used for the tree estimation. '
                                               'Currently UPGMA (upgma) and neighbor joining (nj) are implemented.')
     parser.add_argument('--tree_insertion_rate', type=float, default=None,
                         help='The user can provide their own insertion rate for the tree estimation based on the '
@@ -129,6 +129,11 @@ def parse_args():
                         help='Provide the width and height of the reconstruction plot in the provided unit "px" (pixel), "mm" '
                              '(millimeter) or "in" (inches). '
                              'By default the size is determined by the drawing function.')
+    parser.add_argument('--show_spacer_name_row', action='store_false',
+                        help='If given, the spacer original names are shown in the reconstruction plot (above '
+                             'the alignment and the respective spacer ids). '
+                             'This can be useful for detailed analysis of the reconstruction. '
+                             'By default the spacer names are shown.')
     # Does this work?
     parser.add_argument('--do_show', action='store_true',
                         help='If given, the plots are shown directly. Might lead to crash due to some issue with '
@@ -353,7 +358,8 @@ def main():
                                                     seed=args.seed,
                                                     save_reconstructed_events=args.save_reconstructed_events,
                                                     dpi=args.dpi_rec,
-                                                    figsize_rec=figsize_rec
+                                                    figsize_rec=figsize_rec,
+                                                    show_spacer_name_row=args.show_spacer_name_row,
                                                     )
         summary_dict = compose_summary_dict(df_results_wo_details, dict(vars(args)))
         write_summary(summary_dict, os.path.join(args.output_path, 'summary.txt'))

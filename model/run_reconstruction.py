@@ -61,9 +61,11 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                        save_reconstructed_events=False,
                        dpi=90,
                        figsize_rec=(None, None, 'px'),
+                       show_spacer_name_row=True
                        ):
     """
 
+    :param show_spacer_name_row:
     :param figsize_rec:
     :param dpi:
     :param tree_construction_method:
@@ -224,12 +226,12 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                 tree_loss_rate = TREE_GENERATION_PARAMETERS[modifier + 'deletion_rate']
             if tree_alpha is None:
                 tree_alpha = TREE_GENERATION_PARAMETERS[modifier + 'alpha']
-
+            tree_lh_fct_info = 'ode' if isinstance(tree_lh_fct, list) else tree_lh_fct
             logger.info(f'Constructing tree with distance function: {tree_distance_function}, '
                         f'gain rate: {tree_gain_rate}, '
                         f'loss rate: {tree_loss_rate}, '
                         f'alpha: {tree_alpha}, '
-                        f'provided_lh_fct: {tree_lh_fct} ...')
+                        f'provided_lh_fct: {tree_lh_fct_info} ...')
             tree = construct_tree(ls_array_names, ls_arrays, crispr_group.name,
                                   logger=logger, distance_fct=tree_distance_function,
                                   gain_rate=tree_gain_rate, loss_rate=tree_loss_rate, alpha=tree_alpha,
@@ -371,6 +373,7 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                                                   re_plot_order=False,
                                                   dpi=dpi,
                                                   figsize=figsize_rec,
+                                                  show_spacer_name_row=show_spacer_name_row,
                                                   )
 
         if not sim_as_rec:
