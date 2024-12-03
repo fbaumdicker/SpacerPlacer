@@ -44,7 +44,7 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                        extend_branches=False,
                        tree_lh_fct=None,
                        tree_distance_function='likelihood',
-                       tree_construction_method='upgma',
+                       tree_construction_method='nj',
                        tree_gain_rate=None,
                        tree_loss_rate=None,
                        tree_alpha=None,
@@ -228,6 +228,7 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                 tree_alpha = TREE_GENERATION_PARAMETERS[modifier + 'alpha']
             tree_lh_fct_info = 'ode' if isinstance(tree_lh_fct, list) else tree_lh_fct
             logger.info(f'Constructing tree with distance function: {tree_distance_function}, '
+                        f'tree construction method: {tree_construction_method}, '
                         f'gain rate: {tree_gain_rate}, '
                         f'loss rate: {tree_loss_rate}, '
                         f'alpha: {tree_alpha}, '
