@@ -131,7 +131,8 @@ def parse_args():
                              'By default the size is determined by the drawing function.')
     # Does this work?
     parser.add_argument('--do_show', action='store_true',
-                        help='If given, the plots are shown directly.')
+                        help='If given, the plots are shown directly. Might lead to crash due to some issue with '
+                             'pyqt5.')
 
     ############################################################################################################
     # Evaluation (LRT parameters):

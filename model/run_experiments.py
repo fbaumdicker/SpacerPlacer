@@ -16,9 +16,12 @@ from model.run_reconstruction import run_reconstruction
 from model.run_simulation import run_simulation
 
 WORK_PATH = os.path.join('data', 'simulation_alignment')
-LH_FCT_PATH = os.path.join('../additional_data', '0_lh',
-                           '230329_death_lh_up_to_68_lambdifyed.pickle'
-                           )
+LH_FCT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'model',
+                           'bdm_likelihood_computation', 'sympy_bdm_lh_fct',
+                           '230329_death_lh_up_to_68_lambdifyed.pickle')
+# LH_FCT_PATH = os.path.join('../additional_data', '0_lh',
+#                            '230329_death_lh_up_to_68_lambdifyed.pickle'
+#                            )
 
 
 def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict=None, lh_fct=None, logger=None, plot_tree=True,
