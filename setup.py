@@ -5,7 +5,7 @@ setup(
     version='1.1.0',
     packages=find_packages(),
     package_data={'sp_model': ['mafft_scripts/mafft-linux64/*', 'mafft_scripts/mafft-mac/*', 'mafft_scripts/mafft-win/*',
-                            'bdm_likelihood_computation/sympy_bdm_lh_fct/230329_death_lh_up_to_68.pickle'],
+                            'bdm_likelihood_computation/sympy_bdm_lh_fct/*'],
                   },
     py_modules=['spacerplacer'],
     install_requires=[

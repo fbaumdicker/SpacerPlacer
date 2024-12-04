@@ -125,64 +125,12 @@ def load_p_from_pickle(save_path):
         p = pickle.load(f)
     return p
 
-
-if __name__ == '__main__':
-    load_lambdify_lh_fct(os.path.join('sympy_bdm_lh_fct', '230329_death_lh_up_to_68.pickle'),
-                         save_path=os.path.join('sympy_bdm_lh_fct',
+def update_lambdification_lh_fct():
+    path = os.path.dirname(os.path.abspath(__file__))
+    load_lambdify_lh_fct(os.path.join(path, 'sympy_bdm_lh_fct', '230329_death_lh_up_to_68.pickle'),
+                         save_path=os.path.join(path, 'sympy_bdm_lh_fct',
                                                 '230329_death_lh_up_to_68_lambdifyed'),
                          save_lambdified_lh_fct=True)
-    # solve_kolmogorov_backward_eq(4)
-    #
-    # init_printing()
-    # t = Symbol('t', nonnegative=True)
-    # r = Symbol('r', nonnegative=True)
-    # a = Symbol('a', nonnegative=True)
-    # f = Function('f')
-    # eq = Eq(Derivative(f(t), t), r / a * ((exp(-r * t)) ** 2 - f(t)))
-    #
-    # solution = dsolve(eq, f(t))
-    # sim_solution = simplify(solution)
-    # pprint(solution)
-    # pprint(sim_solution)
 
-    # p = solve_kolmogorov_backward_eq_birth_process(3, 0)
-    # p = solve_kolmogorov_backward_eq_death_process(3, log=False)
-    # pprint(p)
-    # print('bla')
-    # p = load_p_from_pickle(os.path.join('../../data', '0_lh', 'death_lh_up_to_100.pickle'))
-    # print(len(p))
-    # print('bla')
-    # p_ilm = []
-    # for i in range(p.shape[0] - 20):
-    #     p_ilm.append(p[i, 0].subs(a ** 1, 1.0))
-    #     print(i)
-    #     pprint(p_ilm[i])
-    # if i < 15:
-    #     pprint(p_ilm[i])
-    # pprint(p_ilm)
-    # p = solve_kolmogorov_backward_eq_death_process(100, log=False,
-    #                                                save_path=os.path.join('../../data', '0_lh',
-    #                                                                       'death_lh_up_to_100_groot'),
-    #                                                # cont_p=p
-    #                                                cont_p=None
-    #                                                )
-    # p_log = apply_log(p)
-    # save_p_to_pickle(os.path.join('additional_data', '0_lh', 'death_lh_up_to_100_groot'), p)
-
-    # Depending on version of sympy/numpy/...? Might need to re-lambdify the function, or do it on loading instead ->
-    # more expensive.
-    load_lambdify_lh_fct(os.path.join('../../additional_data', '0_lh', '230329_death_lh_up_to_100_groot.pickle'),
-                         save_path=os.path.join('../../additional_data', '0_lh',
-                                                '230329_death_lh_up_to_100_groot_lambdifyed'),
-                         save_lambdified_lh_fct=True)
-
-    # p = load_p_from_pickle(os.path.join('data', '0_lh', 'testing_lh.pickle'))
-    # a, r, t = symbols('a r t', nonnegative=True)
-    # f = lambdify((t, r, a), p[10, 0])
-    # print(p)
-    # pprint(f)
-    # pprint(p[10, 0])
-    # pprint(p[0,0])
-    # pprint(p[1,0])
-    # pprint(p[2,0])
-    # pprint(f(1, 0.1, 1))
+if __name__ == '__main__':
+    update_lambdification_lh_fct()
