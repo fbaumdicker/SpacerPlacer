@@ -371,6 +371,11 @@ graphs for each group (and the .dot files used for rendering the PSIO graphs wit
 <group_name>_rec shows the 
 final reconstruction after the refinement step, while <group_name>_guide_rec show the first guide reconstruction (that 
 does not follow the PSIO).
+Additionally, we provide more compact versions <group_name>_(guide)_rec_pooled_events.
+There, insertion and (successive) deletion events at the same branch are pooled together for visibility (if there are of 
+length more thann 3). Moreover, insertion events at the leaf branches are pooled together, 
+the number of insertions is shown in parentheses. In the header of the alignment, the number of unique leaf 
+spacers is shown in parentheses.
 
 If the option "--determine_orientation" is used, the "0_reversed" folder contains the same information as the 
 "0_forward" folder for the CRISPR groups reconstructed in reverse orientation.
@@ -400,7 +405,7 @@ This step is done for all input formats. The conversion is found in "<group_name
 The spacer numbers are the numbers shown in the reconstruction and PSIO visualizations as colored rectangles. 
 The spacer names (with duplicate candidates), are shown in gray as column headings in the Multiple Spacer Array Alignment in the
 visualized reconstructions. Thus, the information found in "<group_name>_spacer_name_to_sp_number.json" is also 
-contained in any visualized reconstruction.
+contained in any visualized reconstruction in the alignment headers.
 
 ### Known issues, solutions and tips
 
