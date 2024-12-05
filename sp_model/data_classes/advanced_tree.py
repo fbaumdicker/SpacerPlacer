@@ -11,7 +11,7 @@ class AdvancedTree(Tree):
                                            rooted=rooted,
                                            *args,
                                            **kwargs)
-        # I don't like this at all and it doesn't help (yet).
+        # I don't like this at all, and it doesn't help (yet).
         if isinstance(root, AdvancedTree.__bases__[0].__bases__[0]):
             self.root = root.root
         self.parents = self.determine_parents()
