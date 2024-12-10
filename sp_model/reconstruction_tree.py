@@ -1306,7 +1306,7 @@ class ReconstructionTree(advanced_tree.AdvancedTree):
                                  spacer_or_number='number' if spacer_labels_num else 'spacer')
 
         for pool in [True, False]:
-            dict_bg_colors = vis.visualize_tree_rec_spacers(str(self.format(fmt='newick')),
+            dict_bg_colors = vis.visualize_tree_rec_spacers(str(self.format('newick')),
                                                             df_rec_spacers=df,
                                                             df_gains_losses=df_changes.copy(),
                                                             name=name,
