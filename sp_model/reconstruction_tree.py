@@ -1339,7 +1339,7 @@ class ReconstructionTree(advanced_tree.AdvancedTree):
         if not os.path.exists(os.path.join(path, name)):
             os.makedirs(os.path.join(path, name))
         with open(os.path.join(path, name, name + '_tree.nwk'), 'w') as f:
-            f.write(str(self.format(fmt='newick')))
+            f.write(str(self.format('newick')))
         df.to_json(os.path.join(path, name, name + '_rec_spacers.json'))
         df_changes.to_json(os.path.join(path, name, name + '_rec_gains_losses.json'))
         with open(os.path.join(path, name, name + '_other_events.json'), 'w') as f:

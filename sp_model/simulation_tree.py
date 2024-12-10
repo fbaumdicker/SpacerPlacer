@@ -780,7 +780,7 @@ class SimulationTree(AdvancedTree):
             new_array = model_tools.spacer_array_to_binary(node.spacers, alignment=top_order_sorted_by_age)
             df.loc[node.name] = [new_array]
 
-        vis.visualize_tree_sim_spacers(str(self.format(format='newick')),
+        vis.visualize_tree_sim_spacers(str(self.format('newick')),
                                        df_real_rec_spacers=df,
                                        df_gains_losses=df_changes,
                                        name=name,
