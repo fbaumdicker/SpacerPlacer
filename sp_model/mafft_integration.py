@@ -49,7 +49,7 @@ DEFAULT_MAFFT_OPTIONS_FFT = ['--text',
                              '--LOP', '0',
                              '--LEXP', '0',
                              '--quiet',
-                             '--thread', '1',  # '-1',  # multithreading -1 -> automatically choose
+                             '--thread', '-1',  # '-1',  # multithreading -1 -> automatically choose
                              # '--threadit', '0',  # threaded iterative alignment has some randomness (this stops this)
                              ]
 

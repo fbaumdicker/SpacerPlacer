@@ -235,7 +235,7 @@ def check_and_parse_input_data(input_type, input_path, output_path, tree_path, l
             output_tree_path = tree_path
         elif len(ls_path_to_spacer_fasta) == 1:
             dict_trees = {os.path.splitext(os.path.basename(ls_path_to_spacer_fasta[0]))[0]:
-                              import_data.load_single_tree(tree_path).format(fmt='newick')}
+                              import_data.load_single_tree(tree_path).format('newick')}
             if not os.path.exists(output_path_to_tree):
                 os.makedirs(output_path_to_tree)
             json.dump(dict_trees, open(output_tree_path, 'w'))
@@ -260,7 +260,7 @@ def check_and_parse_input_data(input_type, input_path, output_path, tree_path, l
                                  f'File would be found in folder {tree_path} '
                                  f'with filename {group_no_ext} (+ extension).')
 
-            dict_trees[group_no_ext] = import_data.load_single_tree(tp).format(fmt='newick')
+            dict_trees[group_no_ext] = import_data.load_single_tree(tp).format('newick')
         if not os.path.exists(output_path_to_tree):
             os.makedirs(output_path_to_tree)
         json.dump(dict_trees, open(output_tree_path, 'w'))
