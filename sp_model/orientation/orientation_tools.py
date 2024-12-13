@@ -55,9 +55,11 @@ def compare_likelihoods_for_orientation(protocol, protocol_reversed_raw, protoco
     ls_boring = []
     ls_recommendation = []
     ls_pred_orient = []
+    ls_decision_bdy = []
     ls_reversed_lh_0, ls_reversed_lh_1, ls_reversed_ln_lh_0, ls_reversed_ln_lh_1 = [], [], [], []
     dict_trees_final = {}
     for i, n in enumerate(protocol.index):
+        ls_decision_bdy.append(decision_boundary)
         if new_protocol.loc[n, 'recommend reversing array'] == True:
             protocol.loc[n, :] = protocol_reversed_raw.loc[n, :]
             ls_reversed_lh_0.append(new_protocol.loc[n, 'lh_idm'])
@@ -92,6 +94,7 @@ def compare_likelihoods_for_orientation(protocol, protocol_reversed_raw, protoco
     oriented_protocol['lh_idm / reversed_lh_idm'] = new_protocol['lh_idm / reversed_lh_idm']
     oriented_protocol['ln_lh_idm - reversed_ln_lh_idm'] = new_protocol['ln_lh_idm - reversed_ln_lh_idm']
     oriented_protocol['lh_bdm / reversed_lh_bdm'] = new_protocol['lh_bdm / reversed_lh_bdm']
+    oriented_protocol['confidence threshold'] = ls_decision_bdy
     oriented_protocol['ln_lh_bdm - reversed_ln_lh_bdm'] = new_protocol['ln_lh_bdm - reversed_ln_lh_bdm']
     oriented_protocol = oriented_protocol.drop(ls_boring, axis=0, errors='ignore')
 

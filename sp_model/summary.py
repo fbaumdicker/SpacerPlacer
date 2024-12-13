@@ -20,7 +20,7 @@ def compose_summary_dict(df_results, supplied_parameters):
                                    'nb of reconstructed other dup. events',
                                    'nb of reconstructed ind. acquisitions, not duplicates'}
     orientation_results_keys = {'reversed_ln_lh_idm', 'reversed_ln_lh_bdm', 'ln_lh_bdm - reversed_ln_lh_bdm',
-                                'predicted orientation'}
+                                'predicted orientation', 'confidence threshold'}
     tree_information_keys = {'tree height', 'tree length', 'min/max tree branch lengths',
                              'nb of leafs (before combining non-uniques)',
                              'nb of leafs (after combining non-uniques)',
@@ -104,7 +104,10 @@ def write_summary(dict_summary, out_path):
                     # if key == 'recommend reversing array':
                     #     value = 'Reverse' if value is True else 'Forward'
                     #     file.write(f'Predicted orientation: {value}\n')
-                    file.write(f'\t{key}: {value}\n')
+                    if key == 'ln_lh_bdm - reversed_ln_lh_bdm':
+                        file.write(f'\tTest statistic (Likelihood ratio = {key}): {value}\n')
+                    else:
+                        file.write(f'\t{key}: {value}\n')
             file.write(f'\n')
 
             if not combine_non_uniques:
