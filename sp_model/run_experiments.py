@@ -132,8 +132,8 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict=None, lh_fct
         p = os.path.join(save_data_folder, 'spacer_fasta', gn + '_spacer_name_to_sp_number.json')
         if not os.path.exists(os.path.dirname(p)):
             os.makedirs(os.path.dirname(p))
-        json.dump(dict_spacer_names_to_numbers, open(p,
-                                                     'w'))
+        with open(p, 'w') as f:
+            json.dump(dict_spacer_names_to_numbers, f)
     if determine_orientation:
         logger.info(f'Beginning reconstruction of reversed group(s)...\n')
         if not os.path.exists(os.path.join(save_path, '0_reversed')):

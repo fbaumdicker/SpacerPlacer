@@ -58,7 +58,7 @@ class LikelihoodDistance(DistanceCalculator):
                            - self._deletion_keep_lh([t[0], t[1]], ls_keep_counts, ls_deletion_lengths)
         bounds = ((0.0, None), (0.0, None))
         start_values = np.array([0.1, 0.1])
-        return model_tools.minimize_fct(lh_fct, start_values, bounds=bounds, method='Nelder-Mead')
+        return model_tools.minimize_fct(lh_fct, start_values, bounds=bounds, method='L-BFGS-B')
 
     def _gain_lh(self, ls_t, ls_gain_counts):
         lh = [poisson.pmf(k, t * self.gain_rate / (self.loss_rate * self.alpha + self.eps))

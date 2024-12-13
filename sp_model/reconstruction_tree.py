@@ -935,7 +935,7 @@ class ReconstructionTree(advanced_tree.AdvancedTree):
             r.append(self.spacer_orders[k].intersection(losses))
         return l, r
 
-    def compute_lh_ratio_for_given_lh_fct(self, method='Nelder-Mead', filter_by=False):
+    def compute_lh_ratio_for_given_lh_fct(self, method='L-BFGS-B', filter_by=False):
         """
         Function to optimize lh ratio of ilm vs blm, note that ilm likelihood is computed with old lh fct (should make
         no difference, but new lh function can produce artifacts).
@@ -999,7 +999,7 @@ class ReconstructionTree(advanced_tree.AdvancedTree):
             tree_lh.append(ln_mult_loss_lh + ln_keep)
         return sum(tree_lh) if log else np.exp(sum(tree_lh))
 
-    def compute_lh_ratio(self, method='Nelder-Mead', filter_by=False, alpha_bias_correction=False,
+    def compute_lh_ratio(self, method='L-BFGS-B', filter_by=False, alpha_bias_correction=False,
                          rho_bias_correction=False):
         """
         Computes the "naive" lh ratio of the tree with optional bias corrections.

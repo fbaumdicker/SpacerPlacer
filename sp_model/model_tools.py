@@ -22,7 +22,7 @@ def minimize_scalar_fct(lh_fct, bounds=None, method='bounded'):
     return scipy.optimize.minimize_scalar(lh_fct, bounds=bounds, method=method)
 
 
-def compute_lh_ratio_of_multiple_trees(ls_data, method='Nelder-Mead', filter_by=False, lambdifyed_lh_fct=None):
+def compute_lh_ratio_of_multiple_trees(ls_data, method='L-BFGS-B', filter_by=False, lambdifyed_lh_fct=None):
     lh_fct_0 = lambda x: -sum([compute_tree_lh(x, 1.0, d[0], d[1], d[2], log=True) for d in ls_data])
 
     if lambdifyed_lh_fct is None:
