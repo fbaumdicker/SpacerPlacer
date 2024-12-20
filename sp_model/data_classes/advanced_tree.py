@@ -14,11 +14,11 @@ class AdvancedTree(Tree):
         # I don't like this at all, and it doesn't help (yet).
         if isinstance(root, AdvancedTree.__bases__[0].__bases__[0]):
             self.root = root.root
-        self.parents = self.determine_parents()
         self.model_name = model_name if model_name is not None else 'advanced_tree'
         if not rooted:
             self.root_at_midpoint()
-            self.rooted = True
+            # self.rooted = True
+        self.parents = self.determine_parents()
 
     def determine_parents(self):
         """

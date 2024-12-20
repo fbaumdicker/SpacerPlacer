@@ -122,7 +122,8 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict=None, lh_fct
                                                               show_spacer_name_row=show_spacer_name_row,
                                                               )
     dict_trees = dict_trees_forward
-    df_rec_protocol = df_rec_protocol.set_index('name')
+    if not df_rec_protocol.empty:
+        df_rec_protocol = df_rec_protocol.set_index('name')
     df_results_wo_details = df_rec_protocol
     if not df_rec_protocol_trivial.empty:
         df_rec_protocol_trivial = df_rec_protocol_trivial.set_index('name')
@@ -185,8 +186,8 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict=None, lh_fct
                                       figsize_rec=figsize_rec,)
         dict_trees = {'forward': dict_trees_forward,
                       'reversed': dict_trees_reversed}
-
-        df_rec_protocol_reversed = df_rec_protocol_reversed.set_index('name')
+        if not df_rec_protocol_reversed.empty:
+            df_rec_protocol_reversed = df_rec_protocol_reversed.set_index('name')
         if not df_rec_protocol_reversed_trivial.empty:
             df_rec_protocol_reversed_trivial = df_rec_protocol_reversed_trivial.set_index('name')
 
@@ -383,7 +384,8 @@ def run_pickled_data(rec_parameter_dict, data_path, save_path=None, plot_tree=Tr
                                     figsize_rec=figsize_rec,)
         dict_trees = {'forward': dict_trees_forward,
                       'reversed': dict_trees_reversed}
-        df_rec_protocol_reversed = df_rec_protocol_reversed.set_index('name')
+        if not df_rec_protocol_reversed.empty:
+            df_rec_protocol_reversed = df_rec_protocol_reversed.set_index('name')
         if not df_rec_protocol_reversed_boring.empty:
             df_rec_protocol_reversed_boring = df_rec_protocol_reversed_boring.set_index('name')
 

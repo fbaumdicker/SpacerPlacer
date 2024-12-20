@@ -214,6 +214,7 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                                             'reason': reason})
                 continue
             tree = import_data.load_single_tree_from_string(dict_trees[crispr_group.name] + '\n')
+            tree_rooted = True
         else:
             if tree_lh_fct is None or tree_lh_fct == 'simple':
                 modifier = 'simple_'
@@ -239,13 +240,15 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                                   provided_lh_fct=give_lh_fct,
                                   tree_save_path=None,
                                   tree_construction_method=tree_construction_method)
-        new_tree = AdvancedTree(tree, True, model_name=crispr_group.name)
+            tree_rooted = False if tree_construction_method == 'nj' else True
 
-        new_dict_trees[crispr_group.name] = tree.format('newick')
+        new_tree = AdvancedTree(tree, tree_rooted, model_name=crispr_group.name)
+
+        new_dict_trees[crispr_group.name] = new_tree.format('newick')
         # print(ls_array_names)
         if core_genome_trees:
             # Bio.Phylo.draw_ascii(tree)
-            tree, crispr_group = tree_handling(tree, crispr_group, name_inner_nodes=True, bl_eps=0)
+            new_tree, crispr_group = tree_handling(new_tree, crispr_group, name_inner_nodes=True, bl_eps=0)
             ls_arrays = [crispr_array.spacer_array for crispr_array in crispr_group.crispr_dict.values()]
             ls_array_names = list(crispr_group.crispr_dict.keys())
             if len(ls_arrays) < minimum_nb_of_arrays:
@@ -254,14 +257,14 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                                             'reason': 'Skipped because too few arrays after pruning.'})
                 continue
         else:
-            tree = name_inner_nodes_if_unnamed(tree)
+            new_tree = name_inner_nodes_if_unnamed(new_tree)
         if len(ls_arrays) < minimum_nb_of_arrays:
             logger.warning(f'{crispr_group.name} was skipped because there is only one array.')
             ls_skipped_protocol.append({'name': crispr_group.name, 'repeat': crispr_group.repeat,
                                         'reason': 'Skipped because there is only one array.'})
             continue
 
-        crispr_group.set_tree(tree)
+        crispr_group.set_tree(new_tree)
         # To prevent branches from having 0 branch length
         if extend_branches:
             for node in crispr_group.tree.find_clades():
@@ -302,7 +305,7 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
             gain_dict, loss_dict = crispr_group.gain_loss_dicts
             if hide_unobserved_spacers:
                 resolved_df, raw_top_order, gain_dict, loss_dict = model_tools.remove_unobserved_spacer(resolved_df,
-                                                                                                        tree,
+                                                                                                        new_tree,
                                                                                                         gain_dict,
                                                                                                         loss_dict,
                                                                                                         logger=logger)
@@ -322,7 +325,7 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                 resolved_df = resolved_df.drop(columns=ls_drop_cols)
             gain_loss_dicts = None
 
-        rec_m = ReconstructionTree(rec_parameter_dict, save_path, tree, True, model_name=crispr_group.name,
+        rec_m = ReconstructionTree(rec_parameter_dict, save_path, new_tree, True, model_name=crispr_group.name,
                                    lh_fct=give_lh_fct, sim_as_rec=sim_as_rec,
                                    sim_gain_loss_dicts=gain_loss_dicts,
                                    save_reconstructed_events=save_reconstructed_events,

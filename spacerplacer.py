@@ -83,7 +83,7 @@ def parse_args():
                         default='likelihood', help='Determines the distance function used for the tree estimation '
                                                    'with UPGMA. Currently redundant, as only "likelihood" is implemented.')
     parser.add_argument('--tree_construction_method', type=str, choices=['upgma', 'nj'],
-                        default='nj', help='Determines the tree construction method used for the tree estimation. '
+                        default='upgma', help='Determines the tree construction method used for the tree estimation. '
                                               'Currently UPGMA (upgma) and neighbor joining (nj) are implemented.')
     parser.add_argument('--tree_insertion_rate', type=float, default=None,
                         help='The user can provide their own insertion rate for the tree estimation based on the '

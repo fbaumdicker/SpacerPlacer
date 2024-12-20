@@ -1,4 +1,3 @@
-import pandas as pd
 from Bio.Phylo.TreeConstruction import DistanceMatrix, DistanceCalculator, DistanceTreeConstructor
 import numpy as np
 from scipy.stats import poisson
@@ -18,7 +17,7 @@ class LikelihoodDistance(DistanceCalculator):
     Expects arrays to be aligned! But it is not necessary.
     """
 
-    def __init__(self, gain_rate, loss_rate, alpha, provided_lh_fct=None, *args, **kwargs):
+    def __init__(self, gain_rate, loss_rate, alpha, provided_lh_fct=None, optimize_separately=True, *args, **kwargs):
         if gain_rate == 0 and loss_rate == 0:
             raise ValueError('Both gain rate and loss rate seem to be 0! No likelihood computation is possible!')
         self.gain_rate = gain_rate
@@ -27,6 +26,7 @@ class LikelihoodDistance(DistanceCalculator):
         self.provided_lh_fct = provided_lh_fct
         self.big_eps = 1e20
         self.eps = 1e-40
+        self.optimize_separately = optimize_separately
         super().__init__(*args, **kwargs)
 
         self.min_val = MIN_BL
@@ -45,25 +45,37 @@ class LikelihoodDistance(DistanceCalculator):
         return DistanceMatrix(names, matrix=scores)
 
     def _pairwise(self, seq1, seq2):
+        if seq1 == seq2:
+            return 0
         fes_pos, fes = self._find_FES(seq1, seq2)
         ls_gain_counts, ls_keep_counts, ls_deletion_lengths = self._find_gains_deletions(seq1, seq2, fes_pos)
-        opt_result = self._optimize_bl(ls_gain_counts, ls_keep_counts, ls_deletion_lengths)
-        t_1, t_2 = opt_result.x[0], opt_result.x[1]
+        if self.optimize_separately:
+            t_1 = self._optimize_bl_separately(ls_gain_counts[0], ls_keep_counts[0], ls_deletion_lengths[0]).x
+            t_2 = self._optimize_bl_separately(ls_gain_counts[1], ls_keep_counts[1], ls_deletion_lengths[1]).x
+        else:
+            opt_result = self._optimize_bl(ls_gain_counts, ls_keep_counts, ls_deletion_lengths)
+            t_1, t_2 = opt_result.x[0], opt_result.x[1]
         t_1_2 = min(t_1 + t_2, self.max_val)
         t_1_2 = max(t_1_2, self.min_val)
         return t_1_2
 
+    def _optimize_bl_separately(self, gain_count, keep_count, deletion_length):
+        lh_fct = lambda t: -self._gain_lh([t], [gain_count])[0] \
+                            - self._deletion_keep_lh([t], [keep_count], [deletion_length])
+        bounds = (self.eps, 1000000)
+        return model_tools.minimize_scalar_fct(lh_fct, bounds=bounds, method='bounded')
+
     def _optimize_bl(self, ls_gain_counts, ls_keep_counts, ls_deletion_lengths):
-        lh_fct = lambda t: - sum(np.log(self._gain_lh([t[0], t[1]], ls_gain_counts))) \
+        lh_fct = lambda t: - sum(self._gain_lh([t[0], t[1]], ls_gain_counts)) \
                            - self._deletion_keep_lh([t[0], t[1]], ls_keep_counts, ls_deletion_lengths)
-        bounds = ((0.0, None), (0.0, None))
+        bounds = ((self.eps, None), (self.eps, None))
         start_values = np.array([0.1, 0.1])
-        return model_tools.minimize_fct(lh_fct, start_values, bounds=bounds, method='L-BFGS-B')
+        return model_tools.minimize_fct(lh_fct, start_values, bounds=bounds, method='L-BFGS-B', tol=1e-10)
 
     def _gain_lh(self, ls_t, ls_gain_counts):
-        lh = [poisson.pmf(k, t * self.gain_rate / (self.loss_rate * self.alpha + self.eps))
+        lh = [poisson.logpmf(k, t * self.gain_rate / (self.loss_rate * self.alpha + self.eps))
               for t, k in zip(ls_t, ls_gain_counts)]
-        return [max(self.eps, val) for val in lh]
+        return lh
 
     def _deletion_keep_lh(self, ls_t, ls_keep_counts, ls_deletion_lengths):
         if self.provided_lh_fct is None:
@@ -123,14 +135,20 @@ class LikelihoodDistance(DistanceCalculator):
                         ls_deletion_lengths_1.append(deletion_length_1)
                         deletion_length_1 = 0
             else:
-                keep_count_1 += 1
-                keep_count_2 += 1
-                if deletion_length_1 > 0:
-                    ls_deletion_lengths_1.append(deletion_length_1)
-                    deletion_length_1 = 0
-                if deletion_length_2 > 0:
-                    ls_deletion_lengths_2.append(deletion_length_2)
-                    deletion_length_2 = 0
+                if i < fes_pos:
+                    # s_1 == s_2: this should normally not happen (should be fes then)
+                    # s_1 != s_2: misalignment by mafft -> gain for both of different spacers
+                    gain_count_1 += 1
+                    gain_count_2 += 1
+                else:
+                    keep_count_1 += 1
+                    keep_count_2 += 1
+                    if deletion_length_1 > 0:
+                        ls_deletion_lengths_1.append(deletion_length_1)
+                        deletion_length_1 = 0
+                    if deletion_length_2 > 0:
+                        ls_deletion_lengths_2.append(deletion_length_2)
+                        deletion_length_2 = 0
         if deletion_length_1 > 0:
             ls_deletion_lengths_1.append(deletion_length_1)
         if deletion_length_2 > 0:
@@ -211,7 +229,7 @@ class FixedDistanceTreeConstructor(DistanceTreeConstructor):
             del dm[min_i]
         inner_clade.branch_length = 0
 
-        return Tree(inner_clade)
+        return Tree(inner_clade, rooted=True)
 
     def nj(self, distance_matrix):
         """
@@ -288,6 +306,8 @@ class FixedDistanceTreeConstructor(DistanceTreeConstructor):
             # assign branch length
             clade1.branch_length = max((dm[min_i, min_j] + node_dist[min_i] - node_dist[min_j]) / 2.0, self.min_bl)
             clade2.branch_length = max(dm[min_i, min_j] - clade1.branch_length, self.min_bl)
+            # clade1.branch_length = (dm[min_i, min_j] + node_dist[min_i] - node_dist[min_j]) / 2.0
+            # clade2.branch_length = dm[min_i, min_j] - clade1.branch_length
 
             # update node list
             clades[min_j] = inner_clade
@@ -307,11 +327,11 @@ class FixedDistanceTreeConstructor(DistanceTreeConstructor):
         root = None
         if clades[0] == inner_clade:
             clades[0].branch_length = 0
-            clades[1].branch_length = dm[1, 0]
+            clades[1].branch_length = max(dm[1, 0], self.min_bl)
             clades[0].clades.append(clades[1])
             root = clades[0]
         else:
-            clades[0].branch_length = dm[1, 0]
+            clades[0].branch_length = max(dm[1, 0], self.min_bl)
             clades[1].branch_length = 0
             clades[1].clades.append(clades[0])
             root = clades[1]

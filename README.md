@@ -284,7 +284,7 @@ be saved in the output directory, with dictionaries detailing the renaming proce
 For more details see the section "Output".
 
 ### (optional) Tree input format
-Trees can be provided by the user. The trees MUST be in newick format. 
+Trees can be provided by the user. The trees MUST be in newick format and rooted. 
 
 If only a single fasta is run, the direct path to the tree can be provided using the option "--tree_path <path_to_tree>".
 

@@ -13,13 +13,13 @@ EPS = 1e-40
 BIG_EPS = 1e20
 
 
-def minimize_fct(lh_fct, start_values, bounds=None, method='L-BFGS-B'):
-    opt = scipy.optimize.minimize(lh_fct, start_values, bounds=bounds, method=method)
+def minimize_fct(lh_fct, start_values, bounds=None, method='L-BFGS-B', **kwargs):
+    opt = scipy.optimize.minimize(lh_fct, start_values, bounds=bounds, method=method, **kwargs)
     return opt
 
 
-def minimize_scalar_fct(lh_fct, bounds=None, method='bounded'):
-    return scipy.optimize.minimize_scalar(lh_fct, bounds=bounds, method=method)
+def minimize_scalar_fct(lh_fct, bounds=None, method='bounded', **kwargs):
+    return scipy.optimize.minimize_scalar(lh_fct, bounds=bounds, method=method, **kwargs)
 
 
 def compute_lh_ratio_of_multiple_trees(ls_data, method='L-BFGS-B', filter_by=False, lambdifyed_lh_fct=None):

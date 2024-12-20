@@ -222,6 +222,7 @@ def construct_tree(ls_array_names, ls_arrays, group_name, logger=None, distance_
     dm = tree_constructor.distance_calculator.get_distance([ls_array_names, ls_arrays])
     tree = tree_constructor.build_tree([ls_array_names, ls_arrays])
 
+
     # for clade in tree.find_clades():
     #     print(clade.name)
     #     print(clade.branch_length)
