@@ -1,0 +1,13 @@
+example_datasets/tomida_datasets/CRISPR1
+0_result_folder/tomida_crispr1_nj
+--input_type
+spacer_fasta
+--lh_fct
+simple
+--significance_level
+0.05
+--tree_construction_method
+nj
+--determine_orientation
+--orientation_decision_boundary
+5

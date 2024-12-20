@@ -212,7 +212,6 @@ def construct_tree(ls_array_names, ls_arrays, group_name, logger=None, distance_
                                                                 provided_lh_fct=provided_lh_fct, skip_letters={'-'})
     else:
         raise NotImplementedError('Distance function not implemented!')
-
     tree_constructor = distance_tree_constructor.FixedDistanceTreeConstructor(distance_calculator=distance,
                                                                               method=tree_construction_method)
     # tree_constructor = DistanceTreeConstructor(distance_calculator=distance, method=tree_construction_method)

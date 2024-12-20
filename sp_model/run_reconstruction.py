@@ -184,6 +184,12 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
         prev_len = len(ls_arrays)
         dict_combined_arrays = dict()
 
+        if len(ls_arrays) < minimum_nb_of_arrays:
+            logger.warning(f'{crispr_group.name} was skipped because there is only one array.')
+            ls_skipped_protocol.append({'name': crispr_group.name, 'repeat': crispr_group.repeat,
+                                        'reason': 'Skipped because there is only one array.'})
+            continue
+
         if combine_non_unique_arrays:
             ls_arrays, ls_array_names, dict_combined_arrays = misc.remove_completely_same_arrays(ls_arrays,
                                                                                                  ls_array_names)
@@ -258,12 +264,6 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
                 continue
         else:
             new_tree = name_inner_nodes_if_unnamed(new_tree)
-        if len(ls_arrays) < minimum_nb_of_arrays:
-            logger.warning(f'{crispr_group.name} was skipped because there is only one array.')
-            ls_skipped_protocol.append({'name': crispr_group.name, 'repeat': crispr_group.repeat,
-                                        'reason': 'Skipped because there is only one array.'})
-            continue
-
         crispr_group.set_tree(new_tree)
         # To prevent branches from having 0 branch length
         if extend_branches:
