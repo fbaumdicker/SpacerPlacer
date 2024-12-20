@@ -87,6 +87,10 @@ def write_summary(dict_summary, out_path):
             file.write(f'{group}:\n')
             file.write(f'\n')
             file.write(f'\tEstimated parameters:\n')
+            if dict_sum['reconstruction_results']['nb of reconstructed deletions'] == 0:
+                file.write(f'\tWARNING: No deletions were reconstructed; therefore, the estimated parameters '
+                           'and the test between IDM and BDM '
+                           'are not meaningful!\n')
             for key, value in dict_sum['estimated_parameters'].items():
                 file.write(f'\t{key}: {value}\n')
             file.write(f'\n')

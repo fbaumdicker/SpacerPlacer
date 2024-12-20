@@ -582,8 +582,8 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
     protocol_file_name = os.path.join(save_path, '_'.join(['0_protocol']))
 
     df_boring_protocol = pd.DataFrame(ls_boring_protocol)
-    df_boring_protocol.to_csv(os.path.join(save_path, '_'.join(['0_protocol_wo_trivial']) + '.csv'))
-    df_boring_protocol.to_pickle(os.path.join(save_path, '_'.join(['0_protocol_wo_trivial']) + '.pkl'))
+    df_boring_protocol.to_csv(os.path.join(save_path, '_'.join(['0_protocol_trivial']) + '.csv'))
+    df_boring_protocol.to_pickle(os.path.join(save_path, '_'.join(['0_protocol_trivial']) + '.pkl'))
 
     df_skipped_protocol = pd.DataFrame(ls_skipped_protocol)
     df_skipped_protocol.to_csv(os.path.join(save_path, '_'.join(['0_protocol_skipped']) + '.csv'))

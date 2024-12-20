@@ -124,9 +124,10 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict=None, lh_fct
     dict_trees = dict_trees_forward
     if not df_rec_protocol.empty:
         df_rec_protocol = df_rec_protocol.set_index('name')
-    df_results_wo_details = df_rec_protocol
     if not df_rec_protocol_trivial.empty:
         df_rec_protocol_trivial = df_rec_protocol_trivial.set_index('name')
+
+    df_results_wo_details = pd.concat([df_rec_protocol, df_rec_protocol_trivial], axis=1)
 
     for gn, provided_numbering in dict_provided_numbering.items():
         dict_spacer_names_to_numbers = provided_numbering[0]
@@ -191,7 +192,8 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict=None, lh_fct
         if not df_rec_protocol_reversed_trivial.empty:
             df_rec_protocol_reversed_trivial = df_rec_protocol_reversed_trivial.set_index('name')
 
-        df_rec_protocol, df_oriented_rec_protocol, dict_trees = orientation_tools.compare_likelihoods_for_orientation(
+        (df_rec_protocol, df_oriented_rec_protocol,
+         df_oriented_rec_protocol_w_trivial, dict_trees) = orientation_tools.compare_likelihoods_for_orientation(
             df_rec_protocol,
             df_rec_protocol_reversed,
             df_rec_protocol_trivial,
@@ -209,7 +211,7 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict=None, lh_fct
                                                      '0_detailed_results_wo_trivial_groups.csv'))
         df_oriented_rec_protocol.to_pickle(os.path.join(detailed_protocols_save_path,
                                                         '0_detailed_results_wo_trivial_groups.pkl'))
-        df_results_wo_details = df_oriented_rec_protocol
+        df_results_wo_details = df_oriented_rec_protocol_w_trivial
 
     df_results_wo_details = df_results_wo_details.drop(
         columns=['relative deletion positions', 'nb of existent spacers',
@@ -228,7 +230,7 @@ def run_multiple_groups(ls_data_path, save_path, rec_parameter_dict=None, lh_fct
                  'les -m presence',
                  'ls -m presence', 'fs +m presence', 'global fes +m presence',
                  'global les -m presence', 'global ls -m presence',
-                 'combined array names',
+                 # 'combined array names',
                  ],
         errors='ignore')
 

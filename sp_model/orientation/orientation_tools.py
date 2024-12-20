@@ -96,10 +96,11 @@ def compare_likelihoods_for_orientation(protocol, protocol_reversed_raw, protoco
     oriented_protocol['lh_bdm / reversed_lh_bdm'] = new_protocol['lh_bdm / reversed_lh_bdm']
     oriented_protocol['confidence threshold'] = ls_decision_bdy
     oriented_protocol['ln_lh_bdm - reversed_ln_lh_bdm'] = new_protocol['ln_lh_bdm - reversed_ln_lh_bdm']
+    oriented_protocol_w_trivial = oriented_protocol.copy()
     oriented_protocol = oriented_protocol.drop(ls_boring, axis=0, errors='ignore')
 
     # print(oriented_protocol)
-    return new_protocol, oriented_protocol, dict_trees_final
+    return new_protocol, oriented_protocol, oriented_protocol_w_trivial, dict_trees_final
 
 
 def decision_fct(ln_lh_diff, decision_boundary=0):
