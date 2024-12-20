@@ -46,7 +46,7 @@ class LikelihoodDistance(DistanceCalculator):
 
     def _pairwise(self, seq1, seq2):
         if seq1 == seq2:
-            return 0
+            return self.min_val
         fes_pos, fes = self._find_FES(seq1, seq2)
         ls_gain_counts, ls_keep_counts, ls_deletion_lengths = self._find_gains_deletions(seq1, seq2, fes_pos)
         if self.optimize_separately:
