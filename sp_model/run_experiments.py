@@ -391,7 +391,8 @@ def run_pickled_data(rec_parameter_dict, data_path, save_path=None, plot_tree=Tr
         if not df_rec_protocol_reversed_boring.empty:
             df_rec_protocol_reversed_boring = df_rec_protocol_reversed_boring.set_index('name')
 
-        df_rec_protocol, df_oriented_rec_protocol, dict_trees = orientation_tools.compare_likelihoods_for_orientation(
+        (df_rec_protocol, df_oriented_rec_protocol,
+         df_oriented_rec_protocol_w_trivial, dict_trees) = orientation_tools.compare_likelihoods_for_orientation(
             df_rec_protocol,
             df_rec_protocol_reversed,
             df_rec_protocol_boring,

@@ -192,7 +192,7 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
             # logger.info(f'Arrays that were combined to one array {dict_combined_arrays}')
             logger.info(f'Note: For completely same arrays only one representative is used for reconstruction and '
                         f'visualization, due to provided option: --combine_non_unique_arrays. '
-                        f'The classes of combined arrays are found in detailed results csv under '
+                        f'The classes of combined arrays are found in 0_results and detailed results csv under '
                         f'"combined array names".')
             logger.info(f'Number of arrays before combination: {prev_len} /  after: {len(ls_arrays)}')
             # Be aware: Tree generation or alignment produces an error for single arrays (which are useless anyway)
