@@ -288,7 +288,7 @@ def align_crispr_groups(work_path, dict_crispr_groups, mafft_options=None, logge
         write_fasta(ls_hx_arrays, ls_names, work_path, group_name)
 
         run_mafft(os.path.join(work_path, group_name),
-                  os.path.join(work_path, group_name), mafft_options, mx_path)
+                  os.path.join(work_path, group_name), mafft_options, mx_path, logger=logger)
 
         ls_arrays, ls_names = convert_mafft_output(os.path.join(work_path, group_name + '_output.txt'))
 
@@ -330,9 +330,9 @@ def run_mafft(file_path, output_path, options, mx_path, logger=None):
         subprocess.call(['mafft'] + options + ['--textmatrix', mx_path] + [file_path + '.ascii'], stdout=outfile)
     with open(output_path + '_output.txt', 'w') as outfile:
         if logger is not None:
-            logger.info('Calling ', ' '.join([file_path_maffttext2hex] + [file_path + '_output.ascii']))
+            logger.info('Calling ' + ' '.join([file_path_maffttext2hex] + [file_path + '_output.ascii']) + '\n')
         else:
-            print('Calling ', ' '.join([file_path_maffttext2hex] + [file_path + '_output.ascii']))
+            print('Calling ', ' '.join([file_path_maffttext2hex] + [file_path + '_output.ascii']), '\n')
         subprocess.call([file_path_maffttext2hex] + [file_path + '_output.ascii'], stdout=outfile)
 
     return

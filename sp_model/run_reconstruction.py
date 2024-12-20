@@ -419,8 +419,9 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
         test_result, quantile = stats.test_significance_ratio_chi2(ln_lh_ratio, significance_level)
         preferred_model = 'BDM' if test_result else 'IDM'
         if nb_rec_deletions == 0:
-            logger.info('No deletions were reconstructed, therefore the test results are not meaningful '
-                        '(especially estimated parameters).')
+            logger.warning('No deletions were reconstructed, therefore the estimated parameters '
+                           '(and the test between IDM and BDM) '
+                           'are not meaningful!')
         logger.info(f'ln(lh_idm): {ln_lh_0} ; ln(lh_bdm): {ln_lh_1} ; '
                     f'test statistic (2*(ln(lh_bdm) - ln(lh_idm)): {ln_lh_ratio} ; '
                     f'test significant?: {test_result} ; '
@@ -436,7 +437,7 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
             ex_y_s_res_lr_0, ex_y_s_res_lr_1, ex_y_s_res_alpha_1 = np.nan, np.nan, np.nan
             con_o_s_res_lr_0, con_o_s_res_lr_1, con_o_s_res_alpha_1 = np.nan, np.nan, np.nan
             if len(rec_m.rec_gain_dict[rec_m.root.name]) == 0:
-                logger.warning('The root has NO insertions! Therefore alternative parameter estimations based on root '
+                logger.warning('The root has no insertions! Therefore alternative parameter estimations based on root '
                                'spacers were set to np.nan.')
         else:
             if give_lh_fct is not None:
@@ -638,7 +639,7 @@ def run_reconstruction(rec_parameter_dict, dict_crispr_groups, save_path=None, p
         logger.info('Computing likelihood ratio and parameter estimates over all groups...')
         lh_0, lh_1, opt_result_0, opt_result_1 = model_tools.compute_lh_ratio_of_multiple_trees(
             list(dict_data_for_lh_ratio.values()),
-            method='Nelder-Mead',
+            method='L-BFGS-B',
             filter_by=False,
             lambdifyed_lh_fct=give_lh_fct)
 
