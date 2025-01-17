@@ -336,7 +336,7 @@ def main():
                                                                         cluster_spacers=args.cluster_spacers)
         df_results_wo_details = run_multiple_groups(ls_path_to_spacer_fasta, args.output_path,
                                                     rec_parameter_dict=rec_parameter_dict,
-                                                    logger=logger,
+                                                        logger=logger,
                                                     lh_fct=args.lh_fct,
                                                     plot_tree=not args.no_plot_reconstruction,
                                                     do_show=args.do_show,

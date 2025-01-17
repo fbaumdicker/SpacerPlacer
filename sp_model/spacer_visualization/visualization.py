@@ -171,8 +171,13 @@ def visualize_tree_rec_spacers(newick_tree, df_rec_spacers=None, df_gains_losses
             num_bg_col_dict.update({name: 'Silver' for name in added_placeholder})
             num_fg_col_dict.update({name: 'Black' for name in added_placeholder})
         else:
-            vis_ls_spacers = ls_spacers
-            vis_num_ls_spacers = num_ls_spacers
+            moving_spacers = [s for s, a in zip(ls_spacers, all_leaf_insertions) if a == 1]
+            moving_num_spacers = [s for s, a in zip(num_ls_spacers, all_leaf_insertions) if a == 1]
+            remaining_spacers = [s for s, a in zip(ls_spacers, all_leaf_insertions) if a != 1]
+            remaining_num_spacers = [s for s, a in zip(num_ls_spacers, all_leaf_insertions) if a != 1]
+
+            vis_ls_spacers = moving_spacers + remaining_spacers
+            vis_num_ls_spacers = moving_num_spacers + remaining_num_spacers
     else:
         vis_ls_spacers = ls_spacers
         vis_num_ls_spacers = num_ls_spacers

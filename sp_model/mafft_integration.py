@@ -259,8 +259,9 @@ def align_crispr_groups(work_path, dict_crispr_groups, mafft_options=None, logge
             mafft_options = DEFAULT_MAFFT_OPTIONS if mafft_options is None else mafft_options
 
         if seed is not None:
-            mafft_options.append('--randomseed')
-            mafft_options.append(str(seed))
+            if not '--randomseed' in mafft_options:
+                mafft_options.append('--randomseed')
+                mafft_options.append(str(seed))
 
         if len(ls_arrays) > 1000:
             if logger is not None:
