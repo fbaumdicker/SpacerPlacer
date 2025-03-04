@@ -1,4 +1,5 @@
 import json
+import os.path
 
 from sp_model.helpers.misc import create_logger
 
@@ -11,8 +12,9 @@ def reverse_complement(dna_seq):
     return "".join([complement[base] if base in complement else base for base in dna_seq[::-1]])
 
 class CRISPRFinderParser:
-    def __init__(self, crisprfinder_result_json_file, min_evidence_level=4, reorient_by_direction_pred=True, logger=None,
-                 cluster_by_spacer_overlap=True):
+    def __init__(self, crisprfinder_result_json_file, output_folder=None, min_evidence_level=4,
+                 reorient_by_direction_pred=True, logger=None,
+                 cluster_by_spacer_overlap=True, filter_more_than_x_in_group=None):
         self.crisprfinder_result_json_file = crisprfinder_result_json_file
         self.min_evidence_level = min_evidence_level
         self.reorient_by_direction_pred = reorient_by_direction_pred
@@ -24,21 +26,37 @@ class CRISPRFinderParser:
         self.sample_summary = {}
         self.logger = logger if logger is not None else create_logger('CRISPRFinderParser', 1)
         self.cluster_by_spacer_overlap = cluster_by_spacer_overlap
+        self.filter_more_than_x_in_group = filter_more_than_x_in_group
+        self.output_folder = output_folder
 
         self._parse_ls_crisprfinder_files()
         self._cluster_array_groups_by_repeat()
         if self.cluster_by_spacer_overlap:
             self._cluster_groups_by_spacer_overlap()
         self._distribute_spacer_ids()
-        # self.write_spacer_fasta()
+        if self.output_folder is not None:
+            if not os.path.exists(self.output_folder):
+                os.makedirs(self.output_folder)
+            self.write_spacer_fasta(self.output_folder, filter_more_than_x_in_group=self.filter_more_than_x_in_group)
+            # self.write_spacer_seq_to_spacer_id(self.output_folder)
 
-    def write_spacer_fasta(self, output_folder):
+
+    def write_spacer_fasta(self, output_folder, filter_more_than_x_in_group=None):
         self.logger.info(f'Writing spacer sequences to FASTA files in {output_folder}')
         for group_name, ls_array_tuples in self.clustered_groups_spacer_ids.items():
+            if filter_more_than_x_in_group is not None:
+                if len(ls_array_tuples) < filter_more_than_x_in_group:
+                    self.logger.info(f'Skipping group {group_name} with less than {filter_more_than_x_in_group} arrays.')
+                    continue
             with open(f'{output_folder}/{group_name}.fa', 'w') as f:
                 for array_name, spacers, direction in ls_array_tuples:
                     f.write(f'>{array_name} ' + ' ; ' + f'{direction}' + ' \n')
                     f.write(f'{", ".join([str(s) for s in spacers])} \n')
+    def write_spacer_seq_to_spacer_id(self, output_folder):
+        self.logger.info(f'Writing dictionary of spacer sequences -> spacer ids to {output_folder}')
+        for group_name, dict_spacer_seq_to_spacer_id in self.cluster_spacer_seq_to_spacer_id.items():
+            with open(f'{output_folder}/{group_name}_spacer_seq_to_spacer_id.json', 'w') as f:
+                json.dump(dict_spacer_seq_to_spacer_id, f)
 
     def get_clustered_groups_spacer_ids(self):
         return self.clustered_groups_spacer_ids
