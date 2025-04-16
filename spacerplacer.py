@@ -37,7 +37,7 @@ def parse_args():
                              'If none is provided, trees are estimated by SpacerPlacer. '
                              'The trees can be given in a newick format or as a dictionary in a json file '
                              '(such a json file is also returned by SpacerPlacer).')
-    parser.add_argument('-it', '--input_type', type=str, choices=['spacer_fasta', 'pickled', 'ccdb',
+    parser.add_argument('-it', '--input_type', type=str, choices=['spacer_fasta', 'sf', 'pickled', 'ccdb',
                                                                   'crisprcasdb',
                                                                   'ccf_json', 'crisprcasfinder_json'],
                         default='spacer_fasta',  # think about this name
@@ -204,7 +204,7 @@ def parse_args():
 
 def check_and_parse_input_data(input_type, input_path, output_path, tree_path, logger, cluster_spacers=False,
                                cluster_spacers_max_distance=1, min_evidence_level=4,):
-    if input_type == 'spacer_fasta':
+    if input_type == 'spacer_fasta' or input_type == 'sf':
         if os.path.splitext(input_path)[-1] in {'.fa', '.fasta', '.fna'}:
             ls_path_to_spacer_fasta = [input_path]
         else:
@@ -358,7 +358,7 @@ def main():
                                               dpi=args.dpi_rec,
                                               figsize_rec=figsize_rec,
                                               )
-    elif args.input_type in ['ccdb', 'crisprcasdb', 'spacer_fasta', 'ccf_json', 'crisprcasfinder_json']:
+    elif args.input_type in ['ccdb', 'crisprcasdb', 'spacer_fasta', 'sf', 'ccf_json', 'crisprcasfinder_json']:
         ls_path_to_spacer_fasta, tree_path = check_and_parse_input_data(args.input_type, args.input_path,
                                                                         args.output_path, args.tree_path, logger,
                                                                         cluster_spacers=args.cluster_spacers,
