@@ -139,8 +139,8 @@ If the difference in likelihoods is below the threshold, SpacerPlacer will use t
 default.
 
 ## Input data
-The CRISPR array input data has to be provided in a specific format. We provide two alternative input formats:
-"spacer_fasta" and "ccf"/"crisprcasfinder". Trees can be estimated by SpacerPlacer 
+The CRISPR array input data has to be provided in a specific format. We provide three alternative input formats:
+"spacer_fasta", "ccf_json/crisprcasfinder_json" and "ccdb/crisprcasdb". Trees can be estimated by SpacerPlacer 
 based on the spacer arrays, but we generally recommend to provide trees, if available, in particular, to get interpretable results 
 in parameter estimates.
 The following sections describe the input formats in detail.
@@ -202,18 +202,73 @@ or without specifying the input type, as "spacer_fasta" is the default. "input_p
 of the run, in this example "<path-to-experiment>/experiment".
 
 
+### CRISPRCasFinder json input format
+SpacerPlacer can work with the output of CRISPRCasFinder directly. Note that in this case, SpacerPlacer performs clustering 
+steps to collect meaningful groups with spacer overlap out of the available CRISPR arrays detected by CRISPRFinder.
 
-### CRISPRCasdb or CRISPRCasFinder input format
-SpacerPlacer can use data in CRISPRCasdb/CRISPRCasFinder output format.
-To get files in this format you can e.g. submit the genomic sequences to the CRISPRCasFinder web server 
-(or extract existing arrays from CRISPRCasdb).
+Place the output folder of your CRISPRCasFinder run
+in the input directory (whatever path you choose). You can also only place the "result.json" in each folder as this is 
+the only file used by SpacerPlacer. You can place multiple runs/folders in the input directory and the results 
+from all directories will be combined and used.
+
+The input directory should look something like this:
+```bash
+    .
+    ├── input_path                # Top-level directory of run (the input directory provided to SpacerPlacer)
+    │   ├── Result_ccf1_x         # First result folder from CRISPRCasFinder
+    │   │   ├── result.json       # result.json file
+    │   │   └── ...               # other files (not required)
+    │   ├── Result_ccf2_y         # Second result folder from CRISPRCasFinder
+    │   │   ├── result.json       # result.json file
+    │   │   └── ...               # other files (not required)
+    │   └── ...                   # etc.
+    └── ...                  
+```
+To run SpacerPlacer with the (shown) CRISPRCasFinder output, you can use the following command:
+   ```bash
+   python spacerplacer.py <input_path> <output_path> -it ccf_json [more_options]
+   ```
+
+Spacerplacer then follows multiple (optional) steps to:
+1. extract relevant CRISPR arrays from the result.json(s),
+2. forms groups of array with the same consensus repeats, 
+3. (optional) cluster spacers by levenshtein distance, 
+4. group arrays together according to spacer overlap,
+5. gives the clusters/spacers IDs (for visual clarity), 
+6. converts each group into "spacer_fasta" format and
+7. runs SpacerPlacer on all groups with two or more arrays.
+All of these steps are explained in detail in the [paper](https://doi.org/10.1093/nar/gkae772).
+
+Notes on the steps and some additional options available for the "ccf_json" input format:
+1. Orientation of the arrays is determined by the CRISPRDirection prediciton of CRISPRCasFinder, options: `--min_evidence_level <level>: Minimum evidence level of CCF prediction (default: 4), 4 is the highest.` See CCF documentation for more info. 
+   We generally recommend to use minimum evidence level 3 or 4 to avoid (very short) false positive CRISPR arrays.
+2. Note, that all subsequent steps are run within each consensus repeat group.
+3. This clusters spacers according to their edit distances to avoid missing overlap between arrays due to (single/few) mutations.
+   Options: `--cluster_spacers: If given, cluster spacers by levenshtein distance (default: False); --cluster_spacers_max_distance <distance>: Determines maximum distance for spacers to be clustered (default: 1).`
+   Each cluster chooses a representative spacer sequence, that replaces all spacers in the cluster for subsequent steps.
+4. Groups are currently named simply as "g_<counter>".
+5. The IDs are simply numbers that replace the (representative) spacer sequences of each array. 
+   The IDs can be used to identify the spacers in the output files. Note that these IDs are sometimes called "spacer names" and not the same as the "spacer numbers" distributed by SpacerPlacer (for spacer uniqueness) during the reconstruction.
+6. These files can then be used for subsequent reconstructions with SpacerPlacer; see section "spacer_fasta input format" above.
+
+All groups are saved as spacer_fasta in the output folder and all steps save relevant information into fasta and json files; see section "Outputs" for more details.
+
+This is designed for our own use and convenience, so it might not be perfect for your purposes. 
+Thus, if this does not work well for you, we recommend to do your own clustering and preprocessing steps and use "spacer_fasta" input format.
+However, if you ran into issues, or have ideas for improvements that might also be beneficial for others, please let us know.
+We would love to hear your feedback.
+
+### CRISPRCasdb input format
+SpacerPlacer can use data in CRISPRCasdb output format.
+To get files in this format you can e.g. extract existing arrays from CRISPRCasdb 
+or submit the genomic sequences to the CRISPRCasFinder web server (and then extract them).
 
 
 ![first_step_long](doc/figures/firstlong.gif)
 
 
 You then need to carefully select the output CRISPR array and place them into two folders as the 
-CRISPRCasdb/CRISPRCasFinder interface is capable of predicting the orientation but always provides the spacers in the forward 
+CRISPRCasdb interface is capable of predicting the orientation but always provides the spacers in the forward 
 strand orientation (and does not change their ordering). 
 Be aware that since CRISPRCasFinder predicts the orientation internally the consensus repeat will appear different 
 in the output.
@@ -273,18 +328,26 @@ If reconstructions show no overlap, you might want to check the orientation of t
 You can then run SpacerPlacer with the following command:
 
    ```bash
-   python spacerplacer.py <input_path> <output_path> -it ccf [more_options]
+   python spacerplacer.py <input_path> <output_path> -it ccdb [more_options]
    ```
  "input_path" is the top-level directory 
 of the run, in this case "path-to-experiment/experiment". Note, that currently you need to specify the top-level 
 directory not an individual group directory (even if you are only running one group).
 
-SpacerPlacer will automatically convert the CRISPRCasFinder format into "spacer_fasta" format. The converted files will 
+SpacerPlacer will automatically convert the CRISPRCasdb format into "spacer_fasta" format. The converted files will 
 be saved in the output directory, with dictionaries detailing the renaming process. 
 For more details see the section "Output".
 
+SpacerPlacer can perform spacer clustering as described in the section "CRISPRCasFinder json input format" with options:
+`--cluster_spacers` and `--cluster_spacers_max_distance`. 
+
+
 ### (optional) Tree input format
 Trees can be provided by the user. The trees MUST be in newick format and rooted. 
+
+Providing a (or more) the "ccf_json" input format is currently not supported and unlikely to work. 
+If you want to provide a tree, we recommend to first run "ccf_json" for the grouping and clustering and then run the 
+obtained groups in "spacer_fasta" input format with suitable individual (sub)trees for each group as described below.
 
 If only a single fasta is run, the direct path to the tree can be provided using the option "--tree_path <path_to_tree>".
 
@@ -394,30 +457,43 @@ detailing the renaming process from the given spacer name to
 the internal spacer number used by SpacerPlacer (this is the numbering shown in reconstruction and PSIO visualizations).
 
 To reiterate the spacer data is converted/renamed as follows:
-- DNA sequences to spacer names to generate spacer_fasta files and determine spacer overlap between arrays. 
-This step is only done, if the input format is from CRISPRCasFinder. The conversion is found in 
-"<group_name>_spacer_name_to_seq.fa".
-- Spacer names are converted to spacer numbers to run the reconstruction algorithm. 
+- DNA sequences to spacer IDs/names to generate spacer_fasta files and determine spacer overlap between arrays. 
+This step is only done, if the input format is "ccdb" or "ccf_json". The conversion is found in 
+"<group_name>_spacer_name_to_seq.fa". Note that if "ccf_json" input format is used, additional (spacer) clustering steps are taken.
+- Spacer IDs/names are converted to spacer numbers to run the reconstruction algorithm. 
 This is done to guarantee that spacers numbers are unique during the algorithm. Note, that any additions to the 
 spacer name (A, B, C, ...) show duplicate candidates in the Multiple Spacer Array Alignment. Each of those spacers have the 
 same underlying DNA sequence (e.g. 9A, 9B are the same original spacer 9). 
 This step is done for all input formats. The conversion is found in "<group_name>_spacer_name_to_sp_number.json".
 The spacer numbers are the numbers shown in the reconstruction and PSIO visualizations as colored rectangles. 
-The spacer names (with duplicate candidates), are shown in gray as column headings in the Multiple Spacer Array Alignment in the
+The spacer IDs/names (with duplicate candidates), are shown in gray as column headings in the Multiple Spacer Array Alignment in the
 visualized reconstructions. Thus, the information found in "<group_name>_spacer_name_to_sp_number.json" is also 
 contained in any visualized reconstruction in the alignment headers.
+
+#### Additional output for ccf_json input format
+
+If the input format is "ccf_json", the output folder contains additional files:
+- ccf_json_clustered_groups contains the clustered groups in "spacer_fasta" format that were large enough (more than 2 arrays) to be run through SpacerPlacer.
+- ccf_json_too_small_clustered_groups contains the clustered groups in json format that were too small to be run through SpacerPlacer, i.e. they contain only one array.
+- ccf_json_clustered_spacers contains for each group a json with the dictionary assigning clusters/spacers to spacer id (spacer name). 
+Furthermore, it contains spacer_clusters.json which contains a dictionary of all spacer clusters pointing from their representative to a list of all members of the cluster for each repeat cluster.
+- (Coming soon) More convenient way to track spacer sequences through SpacerPlacer and clustering process.
 
 ### Known issues, solutions and tips
 
 1. Not all options available for SpacerPlacer are described in this README. For a full list of options, run 
    `python spacerplacer.py -h`.
 
-2. As SpacerPlacer relies on ETE Toolkit 3, the visualization of the reconstruction will not work on (web) servers without
-   a graphical interface (X backend). If you run into issues you can try:
-   (1) adding the environment variable "QT_QPA_PLATFORM=offscreen" to your shell (running "export QT_QPA_PLATFORM=offscreen" (linux), see [source](https://github.com/NVlabs/instant-ngp/discussions/300)),
-   (2) X11 forwarding (if available), or 
+2. The visualization of the reconstruction will not work on (web) servers without
+   a graphical interface (X backend) out of the box. This is a known issue of ETE Toolkit 3 (on which we rely for visualization). If you run into issues you can try:
+   
+   (1) adding the environment variable "QT_QPA_PLATFORM=offscreen" to your shell (running "export QT_QPA_PLATFORM=offscreen" (linux), see [source](https://github.com/NVlabs/instant-ngp/discussions/300)). (This works very well for me (Axel) :) )
+   
+   (2) X11 forwarding (which works, but is not always convenient to use), or 
+   
    (3) running a virtual X server, e.g. with XVFB
-   (see the [ETE Toolkit tutorial](http://etetoolkit.org/docs/latest/tutorial/tutorial_webplugin.html?highlight=x11)).
+      (see the [ETE Toolkit tutorial](http://etetoolkit.org/docs/latest/tutorial/tutorial_webplugin.html?highlight=x11)).
+
    Alternatively, you can skip the visualization step by running SpacerPlacer with the option "--no_plot_reconstruction".
 
 3. Parts of the reconstruction visualization png may be missing, if the size of the image exceeds 2^15 pixels in width 
@@ -434,10 +510,15 @@ using the custom figure size options ("--figsize_rec" and "--dpi_rec").
       - check the logfile (0_logger.log) for errors/warnings, 
       - check "0_forward/0_protocol_skipped.csv" and/or "0_reversed/0_protocol_skipped.csv" for skipped groups and the reason (e.g. groups with only one array are skipped),
       - check if the input data is read correctly by SpacerPlacer, particularly, check if the input/output to/by MAFFT (in "additional_data/work_folder") is reasonable, and compare your input with the provided example datasets.
-      - check the orientation of the CRISPR arrays, if you use CRISPRCasFinder format. We aim to provide an easier to use 
-        CRISPRCasFinder integration and comprehensive clustering of provided arrays in the future.
+      - check the orientation of the CRISPR arrays, especially if you use ccdb format.
+   
+7. If you encounter issues with the clustering steps of the "ccf_json" input format, we would love to hear your feedback and suggestions for improvements. 
+However, be aware it may be better to do the subselection of arrays and the clustering yourself, since it was (originally) designed for our own use and convenience. 
 
-   If you encounter non-informative/unresolvable errors or the results are not as expected (or not understandable), please open an issue 
+8. We are planning to include functionality to use CRISPRidentify output directly (similar to ccf_json).
+9. We are also planning to put SpacerPlacer on bioconda, but it might take a while.
+
+If you encounter non-informative/unresolvable errors or the results are not as expected (or not understandable), please open an issue 
    or contact us directly, and we will try to help you (and try to resolve the issue for future users).
 
 ### Notes on impact of dataset quality on reconstructions and parameter estimates

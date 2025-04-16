@@ -7,6 +7,7 @@ from sp_model.helpers.misc import create_logger
 from sp_model.summary import compose_summary_dict, write_summary
 from sp_model.run_experiments import run_pickled_data, run_multiple_groups
 import sp_model.helpers.import_data as import_data
+from sp_model.crisprfinder_to_spacerfasta import CRISPRFinderParser
 
 
 def parse_args():
@@ -35,16 +36,27 @@ def parse_args():
                         help='Path to tree json file or folder with newick files. '
                              'If none is provided, trees are estimated by SpacerPlacer. '
                              'The trees can be given in a newick format or as a dictionary in a json file '
-                             '(such a json file is returned by SpacerPlacer).')
-    parser.add_argument('-it', '--input_type', type=str, choices=['spacer_fasta', 'pickled', 'ccf',
-                                                                  'crisprcasfinder'],
+                             '(such a json file is also returned by SpacerPlacer).')
+    parser.add_argument('-it', '--input_type', type=str, choices=['spacer_fasta', 'pickled', 'ccdb',
+                                                                  'crisprcasdb',
+                                                                  'ccf_json', 'crisprcasfinder_json'],
                         default='spacer_fasta',  # think about this name
                         help='Determines the input type, i.e. either already preprocessed fasta style spacer arrays, '
-                             'a pickled file with CRISPR group(s) (our own data structure) '
-                             'or data extracted from CRISPRCasFinder or CRISPRCasdb.')
+                             'a pickled file with CRISPR group(s) (our own data structure), '
+                             'DNA data (extracted from CRISPRCasdb) in a structure described in the '
+                             'github repository or directly from result.json files '
+                             'returned by CRISPRCasFinder.')
     parser.add_argument('--cluster_spacers', action='store_true',
                         help='If given, the spacers of the input data are clustered (using levenshtein distance).'
                              'The clustering process is described in the paper.')
+    parser.add_argument('--cluster_spacers_max_distance', type=int, default=1,
+                        help='Determines the maximum Levenshtein distance for spacers to be clustered, i.e. identified '
+                             'with each other (same spacer id) within repeat groups. ')
+    # If the user provides CRISPRCasFinder result json as input format (requires --input type ccf_result_json):
+    parser.add_argument('--min_evidence_level', type=int, default=4,
+                        help='Determines the minimum evidence level for the CRISPRCasFinder results to be included in '
+                             'the reconstruction. The evidence level is given in the CRISPRCasFinder output. '
+                             'The default (4) is the highest possible value.')
 
     ############################################################################################################
     # Reconstruction:
@@ -162,7 +174,6 @@ def parse_args():
 
     ############################################################################################################
     # Orientation determination:
-    # Do we want to always determine the orientation (for CRISPRCasdb data)? Or make it dependent on the input structure?
     parser.add_argument('--determine_orientation', action='store_true',
                         help='If given, both a forward and a reverse '
                              'reconstruction is made and the orientation of the arrays is determined by SpacerPlacer. '
@@ -188,18 +199,11 @@ def parse_args():
                              'visualized and the events can be analyzed in more detail. Currently only works, if the '
                              'the reconstruction is visualized.')
 
-    ############################################################################################################
-    # Preprocessing:
-    # parser.add_argument('--clustering', action='store_true',
-    #                     help='If given, the input data is clustered in subgroups before the reconstruction.'
-    #                          ' The clustering process is described in the paper.')
-    # parser.add_argument('--group_by', type=str, choices=['crispr type',
-    #                                                      'minimum array number', 'selection not in groups',])
-
     return parser.parse_args()
 
 
-def check_and_parse_input_data(input_type, input_path, output_path, tree_path, logger, cluster_spacers=False):
+def check_and_parse_input_data(input_type, input_path, output_path, tree_path, logger, cluster_spacers=False,
+                               cluster_spacers_max_distance=1, min_evidence_level=4,):
     if input_type == 'spacer_fasta':
         if os.path.splitext(input_path)[-1] in {'.fa', '.fasta', '.fna'}:
             ls_path_to_spacer_fasta = [input_path]
@@ -210,7 +214,30 @@ def check_and_parse_input_data(input_type, input_path, output_path, tree_path, l
         if not ls_path_to_spacer_fasta:
             logger.error(f'No fasta file found in {input_path}.')
             raise ValueError(f'No fasta file found in {input_path}.')
-
+    elif input_type in ['ccf_json', 'crisprcasfinder_json',]:
+        ls_result_json_paths = [os.path.join(input_path, ccf_output_folder, 'result.json') for ccf_output_folder in
+                                os.listdir(input_path)]
+        for path in ls_result_json_paths:
+            if not os.path.isfile(path):
+                path_parent_dir = os.path.dirname(path)
+                logger.error(f'No result.json found in {path_parent_dir}.')
+                raise ValueError(f'No result.json found in {path_parent_dir}.')
+        output_folder = os.path.join(output_path, 'additional_data', 'ccf_json_clustered_groups')
+        output_folder_too_small = os.path.join(output_path, 'additional_data', 'ccf_json_too_small_clustered_groups')
+        additional_output = os.path.join(output_path, 'additional_data', 'ccf_json_clustering_info')
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+        parser = CRISPRFinderParser(ls_result_json_paths, output_folder=output_folder,
+                                    output_folder_for_too_small_groups=output_folder_too_small,
+                                    min_evidence_level=min_evidence_level,
+                                    reorient_by_direction_pred=True, logger=logger,
+                                    cluster_by_spacer_overlap=True,
+                                    filter_more_than_x_in_group=2, # might want to adjust this
+                                    max_levenshtein_distance_spacers=cluster_spacers_max_distance
+                                    if cluster_spacers else 0)
+        parser.write_spacer_cluster_to_file(additional_output)
+        parser.write_spacer_seq_to_spacer_id(additional_output)
+        ls_path_to_spacer_fasta = [os.path.join(output_folder, group) for group in os.listdir(output_folder)]
     else:
         ls_path_to_spacer_fasta = []
         path_to_spacer_fasta_folder = os.path.join(output_path, 'additional_data', 'spacer_fasta')
@@ -222,7 +249,8 @@ def check_and_parse_input_data(input_type, input_path, output_path, tree_path, l
                                               group + '_spacer_name_to_seq.fa')
             ccf_parser = InputParser(os.path.join(input_path, group), path_to_spacer_fasta,
                                      spacer_number_to_seq_file=path_to_n_seq_file,
-                                     cluster_spacers=cluster_spacers)
+                                     cluster_spacers=cluster_spacers,
+                                     cluster_spacers_max_distance=cluster_spacers_max_distance,)
             ls_path_to_spacer_fasta.append(path_to_spacer_fasta)
 
     output_path_to_tree = os.path.join(output_path, 'additional_data')
@@ -330,10 +358,12 @@ def main():
                                               dpi=args.dpi_rec,
                                               figsize_rec=figsize_rec,
                                               )
-    elif args.input_type in ['ccf', 'crisprcasfinder', 'spacer_fasta']:
+    elif args.input_type in ['ccdb', 'crisprcasdb', 'spacer_fasta', 'ccf_json', 'crisprcasfinder_json']:
         ls_path_to_spacer_fasta, tree_path = check_and_parse_input_data(args.input_type, args.input_path,
                                                                         args.output_path, args.tree_path, logger,
-                                                                        cluster_spacers=args.cluster_spacers)
+                                                                        cluster_spacers=args.cluster_spacers,
+                                                                        cluster_spacers_max_distance=args.cluster_spacers_max_distance,
+                                                                        min_evidence_level=args.min_evidence_level)
         df_results_wo_details = run_multiple_groups(ls_path_to_spacer_fasta, args.output_path,
                                                     rec_parameter_dict=rec_parameter_dict,
                                                         logger=logger,

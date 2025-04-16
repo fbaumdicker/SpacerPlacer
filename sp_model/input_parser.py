@@ -30,10 +30,11 @@ def levenshtein_distance(seq1, seq2):
 class InputParser:
     def __init__(self, input_folder, restructured_output_path, spacer_number_to_seq_file=None,
                  cluster_spacers=False, check_orientation_for_highest_spacer_overlap=False,
-                 split_into_groups_by_spacer_overlap=False):
+                 split_into_groups_by_spacer_overlap=False, cluster_spacers_max_distance=0):
         self.input_folder = input_folder
         self.restructured_output_path = restructured_output_path
         self.spacer_number_to_seq_file = spacer_number_to_seq_file
+        self.cluster_spacers_max_distance = cluster_spacers_max_distance
         self.spacer_seq_to_number = None
         # self.spacer_number_to_seq = None
         self.file_name_to_spacer_indices = None
@@ -115,7 +116,7 @@ class InputParser:
             raise NotImplementedError
         if self.cluster_spacers:
             # cluster spacers with levenstein distance. Start with single clusters. Then merge clusters with some
-            # distance (1) in mutations iteratively, until no clusters are mergeable.
+            # distance (x) in mutations iteratively, until no clusters are mergeable.
             new_clusters = self.cluster_spacers_with_levenshtein()
             self.rename_spacers(new_clusters)
         if self.split_into_groups_by_spacer_overlap:
@@ -130,7 +131,7 @@ class InputParser:
         def merge_clusters(cluster1, cluster2):
             for spacer1 in cluster1:
                 for spacer2 in cluster2:
-                    if levenshtein_distance(spacer1, spacer2) == 1:
+                    if levenshtein_distance(spacer1, spacer2) <= self.cluster_spacers_max_distance:
                         return cluster1 + cluster2
             return None
         def merge_all_clusters(clusters):
