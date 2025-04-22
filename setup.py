@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 # include=['spacerplacer', 'run_experiments', 'model', 'model.*']
 setup(
     name='spacerplacer',
-    version='1.0.0',
+    version='1.0.1',
     packages=find_packages(),
     package_data={'sp_model': ['mafft_scripts/mafft-linux64/*',
                                'mafft_scripts/mafft-mac/*',
