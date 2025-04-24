@@ -1,7 +1,7 @@
 example_datasets/workflow_example_listeria_monocytogenes
 0_result_folder/workflow_example_listeria_monocytogenes
 --input_type
-ccf
+ccdb
 --lh_fct
 simple
 --significance_level

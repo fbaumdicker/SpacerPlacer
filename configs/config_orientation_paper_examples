@@ -1,7 +1,7 @@
 example_datasets/orientation_paper_examples
 0_result_folder/orientation_paper_examples
 --input_type
-ccf
+ccdb
 --lh_fct
 simple
 --significance_level
