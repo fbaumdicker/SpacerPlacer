@@ -250,7 +250,8 @@ def check_and_parse_input_data(input_type, input_path, output_path, tree_path, l
             ccf_parser = InputParser(os.path.join(input_path, group), path_to_spacer_fasta,
                                      spacer_number_to_seq_file=path_to_n_seq_file,
                                      cluster_spacers=cluster_spacers,
-                                     cluster_spacers_max_distance=cluster_spacers_max_distance,)
+                                     cluster_spacers_max_distance=cluster_spacers_max_distance,
+                                     logger=logger)
             ls_path_to_spacer_fasta.append(path_to_spacer_fasta)
 
     output_path_to_tree = os.path.join(output_path, 'additional_data')

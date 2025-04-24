@@ -30,7 +30,7 @@ def levenshtein_distance(seq1, seq2):
 class InputParser:
     def __init__(self, input_folder, restructured_output_path, spacer_number_to_seq_file=None,
                  cluster_spacers=False, check_orientation_for_highest_spacer_overlap=False,
-                 split_into_groups_by_spacer_overlap=False, cluster_spacers_max_distance=0):
+                 split_into_groups_by_spacer_overlap=False, cluster_spacers_max_distance=0, logger=None):
         self.input_folder = input_folder
         self.restructured_output_path = restructured_output_path
         self.spacer_number_to_seq_file = spacer_number_to_seq_file
@@ -39,6 +39,7 @@ class InputParser:
         # self.spacer_number_to_seq = None
         self.file_name_to_spacer_indices = None
         self.spacer_orientations = None
+        self.logger = logger
 
         self.cluster_spacers = cluster_spacers
         self.check_orientation_for_highest_spacer_overlap = check_orientation_for_highest_spacer_overlap
@@ -56,6 +57,15 @@ class InputParser:
 
         forward_orientation = os.path.join(self.input_folder, "pos_strand")
         reverse_orientation = os.path.join(self.input_folder, "neg_strand")
+        if not os.path.exists(forward_orientation) and not os.path.exists(reverse_orientation):
+            self.logger.error("No pos_strand and no neg_strand folder found in the input directory, i.e. no input files or not suitably structured.")
+            raise FileNotFoundError("No pos_strand and no neg_strand folder found in the input directory, i.e. no input files or not suitably structured.")
+        if not os.path.exists(forward_orientation):
+            self.logger.warning(f"pos_strand folder '{forward_orientation}' does not exist. Creating it.")
+            os.makedirs(forward_orientation)
+        if not os.path.exists(reverse_orientation):
+            self.logger.warning(f"neg_strand folder '{reverse_orientation}' does not exist. Creating it.")
+            os.makedirs(reverse_orientation)
 
         for file_name_index, file_name in enumerate(os.listdir(forward_orientation), 1):
             result[file_name.split('.')[0]] = []
