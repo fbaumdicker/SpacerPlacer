@@ -132,7 +132,7 @@ If you installed it via the Github repository, you can run SpacerPlacer with (in
 "output_path" is a required positional argument. It specifies the output directory where the results will be saved.
 
 
-***If you use the Bioconda installation replace "python spacerplacer.py" with "spacerplacer" in all following commands.***
+**If you use the Bioconda installation replace "python spacerplacer.py" with "spacerplacer" in all following commands.**
 
 Available options can be found by running:
 
