@@ -53,8 +53,38 @@ Please feel free to explore the paper/poster to learn more about SpacerPlacer an
 [//]: # ()
 
 ## Installation and Usage
-At the moment, SpacerPlacer is supported on Linux. We do not guarantee that it will work on other operating systems.
-To install SpacerPlacer, follow these steps:
+Install SpacerPlacer either by cloning the GitHub repository or by using Bioconda.
+Note, that the github repository is more likely to be up to date and in working order.
+
+At the moment, SpacerPlacer is supported on Linux. Although we try to make it work on other operating systems, 
+we do not guarantee that it will work. If you encounter issues, please let us know.
+
+### Installation via Bioconda
+SpacerPlacer is now available on Bioconda. Follow the instructions below to install it:
+
+1. [Install conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html), if you haven't already.
+2. Set up Bioconda channels (https://bioconda.github.io/), if you haven't already:
+   ```bash
+   conda config --add channels defaults
+   conda config --add channels bioconda
+   conda config --add channels conda-forge
+   ```
+3. Create a new conda environment with spacerplacer:
+   ```bash
+   conda create -n <myenv> spacerplacer
+   ```
+   or install it in an existing environment:
+   ```bash
+    conda install spacerplacer
+    ```
+   and activate the environment:
+   ```bash
+    conda activate <myenv>
+    ```
+
+
+### Installation via GitHub Repository
+Follow the instructions below to install SpacerPlacer from the GitHub repository:
 
 1. Clone the GitHub repository:
 
@@ -63,14 +93,8 @@ To install SpacerPlacer, follow these steps:
    ```
  
 2. We recommend to use conda, 
-as mafft is easily installed using conda (otherwise it needs to be manually installed).
-The latest version of conda can be downloaded from: https://conda.io/projects/conda/en/latest/user-guide/install/linux.html.
-Download a conda installer and install conda using the following command:
+as mafft is easily installed using conda (otherwise it needs to be manually installed). [Install conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html), if you haven't already.
 
-   ```bash
-   bash <conda-installer-name>-latest-Linux-x86_64.sh
-   ```
-  
 3. Navigate to the cloned repository and install the required packages in a new environment:
 
    ```bash
@@ -84,14 +108,23 @@ Download a conda installer and install conda using the following command:
    ```bash
    conda activate <myenv>
    ```
-   
-5. You can run SpacerPlacer with the following command:
+
+### Usage
+If you installed SpacerPlacer via Bioconda, you can run it directly from the command line regardless of the installation path:
+```bash
+   spacerplacer <input_path> <output_path> [options]
+```
+
+If you installed it via the Github repository, you can run SpacerPlacer with (in the cloned repository):
 
    ```bash
    python spacerplacer.py <input_path> <output_path> [options]
    ```
-   "input_path" is a required positional argument. It specifies the input directory containing the input data. For the required format see the respective section.
+"input_path" is a required positional argument. It specifies the input directory containing the input data. For the required format see the respective section.
 "output_path" is a required positional argument. It specifies the output directory where the results will be saved.
+
+
+***If you use the Bioconda installation replace "python spacerplacer.py" with "spacerplacer" in all following commands.***
 
 Available options can be found by running:
 
@@ -112,8 +145,9 @@ them in SpacerPlacer as described above, e.g.:
    python spacerplacer.py @configs/config_workflow_example_listeria_monocytogenes
    ```
 "@" specifies that the following argument is the path to a config file.
-The example configs use example data found in "example_data" directory.
-You can use them as a template for your own input data.
+The example configs use example data found in "example_data" directory. 
+If you cloned the repository, you may run them to see if everything works as expected and to get an idea about the output 
+and how you would like to structure your input.
 
 ## CRISPR orientation prediction
 SpacerPlacer allows to predict the insertion orientation of CRISPR arrays and thus, indirectly, the 
@@ -516,7 +550,8 @@ using the custom figure size options ("--figsize_rec" and "--dpi_rec").
 However, be aware it may be better to do the subselection of arrays and the clustering yourself, since it was (originally) designed for our own use and convenience. 
 
 8. We are planning to include functionality to use CRISPRidentify output directly (similar to ccf_json).
-9. We are also planning to put SpacerPlacer on bioconda, but it might take a while.
+9. SpacerPlacer is now available on Bioconda! See the installation section for more details. 
+   If you encounter issues with the Bioconda installation, please let us know.
 
 If you encounter non-informative/unresolvable errors or the results are not as expected (or not understandable), please open an issue 
    or contact us directly, and we will try to help you (and try to resolve the issue for future users).
