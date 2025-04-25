@@ -54,7 +54,8 @@ Please feel free to explore the paper/poster to learn more about SpacerPlacer an
 
 ## Installation and Usage
 Install SpacerPlacer either by cloning the GitHub repository or by using Bioconda.
-Note, that the github repository is more likely to be up to date and in working order.
+The version on Bioconda is the latest release version on github and may lag behind the main branch in the github repository.
+
 
 At the moment, SpacerPlacer is supported on Linux. Although we try to make it work on other operating systems, 
 we do not guarantee that it will work. If you encounter issues, please let us know.
