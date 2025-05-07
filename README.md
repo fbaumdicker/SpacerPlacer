@@ -281,23 +281,23 @@ Spacerplacer then follows multiple (optional) steps to:
 7. runs SpacerPlacer on all groups with two or more arrays.
 All of these steps are explained in detail in the [paper](https://doi.org/10.1093/nar/gkae772).
 
-Notes on the steps and some additional options available for the "ccf_json" input format:
-1. Orientation of the arrays is determined by the CRISPRDirection prediciton of CRISPRCasFinder, options: `--min_evidence_level <level>: Minimum evidence level of CCF prediction (default: 4), 4 is the highest.` See CCF documentation for more info. 
+Notes about some of the steps and some additional options available for the "ccf_json" input format:
+1. Orientation of the arrays is determined by the CRISPRDirection prediction of CRISPRCasFinder. Additional option: `--min_evidence_level <level>: Minimum evidence level of CCF prediction (default: 4), 4 is the highest.` See CCF documentation for more info. 
    We generally recommend to use minimum evidence level 3 or 4 to avoid (very short) false positive CRISPR arrays.
-2. Note, that all subsequent steps are run within each consensus repeat group.
+2. Note, that all subsequent steps after this step are run within each consensus repeat group.
 3. This clusters spacers according to their edit distances to avoid missing overlap between arrays due to (single/few) mutations.
-   Options: `--cluster_spacers: If given, cluster spacers by levenshtein distance (default: False); --cluster_spacers_max_distance <distance>: Determines maximum distance for spacers to be clustered (default: 1).`
-   Each cluster chooses a representative spacer sequence, that replaces all spacers in the cluster for subsequent steps.
+   This step has the following (additional) options: `--cluster_spacers: If given, cluster spacers by levenshtein distance (default: False); --cluster_spacers_max_distance <distance>: Determines maximum distance for spacers to be clustered (default: 1).`
+   Each cluster chooses a representative spacer sequence, that replaces all spacers in the cluster for subsequent steps (this information is saved, see section Outputs).
 4. Groups are currently named simply as "g_<counter>".
-5. The IDs are simply numbers that replace the (representative) spacer sequences of each array. 
+5. The IDs are numbers that replace the (representative) spacer sequences of each array. 
    The IDs can be used to identify the spacers in the output files. Note that these IDs are sometimes called "spacer names" and not the same as the "spacer numbers" distributed by SpacerPlacer (for spacer uniqueness) during the reconstruction.
 6. These files can then be used for subsequent reconstructions with SpacerPlacer; see section "spacer_fasta input format" above.
 
 All groups are saved as spacer_fasta in the output folder and all steps save relevant information into fasta and json files; see section "Outputs" for more details.
 
-This is designed for our own use and convenience, so it might not be perfect for your purposes. 
+The clustering procedure is designed for our own use and convenience, so it might not be perfect for your purposes. 
 Thus, if this does not work well for you, we recommend to do your own clustering and preprocessing steps and use "spacer_fasta" input format.
-However, if you ran into issues, or have ideas for improvements that might also be beneficial for others, please let us know.
+However, if you run into issues, or have ideas for improvements that might also be beneficial for others, please let us know.
 We would love to hear your feedback.
 
 ### CRISPRCasdb input format
